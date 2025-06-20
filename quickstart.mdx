@@ -49,9 +49,9 @@ const tracker = new HumanBehaviorTracker(
 );
 ```
 
-<Note>
+    <Note>
   Replace `'your-api-key-here'` with your actual API key from your HumanBehavior dashboard.
-</Note>
+    </Note>
 
 ## Step 3: Start Recording
 
@@ -147,6 +147,32 @@ If you're using the CDN version:
 </html>
 ```
 
+Or if you have the SDK files locally:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My App</title>
+    <script src="./dist/index.min.js"></script>
+</head>
+<body>
+    <h1>Welcome to My App</h1>
+    
+    <script>
+        // Initialize tracker
+        const tracker = new HumanBehaviorTracker(
+            'your-api-key-here',
+            'https://ingestion.humanbehavior.ai'
+        );
+        
+        // Start recording
+        tracker.start();
+    </script>
+</body>
+</html>
+```
+
 ## What Happens Next?
 
 Once you've completed the setup:
@@ -167,28 +193,28 @@ Now that you have the basics set up, explore these advanced features:
     href="/essentials/custom-events"
   >
     Track specific user actions and business events
-  </Card>
-  <Card
+</Card>
+<Card
     title="Data Redaction"
     icon="shield"
     href="/essentials/data-redaction"
-  >
+>
     Protect sensitive data from being recorded
-  </Card>
-  <Card
+</Card>
+<Card
     title="React Integration"
     icon="react"
     href="/essentials/react-integration"
-  >
+>
     Use the SDK with React applications
-  </Card>
-  <Card
+</Card>
+<Card
     title="API Reference"
     icon="book"
     href="/api-reference/tracker"
-  >
+>
     Complete API documentation
-  </Card>
+</Card>
 </CardGroup>
 
 <Note>
