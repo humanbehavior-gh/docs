@@ -1,0 +1,369 @@
+---
+title: 'HumanBehaviorProvider'
+description: 'React context provider for HumanBehavior SDK integration'
+---
+
+# HumanBehaviorProvider
+
+The `HumanBehaviorProvider` is a React context provider that makes the HumanBehavior tracker available throughout your React component tree.
+
+## Import
+
+```javascript
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+```
+
+## Props
+
+### `apiKey` (string, optional)
+
+Your HumanBehavior API key. Required if no `client` is provided.
+
+**Example:**
+```javascript
+<HumanBehaviorProvider apiKey="your-api-key-here">
+  <App />
+</HumanBehaviorProvider>
+```
+
+### `ingestionUrl` (string, optional)
+
+Your ingestion server URL. Defaults to `'https://ingestion.humanbehavior.ai'`.
+
+**Example:**
+```javascript
+<HumanBehaviorProvider 
+  apiKey="your-api-key-here"
+  ingestionUrl="https://your-ingestion-server.com"
+>
+  <App />
+</HumanBehaviorProvider>
+```
+
+### `client` (HumanBehaviorTracker, optional)
+
+An existing tracker instance to use instead of creating a new one.
+
+**Example:**
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker = new HumanBehaviorTracker(
+  'your-api-key',
+  'https://ingestion.humanbehavior.ai'
+);
+
+<HumanBehaviorProvider client={tracker}>
+  <App />
+</HumanBehaviorProvider>
+```
+
+## Usage
+
+### Basic Usage
+
+```javascript
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key-here">
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### With Environment Variables
+
+```javascript
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider 
+      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+      ingestionUrl={process.env.REACT_APP_HUMANBEHAVIOR_INGESTION_URL}
+    >
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### With Custom Client
+
+```javascript
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+// Create custom tracker
+const tracker = new HumanBehaviorTracker(
+  'your-api-key',
+  'https://ingestion.humanbehavior.ai'
+);
+
+function App() {
+  return (
+    <HumanBehaviorProvider client={tracker}>
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+## Context Value
+
+The provider creates a React context with the following value:
+
+```javascript
+{
+  humanBehavior: HumanBehaviorTracker | null,
+  queueEvent: (event: any) => void
+}
+```
+
+### `humanBehavior`
+
+The HumanBehavior tracker instance that can be used to call all tracker methods, or `null` if not yet initialized.
+
+### `queueEvent`
+
+Function to queue events before initialization is complete.
+
+## Error Handling
+
+### Missing API Key
+
+```javascript
+// Error: Missing API key
+<HumanBehaviorProvider>
+  <App />
+</HumanBehaviorProvider>
+// Throws: "An apiKey is required when no client is provided"
+```
+
+### Invalid Client
+
+```javascript
+// Error: Invalid client
+<HumanBehaviorProvider client="invalid">
+  <App />
+</HumanBehaviorProvider>
+// Throws: "Client must be a HumanBehaviorTracker instance"
+```
+
+## Server-Side Rendering
+
+The provider is fully compatible with SSR:
+
+```javascript
+// Works in both client and server environments
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key">
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+## Performance
+
+### Automatic Initialization
+
+The provider automatically initializes the tracker when mounted:
+
+```javascript
+// Tracker is initialized automatically
+<HumanBehaviorProvider apiKey="your-api-key">
+  <App />
+</HumanBehaviorProvider>
+```
+
+### Memory Management
+
+The provider automatically cleans up resources when unmounted:
+
+```javascript
+// Resources are cleaned up automatically
+function ConditionalProvider({ show }) {
+  if (!show) return null;
+  
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key">
+      <App />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+## Testing
+
+### Mock Provider
+
+```javascript
+// test-utils.js
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+const mockTracker = {
+  start: jest.fn(),
+  stop: jest.fn(),
+  customEvent: jest.fn(),
+  addUserInfo: jest.fn(),
+  setRedactedFields: jest.fn()
+};
+
+export function TestProvider({ children }) {
+  return (
+    <HumanBehaviorProvider client={mockTracker}>
+      {children}
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Component Testing
+
+```javascript
+import { render } from '@testing-library/react';
+import { TestProvider } from './test-utils';
+import MyComponent from './MyComponent';
+
+test('renders with provider', () => {
+  render(
+    <TestProvider>
+      <MyComponent />
+    </TestProvider>
+  );
+  
+  // Component renders successfully
+});
+```
+
+## Best Practices
+
+### Single Provider
+
+Use only one provider at the root of your app:
+
+```javascript
+// Good: Single provider at root
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key">
+      <Header />
+      <Main />
+      <Footer />
+    </HumanBehaviorProvider>
+  );
+}
+
+// Avoid: Multiple providers
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key">
+      <Header />
+      <HumanBehaviorProvider apiKey="your-api-key"> {/* Don't do this */}
+        <Main />
+      </HumanBehaviorProvider>
+      <Footer />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Environment Variables
+
+Use environment variables for configuration:
+
+```javascript
+// .env
+REACT_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
+REACT_APP_HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+
+// App.js
+function App() {
+  return (
+    <HumanBehaviorProvider 
+      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+      ingestionUrl={process.env.REACT_APP_HUMANBEHAVIOR_INGESTION_URL}
+    >
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Error Boundaries
+
+Wrap your app with error boundaries:
+
+```javascript
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <HumanBehaviorProvider apiKey="your-api-key">
+        <YourApp />
+      </HumanBehaviorProvider>
+    </ErrorBoundary>
+  );
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+```javascript
+// Issue: Provider not found
+// Solution: Ensure provider is imported correctly
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+// Issue: API key not working
+// Solution: Check environment variable naming
+REACT_APP_HUMANBEHAVIOR_API_KEY=your-key // Must start with REACT_APP_
+
+// Issue: SSR errors
+// Solution: Provider handles SSR automatically
+// No additional setup needed
+```
+
+### Debug Mode
+
+```javascript
+function DebugProvider({ children }) {
+  return (
+    <HumanBehaviorProvider 
+      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+    >
+      {process.env.NODE_ENV === 'development' && (
+        <DebugComponent />
+      )}
+      {children}
+    </HumanBehaviorProvider>
+  );
+}
+
+function DebugComponent() {
+  const { humanBehavior } = useHumanBehavior();
+  
+  useEffect(() => {
+    if (humanBehavior) {
+      humanBehavior.viewLogs();
+    }
+  }, [humanBehavior]);
+  
+  return null;
+}
+```
+
+<Note>
+  The HumanBehaviorProvider automatically handles initialization and cleanup, making it easy to integrate the SDK into React applications.
+</Note>
+
+<Warning>
+  Always ensure you have user consent before starting session recording, especially in regions with strict privacy laws.
+</Warning> 

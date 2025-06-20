@@ -1,0 +1,573 @@
+---
+title: 'React Integration'
+description: 'Seamless React integration with hooks and context providers for easy implementation'
+---
+
+# React Integration
+
+HumanBehavior SDK provides seamless React integration with hooks and context providers, making it easy to implement session recording in React applications.
+
+## Quick Start
+
+### Basic Setup
+
+Wrap your app with the `HumanBehaviorProvider`:
+
+```javascript
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key-here">
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Using the Hook
+
+Access the tracker in your components:
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function MyComponent() {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    // Start recording when component mounts
+    tracker.start();
+  }, [tracker]);
+  
+  const handleButtonClick = () => {
+    // Note: customEvent is not available in React interface
+    // Use addEvent for custom events
+    tracker.addEvent({
+      type: 'custom',
+      data: {
+        eventName: 'button_click',
+        buttonId: 'my-button'
+      }
+    });
+  };
+  
+  return (
+    <button onClick={handleButtonClick}>
+      Click me
+    </button>
+  );
+}
+```
+
+## Provider Configuration
+
+### Basic Provider
+
+```javascript
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider 
+      apiKey="your-api-key-here"
+    >
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Advanced Provider
+
+```javascript
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider 
+      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+      ingestionUrl="https://ingestion.humanbehavior.ai"
+    >
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Custom Client
+
+Use an existing tracker instance:
+
+```javascript
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+// Create tracker instance
+const tracker = new HumanBehaviorTracker(
+  'your-api-key',
+  'https://ingestion.humanbehavior.ai'
+);
+
+function App() {
+  return (
+    <HumanBehaviorProvider client={tracker}>
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+## Hook Usage
+
+### Basic Hook
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function MyComponent() {
+  const tracker = useHumanBehavior();
+  
+  // Use tracker methods
+  const handleStart = () => tracker.start();
+  const handleStop = () => tracker.stop();
+  
+  return (
+    <div>
+      <button onClick={handleStart}>Start Recording</button>
+      <button onClick={handleStop}>Stop Recording</button>
+    </div>
+  );
+}
+```
+
+### User Identification
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function UserProfile({ user }) {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    // Identify user when component mounts
+    if (user) {
+      tracker.addUserInfo({
+        email: user.email,
+        name: user.name,
+        userId: user.id
+      });
+    }
+  }, [user, tracker]);
+  
+  return <div>Welcome, {user.name}!</div>;
+}
+```
+
+### Custom Events
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function ProductCard({ product }) {
+  const tracker = useHumanBehavior();
+  
+  const handleView = () => {
+    // Use addEvent for custom events
+    tracker.addEvent({
+      type: 'custom',
+      data: {
+        eventName: 'product_view',
+        productId: product.id,
+        productName: product.name,
+        category: product.category
+      }
+    });
+  };
+  
+  const handleAddToCart = () => {
+    tracker.addEvent({
+      type: 'custom',
+      data: {
+        eventName: 'add_to_cart',
+        productId: product.id,
+        price: product.price
+      }
+    });
+  };
+  
+  return (
+    <div onMouseEnter={handleView}>
+      <h3>{product.name}</h3>
+      <button onClick={handleAddToCart}>Add to Cart</button>
+    </div>
+  );
+}
+```
+
+## Next.js Integration
+
+### App Router (Next.js 13+)
+
+```javascript
+// app/layout.tsx
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <HumanBehaviorProvider 
+          apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+        >
+          {children}
+        </HumanBehaviorProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Pages Router (Next.js 12 and below)
+
+```javascript
+// pages/_app.tsx
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+import type { AppProps } from 'next/app';
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <HumanBehaviorProvider 
+      apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+    >
+      <Component {...pageProps} />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Server-Side Rendering
+
+The SDK is fully compatible with SSR:
+
+```javascript
+// The provider handles SSR automatically
+function MyPage() {
+  const tracker = useHumanBehavior();
+  
+  // This works in both client and server environments
+  useEffect(() => {
+    // Only runs on client
+    tracker.start();
+  }, [tracker]);
+  
+  return <div>My Page</div>;
+}
+```
+
+## Advanced Patterns
+
+### Conditional Tracking
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function MyComponent({ userConsent }) {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    if (userConsent) {
+      tracker.start();
+    } else {
+      tracker.stop();
+    }
+  }, [userConsent, tracker]);
+  
+  return <div>Content</div>;
+}
+```
+
+### Form Tracking
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function ContactForm() {
+  const tracker = useHumanBehavior();
+  
+  const handleSubmit = async (formData) => {
+    // Track form submission
+    tracker.addEvent({
+      type: 'custom',
+      data: {
+        eventName: 'form_submit',
+        formId: 'contact-form',
+        fields: Object.keys(formData)
+      }
+    });
+    
+    // Add user info if email is provided
+    if (formData.email) {
+      await tracker.addUserInfo({
+        email: formData.email,
+        name: formData.name
+      });
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <input name="name" placeholder="Name" />
+      <input name="email" placeholder="Email" />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+### Error Boundary Integration
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function ErrorBoundary({ children }) {
+  const tracker = useHumanBehavior();
+  
+  const handleError = async (error, errorInfo) => {
+    tracker.addEvent({
+      type: 'custom',
+      data: {
+        eventName: 'react_error',
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack
+      }
+    });
+  };
+  
+  return (
+    <React.ErrorBoundary onError={handleError}>
+      {children}
+    </React.ErrorBoundary>
+  );
+}
+```
+
+## React Interface Limitations
+
+### Available Methods
+
+The React hook provides a simplified interface with these methods:
+- `addEvent(event)` - Add raw events to session recording
+- `addUserInfo(userProperties)` - Add or update user information
+- `start()` - Start session recording
+- `stop()` - Stop session recording
+- `viewLogs()` - Display SDK logs in console
+
+### Missing Methods
+
+The following tracker methods are **not available** in the React interface:
+- `customEvent()` - Use `addEvent()` with custom event data instead
+- `setRedactedFields()` - Not available in React interface
+- `isRedactionActive()` - Not available in React interface
+- `getRedactedFields()` - Not available in React interface
+- `auth()` - Not available in React interface
+
+### Workarounds
+
+For advanced functionality, use the tracker directly:
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function AdvancedComponent() {
+  const tracker = useHumanBehavior();
+  
+  // For custom events, use addEvent
+  const handleCustomEvent = () => {
+    tracker.addEvent({
+      type: 'custom',
+      data: {
+        eventName: 'custom_action',
+        properties: { action: 'test' }
+      }
+    });
+  };
+  
+  // For redaction, you'll need to use the tracker directly
+  // This requires accessing the context manually
+  const handleRedaction = () => {
+    // Note: Redaction methods are not available in React interface
+    console.warn('Redaction not available in React interface');
+  };
+  
+  return (
+    <div>
+      <button onClick={handleCustomEvent}>Custom Event</button>
+      <button onClick={handleRedaction}>Redaction (Not Available)</button>
+    </div>
+  );
+}
+```
+
+## Performance Optimization
+
+### Memoization
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+import { useCallback, useMemo } from 'react';
+
+function OptimizedComponent() {
+  const tracker = useHumanBehavior();
+  
+  // Memoize event handlers
+  const handleClick = useCallback(() => {
+    tracker.addEvent({
+      type: 'custom',
+      data: {
+        eventName: 'button_click',
+        component: 'OptimizedComponent'
+      }
+    });
+  }, [tracker]);
+  
+  // Memoize user info
+  const userInfo = useMemo(() => ({
+    email: 'user@example.com',
+    name: 'John Doe'
+  }), []);
+  
+  useEffect(() => {
+    tracker.addUserInfo(userInfo);
+  }, [tracker, userInfo]);
+  
+  return <button onClick={handleClick}>Click me</button>;
+}
+```
+
+### Lazy Loading
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+import { lazy, Suspense } from 'react';
+
+// Lazy load components that use tracking
+const TrackingComponent = lazy(() => import('./TrackingComponent'));
+
+function App() {
+  const tracker = useHumanBehavior();
+  
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <TrackingComponent />
+    </Suspense>
+  );
+}
+```
+
+## Testing
+
+### Mock Provider
+
+```javascript
+// test-utils.js
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+const mockTracker = {
+  addEvent: jest.fn(),
+  addUserInfo: jest.fn(),
+  start: jest.fn(),
+  stop: jest.fn(),
+  viewLogs: jest.fn()
+};
+
+export function TestProvider({ children }) {
+  return (
+    <HumanBehaviorProvider client={mockTracker}>
+      {children}
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Component Testing
+
+```javascript
+import { render, screen } from '@testing-library/react';
+import { TestProvider } from './test-utils';
+import MyComponent from './MyComponent';
+
+test('tracks button click', async () => {
+  render(
+    <TestProvider>
+      <MyComponent />
+    </TestProvider>
+  );
+  
+  const button = screen.getByText('Click me');
+  await button.click();
+  
+  expect(mockTracker.addEvent).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: 'custom',
+      data: expect.any(Object)
+    })
+  );
+});
+```
+
+## Troubleshooting
+
+### Common Issues
+
+```javascript
+// Issue: Hook used outside provider
+// Solution: Wrap component with provider
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-key">
+      <MyComponent />
+    </HumanBehaviorProvider>
+  );
+}
+
+// Issue: Method not available
+// Solution: Check available methods in React interface
+// Only addEvent, addUserInfo, start, stop, viewLogs are available
+
+// Issue: SSR errors
+// Solution: Provider handles SSR automatically
+// No additional setup needed
+```
+
+### Debug Mode
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function DebugComponent() {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      // View logs in development
+      tracker.viewLogs();
+    }
+  }, [tracker]);
+  
+  return <div>Debug Component</div>;
+}
+```
+
+<Note>
+  The React integration provides a simplified interface for React applications. For advanced functionality like redaction, consider using the tracker directly or extending the React interface.
+</Note>
+
+<Warning>
+  Always ensure you have user consent before starting session recording, especially in regions with strict privacy laws.
+</Warning> 

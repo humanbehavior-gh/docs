@@ -1,0 +1,203 @@
+---
+title: 'Installation'
+description: 'Installation options and setup for HumanBehavior SDK'
+---
+
+# Installation
+
+HumanBehavior SDK can be installed in several ways depending on your project setup and preferences.
+
+## Package Managers
+
+### NPM
+
+```bash
+npm install humanbehavior-js
+```
+
+### Yarn
+
+```bash
+yarn add humanbehavior-js
+```
+
+### PNPM
+
+```bash
+pnpm add humanbehavior-js
+```
+
+## CDN
+
+For quick prototyping or when you can't use a package manager:
+
+```html
+<script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+```
+
+<Note>
+  The CDN version exposes `HumanBehaviorTracker` globally on the `window` object.
+</Note>
+
+## Module Types
+
+The SDK supports multiple module formats:
+
+### ES Modules (ESM)
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+```
+
+### CommonJS (CJS)
+
+```javascript
+const { HumanBehaviorTracker } = require('humanbehavior-js');
+```
+
+### TypeScript
+
+The SDK includes TypeScript definitions:
+
+```typescript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker: HumanBehaviorTracker = new HumanBehaviorTracker(
+  'your-api-key',
+  'https://ingestion.humanbehavior.ai'
+);
+```
+
+## Framework Integration
+
+### React
+
+For React applications, import the React integration:
+
+```javascript
+import { HumanBehaviorProvider, useHumanBehavior } from 'humanbehavior-js/react';
+```
+
+### Next.js
+
+The SDK is fully compatible with Next.js and server-side rendering:
+
+```javascript
+// pages/_app.js
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+export default function App({ Component, pageProps }) {
+  return (
+    <HumanBehaviorProvider apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}>
+      <Component {...pageProps} />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Vue.js
+
+Use the standard JavaScript SDK with Vue:
+
+```javascript
+// main.js
+import { createApp } from 'vue';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+import App from './App.vue';
+
+const app = createApp(App);
+
+// Initialize tracker
+const tracker = new HumanBehaviorTracker(
+  'your-api-key',
+  'https://ingestion.humanbehavior.ai'
+);
+
+// Make tracker available globally
+app.config.globalProperties.$tracker = tracker;
+
+app.mount('#app');
+```
+
+## Environment Variables
+
+For security, store your API key in environment variables:
+
+### Development (.env)
+
+```bash
+HUMANBEHAVIOR_API_KEY=your-api-key-here
+HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+```
+
+### Production
+
+```bash
+# Set environment variables in your hosting platform
+HUMANBEHAVIOR_API_KEY=your-production-api-key
+HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+```
+
+## Browser Compatibility
+
+The SDK supports all modern browsers:
+
+| Browser | Version |
+|---------|---------|
+| Chrome | 60+ |
+| Firefox | 55+ |
+| Safari | 12+ |
+| Edge | 79+ |
+
+<Warning>
+  Internet Explorer is not supported. The SDK uses modern JavaScript features that are not available in IE.
+</Warning>
+
+## Bundle Size
+
+The SDK is optimized for size:
+
+- **Core SDK**: ~45KB (gzipped)
+- **With React integration**: ~50KB (gzipped)
+- **CDN version**: ~60KB (gzipped)
+
+## Dependencies
+
+The SDK has minimal dependencies:
+
+- `rrweb`: Session recording engine
+- `uuid`: Unique identifier generation
+- `react`: Only for React integration
+
+## Troubleshooting
+
+### Module Not Found
+
+If you encounter module resolution issues:
+
+```bash
+# Clear cache and reinstall
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### TypeScript Errors
+
+Make sure you have TypeScript installed:
+
+```bash
+npm install --save-dev typescript @types/node
+```
+
+### CDN Issues
+
+If the CDN is unavailable, you can use a specific version:
+
+```html
+<script src="https://unpkg.com/humanbehavior-js@0.0.5/dist/index.min.js"></script>
+```
+
+<Note>
+  For production applications, we recommend using a package manager rather than CDN for better reliability and version control.
+</Note> 

@@ -1,71 +1,111 @@
 ---
 title: Introduction
-description: "Welcome to the home of your new documentation"
+description: "HumanBehavior SDK - Session recording and user behavior tracking for web applications"
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.png"
-  alt="Hero Light"
-/>
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.png"
-  alt="Hero Dark"
-/>
+# HumanBehavior SDK
 
-## Setting up
+HumanBehavior SDK is a powerful JavaScript library for tracking user sessions, recording user interactions, and analyzing user behavior in web applications. Built on top of [rrweb](https://github.com/rrweb-io/rrweb), it provides high-fidelity session recordings with advanced features like data redaction, user identification, and custom event tracking.
 
-The first step to world-class documentation is setting up your editing environments.
+## Key Features
 
 <CardGroup cols={2}>
   <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
+    title="Session Recording"
+    icon="video"
+    href="/essentials/session-tracking"
   >
-    Get your docs set up locally for easy development
+    Automatically capture and replay user sessions with high fidelity using rrweb technology
   </Card>
   <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
+    title="User Identification"
+    icon="user"
+    href="/essentials/user-identification"
   >
-    Preview your changes before you push to make sure they're perfect
-  </Card>
-</CardGroup>
-
-## Make it yours
-
-Update your docs to your brand and add valuable content for the best user conversion.
-
-<CardGroup cols={2}>
-  <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
-  >
-    Customize your docs to your company's colors and brands
+    Identify and track users across sessions with automatic cookie-based persistence
   </Card>
   <Card
-    title="Reference APIs"
+    title="Data Redaction"
+    icon="shield"
+    href="/essentials/data-redaction"
+  >
+    Protect sensitive data by selectively redacting form fields and content
+  </Card>
+  <Card
+    title="Custom Events"
     icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
+    href="/essentials/custom-events"
   >
-    Automatically generate endpoints from an OpenAPI spec
+    Track custom user interactions and business events with flexible event properties
   </Card>
   <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/content/components/accordions"
+    title="React Integration"
+    icon="react"
+    href="/essentials/react-integration"
   >
-    Build interactive features and designs to guide your users
+    Seamless React integration with hooks and context providers for easy implementation
   </Card>
   <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
+    title="SSR Compatible"
+    icon="server"
+    href="/essentials/nextjs-setup"
   >
-    Check out our showcase of our favorite documentation
+    Works with server-side rendering frameworks like Next.js and Gatsby
   </Card>
 </CardGroup>
+
+## Quick Start
+
+Get up and running in just a few minutes:
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+// Initialize the tracker
+const tracker = new HumanBehaviorTracker(
+  'your-api-key-here',
+  'https://ingestion.humanbehavior.ai'
+);
+
+// Start recording
+tracker.start();
+
+// Add user information
+await tracker.addUserInfo({
+  email: 'user@example.com',
+  name: 'John Doe'
+});
+```
+
+## Installation
+
+Choose your preferred installation method:
+
+<CodeGroup>
+
+```bash npm
+npm install humanbehavior-js
+```
+
+```bash yarn
+yarn add humanbehavior-js
+```
+
+```bash pnpm
+pnpm add humanbehavior-js
+```
+
+</CodeGroup>
+
+## Browser Support
+
+HumanBehavior SDK supports all modern browsers:
+
+- Chrome 60+
+- Firefox 55+
+- Safari 12+
+- Edge 79+
+
+<Note>
+  HumanBehavior SDK automatically handles user identification using cookies, but you can also provide explicit user information for better tracking and analytics.
+</Note>

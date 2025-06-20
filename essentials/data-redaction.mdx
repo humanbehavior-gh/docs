@@ -1,0 +1,357 @@
+---
+title: 'Data Redaction'
+description: 'Protect sensitive data by selectively redacting form fields and content'
+---
+
+# Data Redaction
+
+HumanBehavior SDK provides powerful data redaction capabilities to protect sensitive information during session recording. This ensures compliance with privacy regulations while maintaining the value of your session recordings.
+
+## How Redaction Works
+
+The SDK uses CSS selectors to identify and redact sensitive elements from session recordings:
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker = new HumanBehaviorTracker(
+  'your-api-key',
+  'https://ingestion.humanbehavior.ai'
+);
+
+// Set fields to be redacted
+tracker.setRedactedFields([
+  'input[type="password"]',
+  'input[type="email"]',
+  '.sensitive-data'
+]);
+
+// Start recording with redaction enabled
+tracker.start();
+```
+
+## Basic Redaction
+
+### Setting Redacted Fields
+
+Specify which elements should be redacted using CSS selectors:
+
+```javascript
+// Redact password fields
+tracker.setRedactedFields([
+  'input[type="password"]'
+]);
+
+// Redact multiple field types
+tracker.setRedactedFields([
+  'input[type="password"]',
+  'input[type="email"]',
+  'input[type="tel"]'
+]);
+
+// Redact by CSS class
+tracker.setRedactedFields([
+  '.sensitive',
+  '.private-data'
+]);
+```
+
+### Common Redaction Patterns
+
+```javascript
+// Redact form fields
+tracker.setRedactedFields([
+  'input[type="password"]',     // Password fields
+  'input[type="email"]',        // Email fields
+  'input[type="tel"]',          // Phone number fields
+  'input[type="number"]',       // Credit card numbers
+  'input[name*="ssn"]',         // Social security numbers
+  'input[name*="credit"]',      // Credit card fields
+  'textarea[name*="address"]'   // Address fields
+]);
+
+// Redact specific elements
+tracker.setRedactedFields([
+  '#credit-card-form',
+  '.payment-details',
+  '[data-sensitive="true"]'
+]);
+```
+
+## Advanced Redaction
+
+### Complex Selectors
+
+Use advanced CSS selectors for precise redaction:
+
+```javascript
+// Redact by attribute patterns
+tracker.setRedactedFields([
+  'input[name*="password"]',    // Any input with "password" in name
+  'input[placeholder*="email"]', // Any input with "email" in placeholder
+  'input[data-redact="true"]'   // Custom data attribute
+]);
+
+// Redact by form context
+tracker.setRedactedFields([
+  'form[action*="payment"] input', // All inputs in payment forms
+  '.checkout-form input[type="text"]', // Text inputs in checkout
+  '#login-form input' // All inputs in login form
+]);
+
+// Redact by content patterns
+tracker.setRedactedFields([
+  'input[pattern*="[0-9]{16}"]', // Credit card pattern
+  'input[maxlength="4"]',        // CVV fields
+  'input[autocomplete="cc-number"]' // Credit card autocomplete
+]);
+```
+
+### Dynamic Redaction
+
+Update redaction rules based on user actions:
+
+```javascript
+// Start with basic redaction
+tracker.setRedactedFields([
+  'input[type="password"]'
+]);
+
+// Add more redaction when user enters sensitive area
+document.getElementById('payment-section').addEventListener('focus', () => {
+  tracker.setRedactedFields([
+    'input[type="password"]',
+    'input[type="email"]',
+    '.payment-form input'
+  ]);
+});
+
+// Remove redaction when leaving sensitive area
+document.getElementById('payment-section').addEventListener('blur', () => {
+  tracker.setRedactedFields([
+    'input[type="password"]'
+  ]);
+});
+```
+
+## Redaction Status
+
+### Check Redaction Status
+
+Monitor redaction configuration:
+
+```javascript
+// Check if redaction is active
+const isActive = tracker.isRedactionActive();
+
+// Get current redacted fields
+const redactedFields = tracker.getRedactedFields();
+
+// Log redaction status
+console.log('Redaction active:', isActive);
+console.log('Redacted fields:', redactedFields);
+```
+
+### Redaction Events
+
+Track redaction-related events:
+
+```javascript
+// Monitor redaction changes
+tracker.customEvent('redaction_updated', {
+  fields: tracker.getRedactedFields(),
+  isActive: tracker.isRedactionActive()
+});
+```
+
+## Privacy Compliance
+
+### GDPR Compliance
+
+Redaction helps ensure GDPR compliance:
+
+```javascript
+// Redact all personal data
+tracker.setRedactedFields([
+  'input[type="email"]',
+  'input[type="tel"]',
+  'input[name*="name"]',
+  'input[name*="address"]',
+  'input[name*="birth"]',
+  'input[name*="ssn"]'
+]);
+```
+
+### Payment Processing
+
+For payment processing applications:
+
+```javascript
+// Redact payment information
+tracker.setRedactedFields([
+  'input[name*="card"]',
+  'input[name*="credit"]',
+  'input[name*="cvv"]',
+  'input[name*="cvc"]',
+  'input[pattern*="[0-9]{16}"]',
+  '.payment-form input'
+]);
+```
+
+## Best Practices
+
+### Selective Redaction
+
+Only redact what's necessary:
+
+```javascript
+// Good: Redact only sensitive fields
+tracker.setRedactedFields([
+  'input[type="password"]',
+  'input[type="email"]',
+  '.sensitive-data'
+]);
+
+// Avoid: Over-redacting
+tracker.setRedactedFields([
+  'input', // Too broad - redacts all inputs
+  'form'   // Too broad - redacts entire forms
+]);
+```
+
+### Performance Considerations
+
+```javascript
+// Use efficient selectors
+tracker.setRedactedFields([
+  'input[type="password"]', // Fast - specific attribute
+  '.sensitive'              // Fast - class selector
+]);
+
+// Avoid complex selectors for performance
+tracker.setRedactedFields([
+  'form:has(input[type="password"]) input' // Complex - may be slow
+]);
+```
+
+### Testing Redaction
+
+Verify redaction is working:
+
+```javascript
+// Test redaction in development
+if (process.env.NODE_ENV === 'development') {
+  console.log('Redaction fields:', tracker.getRedactedFields());
+  console.log('Redaction active:', tracker.isRedactionActive());
+  
+  // Test with sample data
+  tracker.customEvent('redaction_test', {
+    redactedFields: tracker.getRedactedFields()
+  });
+}
+```
+
+## Integration Examples
+
+### React Integration
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function PaymentForm() {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    // Set redaction when component mounts
+    tracker.setRedactedFields([
+      'input[type="password"]',
+      '.payment-form input'
+    ]);
+  }, [tracker]);
+  
+  return (
+    <form className="payment-form">
+      <input type="email" placeholder="Email" />
+      <input type="password" placeholder="Password" />
+      <input type="text" placeholder="Card Number" />
+      <input type="text" placeholder="CVV" />
+    </form>
+  );
+}
+```
+
+### Form-Specific Redaction
+
+```javascript
+// Different redaction for different forms
+function setupFormRedaction() {
+  const loginForm = document.getElementById('login-form');
+  const paymentForm = document.getElementById('payment-form');
+  
+  // Login form redaction
+  loginForm.addEventListener('focus', () => {
+    tracker.setRedactedFields([
+      'input[type="password"]',
+      'input[type="email"]'
+    ]);
+  });
+  
+  // Payment form redaction
+  paymentForm.addEventListener('focus', () => {
+    tracker.setRedactedFields([
+      'input[type="password"]',
+      'input[type="email"]',
+      '.payment-form input',
+      'input[name*="card"]'
+    ]);
+  });
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+```javascript
+// Issue: Redaction not working
+// Solution: Check if selectors are correct
+tracker.setRedactedFields([
+  'input[type="password"]' // Make sure this matches your HTML
+]);
+
+// Issue: Over-redaction
+// Solution: Use more specific selectors
+tracker.setRedactedFields([
+  'form.login input[type="password"]', // More specific
+  '.payment-section input[type="email"]' // More specific
+]);
+
+// Issue: Performance problems
+// Solution: Limit the number of selectors
+tracker.setRedactedFields([
+  'input[type="password"]',
+  'input[type="email"]',
+  '.sensitive' // Keep it simple
+]);
+```
+
+### Debug Redaction
+
+```javascript
+// Enable debug logging
+tracker.viewLogs();
+
+// Check redaction in browser console
+console.log('Redaction status:', {
+  isActive: tracker.isRedactionActive(),
+  fields: tracker.getRedactedFields()
+});
+```
+
+<Note>
+  Redaction is applied in real-time during session recording. Redacted elements will appear as blank or masked in session replays.
+</Note>
+
+<Warning>
+  Always test redaction thoroughly in your specific application to ensure sensitive data is properly protected before deploying to production.
+</Warning> 

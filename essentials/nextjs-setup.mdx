@@ -1,0 +1,559 @@
+---
+title: 'Next.js Setup'
+description: 'Complete setup guide for HumanBehavior SDK with Next.js applications'
+---
+
+# Next.js Setup
+
+HumanBehavior SDK is fully compatible with Next.js and provides seamless integration for both App Router and Pages Router. This guide covers everything you need to set up session recording in your Next.js application.
+
+## Quick Start
+
+### App Router (Next.js 13+)
+
+Create a root layout with the provider:
+
+```typescript
+// app/layout.tsx
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <HumanBehaviorProvider 
+          apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+        >
+          {children}
+        </HumanBehaviorProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Pages Router (Next.js 12 and below)
+
+Wrap your app in `_app.tsx`:
+
+```typescript
+// pages/_app.tsx
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+import type { AppProps } from 'next/app';
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <HumanBehaviorProvider 
+      apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+    >
+      <Component {...pageProps} />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+## Environment Configuration
+
+### Environment Variables
+
+Create a `.env.local` file in your project root:
+
+```bash
+# .env.local
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
+NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+```
+
+### Production Environment
+
+For production deployments, set environment variables in your hosting platform:
+
+```bash
+# Vercel
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-production-api-key
+NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+
+# Netlify
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-production-api-key
+NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+```
+
+## Installation
+
+### Install the SDK
+
+```bash
+npm install humanbehavior-js
+# or
+yarn add humanbehavior-js
+# or
+pnpm add humanbehavior-js
+```
+
+### TypeScript Support
+
+The SDK includes TypeScript definitions. No additional setup required:
+
+```typescript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+// Full TypeScript support
+const tracker: HumanBehaviorTracker = new HumanBehaviorTracker(
+  'your-api-key',
+  'https://ingestion.humanbehavior.ai'
+);
+```
+
+## Usage Examples
+
+### Basic Page Component
+
+```typescript
+// app/page.tsx (App Router)
+'use client';
+
+import { useHumanBehavior } from 'humanbehavior-js/react';
+import { useEffect } from 'react';
+
+export default function HomePage() {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    // Start recording when page loads
+    tracker.start();
+    
+    // Track page view
+    tracker.customEvent('page_view', {
+      page: '/',
+      title: 'Home Page'
+    });
+  }, [tracker]);
+  
+  return (
+    <div>
+      <h1>Welcome to My App</h1>
+      <button onClick={() => tracker.customEvent('cta_click', { location: 'hero' })}>
+        Get Started
+      </button>
+    </div>
+  );
+}
+```
+
+### Dynamic Routes
+
+```typescript
+// app/products/[id]/page.tsx
+'use client';
+
+import { useHumanBehavior } from 'humanbehavior-js/react';
+import { useEffect } from 'react';
+
+export default function ProductPage({ params }: { params: { id: string } }) {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    tracker.customEvent('product_view', {
+      productId: params.id,
+      page: `/products/${params.id}`
+    });
+  }, [tracker, params.id]);
+  
+  return (
+    <div>
+      <h1>Product {params.id}</h1>
+      <button onClick={() => tracker.customEvent('add_to_cart', { productId: params.id })}>
+        Add to Cart
+      </button>
+    </div>
+  );
+}
+```
+
+### API Routes Integration
+
+```typescript
+// app/api/track/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  const { eventName, properties } = await request.json();
+  
+  // Server-side tracking (if needed)
+  console.log('Server-side event:', eventName, properties);
+  
+  return NextResponse.json({ success: true });
+}
+```
+
+## Advanced Configuration
+
+### Custom Provider Setup
+
+```typescript
+// lib/humanbehavior.ts
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+export function createTracker() {
+  return new HumanBehaviorTracker(
+    process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!,
+    process.env.NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL || 'https://ingestion.humanbehavior.ai'
+  );
+}
+```
+
+```typescript
+// app/layout.tsx
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+import { createTracker } from '@/lib/humanbehavior';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const tracker = createTracker();
+  
+  return (
+    <html lang="en">
+      <body>
+        <HumanBehaviorProvider client={tracker}>
+          {children}
+        </HumanBehaviorProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Conditional Tracking
+
+```typescript
+// components/TrackingWrapper.tsx
+'use client';
+
+import { useHumanBehavior } from 'humanbehavior-js/react';
+import { useEffect } from 'react';
+
+interface TrackingWrapperProps {
+  children: React.ReactNode;
+  userConsent: boolean;
+}
+
+export function TrackingWrapper({ children, userConsent }: TrackingWrapperProps) {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    if (userConsent) {
+      tracker.start();
+    } else {
+      tracker.stop();
+    }
+  }, [userConsent, tracker]);
+  
+  return <>{children}</>;
+}
+```
+
+## Server-Side Rendering
+
+### SSR Compatibility
+
+The SDK is fully compatible with SSR. The provider automatically handles server-side rendering:
+
+```typescript
+// app/page.tsx
+import { Suspense } from 'react';
+import { ClientComponent } from './ClientComponent';
+
+export default function Page() {
+  return (
+    <div>
+      <h1>Server Rendered Content</h1>
+      <Suspense fallback={<div>Loading...</div>}>
+        <ClientComponent />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+```typescript
+// app/ClientComponent.tsx
+'use client';
+
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+export function ClientComponent() {
+  const tracker = useHumanBehavior();
+  
+  // This only runs on the client
+  useEffect(() => {
+    tracker.start();
+  }, [tracker]);
+  
+  return <div>Client Component</div>;
+}
+```
+
+### Static Generation
+
+For statically generated pages:
+
+```typescript
+// app/blog/[slug]/page.tsx
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+export default function BlogPost({ params }: { params: { slug: string } }) {
+  return (
+    <div>
+      <h1>Blog Post: {params.slug}</h1>
+      <ClientTracking slug={params.slug} />
+    </div>
+  );
+}
+
+function ClientTracking({ slug }: { slug: string }) {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    tracker.customEvent('blog_view', { slug });
+  }, [tracker, slug]);
+  
+  return null;
+}
+```
+
+## Authentication Integration
+
+### NextAuth.js Integration
+
+```typescript
+// app/layout.tsx
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+import { SessionProvider } from 'next-auth/react';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <SessionProvider>
+          <HumanBehaviorProvider 
+            apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+          >
+            {children}
+          </HumanBehaviorProvider>
+        </SessionProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+```typescript
+// components/UserTracking.tsx
+'use client';
+
+import { useHumanBehavior } from 'humanbehavior-js/react';
+import { useSession } from 'next-auth/react';
+import { useEffect } from 'react';
+
+export function UserTracking() {
+  const tracker = useHumanBehavior();
+  const { data: session } = useSession();
+  
+  useEffect(() => {
+    if (session?.user) {
+      tracker.addUserInfo({
+        email: session.user.email!,
+        name: session.user.name!,
+        userId: session.user.id
+      });
+    }
+  }, [session, tracker]);
+  
+  return null;
+}
+```
+
+## Performance Optimization
+
+### Dynamic Imports
+
+```typescript
+// components/TrackingComponent.tsx
+import dynamic from 'next/dynamic';
+
+const TrackingComponent = dynamic(() => import('./TrackingComponent'), {
+  ssr: false,
+  loading: () => <div>Loading tracking...</div>
+});
+
+export default function Page() {
+  return (
+    <div>
+      <h1>My Page</h1>
+      <TrackingComponent />
+    </div>
+  );
+}
+```
+
+### Bundle Optimization
+
+```typescript
+// next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    optimizePackageImports: ['humanbehavior-js']
+  }
+};
+
+module.exports = nextConfig;
+```
+
+## Testing
+
+### Jest Configuration
+
+```javascript
+// jest.config.js
+const nextJest = require('next/jest');
+
+const createJestConfig = nextJest({
+  dir: './',
+});
+
+const customJestConfig = {
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testEnvironment: 'jest-environment-jsdom',
+};
+
+module.exports = createJestConfig(customJestConfig);
+```
+
+```javascript
+// jest.setup.js
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+const mockTracker = {
+  start: jest.fn(),
+  stop: jest.fn(),
+  customEvent: jest.fn(),
+  addUserInfo: jest.fn(),
+  setRedactedFields: jest.fn()
+};
+
+jest.mock('humanbehavior-js/react', () => ({
+  HumanBehaviorProvider: ({ children }) => children,
+  useHumanBehavior: () => mockTracker
+}));
+```
+
+### Component Testing
+
+```typescript
+// __tests__/TrackingComponent.test.tsx
+import { render, screen } from '@testing-library/react';
+import { TrackingComponent } from '../components/TrackingComponent';
+
+test('tracks button click', async () => {
+  render(<TrackingComponent />);
+  
+  const button = screen.getByText('Click me');
+  await button.click();
+  
+  expect(mockTracker.customEvent).toHaveBeenCalledWith(
+    'button_click',
+    expect.any(Object)
+  );
+});
+```
+
+## Deployment
+
+### Vercel Deployment
+
+1. Set environment variables in Vercel dashboard
+2. Deploy your application
+3. The SDK will automatically work in production
+
+### Other Platforms
+
+For other deployment platforms, ensure environment variables are set:
+
+```bash
+# Netlify
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-key
+
+# Railway
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-key
+
+# AWS Amplify
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-key
+```
+
+## Troubleshooting
+
+### Common Issues
+
+```typescript
+// Issue: Provider not found
+// Solution: Ensure provider is at the root level
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <HumanBehaviorProvider apiKey="your-key">
+      <Component {...pageProps} />
+    </HumanBehaviorProvider>
+  );
+}
+
+// Issue: Environment variables not working
+// Solution: Use NEXT_PUBLIC_ prefix
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-key
+
+// Issue: SSR errors
+// Solution: Use 'use client' directive for client components
+'use client';
+import { useHumanBehavior } from 'humanbehavior-js/react';
+```
+
+### Debug Mode
+
+```typescript
+// components/DebugTracking.tsx
+'use client';
+
+import { useHumanBehavior } from 'humanbehavior-js/react';
+import { useEffect } from 'react';
+
+export function DebugTracking() {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      tracker.viewLogs();
+    }
+  }, [tracker]);
+  
+  return null;
+}
+```
+
+<Note>
+  The HumanBehavior SDK is fully compatible with Next.js and automatically handles SSR, static generation, and dynamic imports.
+</Note>
+
+<Warning>
+  Always ensure you have user consent before starting session recording, especially in regions with strict privacy laws.
+</Warning> 

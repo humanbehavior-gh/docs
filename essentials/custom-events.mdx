@@ -1,0 +1,458 @@
+---
+title: 'Custom Events'
+description: 'Track custom user interactions and business events with HumanBehavior SDK'
+---
+
+# Custom Events
+
+HumanBehavior SDK allows you to track custom events beyond the automatic session recording. This enables you to capture specific user interactions, business events, and application state changes.
+
+## Basic Custom Events
+
+Track simple events with a name and optional properties:
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker = new HumanBehaviorTracker(
+  'your-api-key',
+  'https://ingestion.humanbehavior.ai'
+);
+
+// Track a simple event
+await tracker.customEvent('button_click', {
+  buttonId: 'submit-form',
+  page: '/checkout'
+});
+
+// Track an event without properties
+await tracker.customEvent('page_view');
+```
+
+## Event Properties
+
+### Simple Properties
+
+Include relevant data with your events:
+
+```javascript
+// Track form submission
+await tracker.customEvent('form_submit', {
+  formId: 'contact-form',
+  fields: ['name', 'email', 'message'],
+  submissionTime: Date.now()
+});
+
+// Track purchase
+await tracker.customEvent('purchase', {
+  productId: 'prod_123',
+  amount: 99.99,
+  currency: 'USD',
+  paymentMethod: 'credit_card'
+});
+
+// Track user action
+await tracker.customEvent('user_action', {
+  action: 'download_file',
+  fileName: 'report.pdf',
+  fileSize: 1024000
+});
+```
+
+### Complex Properties
+
+Include nested objects and arrays:
+
+```javascript
+// Track shopping cart update
+await tracker.customEvent('cart_update', {
+  cartId: 'cart_456',
+  items: [
+    { id: 'prod_123', quantity: 2, price: 29.99 },
+    { id: 'prod_456', quantity: 1, price: 49.99 }
+  ],
+  totalItems: 3,
+  totalValue: 109.97,
+  currency: 'USD'
+});
+
+// Track feature usage
+await tracker.customEvent('feature_used', {
+  feature: 'advanced_search',
+  filters: {
+    category: 'electronics',
+    priceRange: { min: 100, max: 500 },
+    brand: ['apple', 'samsung']
+  },
+  resultsCount: 45
+});
+```
+
+## Common Event Patterns
+
+### User Interactions
+
+Track user interface interactions:
+
+```javascript
+// Button clicks
+await tracker.customEvent('button_click', {
+  buttonId: 'signup-button',
+  location: 'header',
+  page: '/home'
+});
+
+// Form interactions
+await tracker.customEvent('form_start', {
+  formId: 'registration',
+  step: 1
+});
+
+await tracker.customEvent('form_complete', {
+  formId: 'registration',
+  duration: 120000, // milliseconds
+  steps: 3
+});
+
+// Navigation events
+await tracker.customEvent('navigation', {
+  from: '/products',
+  to: '/checkout',
+  method: 'click'
+});
+```
+
+### Business Events
+
+Track important business milestones:
+
+```javascript
+// User registration
+await tracker.customEvent('user_signup', {
+  method: 'email',
+  source: 'landing_page',
+  plan: 'free'
+});
+
+// Subscription events
+await tracker.customEvent('subscription_created', {
+  plan: 'premium',
+  amount: 29.99,
+  billingCycle: 'monthly'
+});
+
+await tracker.customEvent('subscription_cancelled', {
+  plan: 'premium',
+  reason: 'too_expensive',
+  retentionDays: 45
+});
+
+// Feature adoption
+await tracker.customEvent('feature_adopted', {
+  feature: 'analytics_dashboard',
+  adoptionTime: 300000 // 5 minutes after signup
+});
+```
+
+### Error Tracking
+
+Track application errors and issues:
+
+```javascript
+// JavaScript errors
+await tracker.customEvent('js_error', {
+  message: 'Cannot read property of undefined',
+  stack: 'Error: Cannot read property...',
+  url: '/checkout',
+  line: 42
+});
+
+// API errors
+await tracker.customEvent('api_error', {
+  endpoint: '/api/payment',
+  status: 500,
+  message: 'Internal server error'
+});
+
+// User-reported issues
+await tracker.customEvent('user_feedback', {
+  type: 'bug_report',
+  description: 'Checkout button not working',
+  severity: 'high'
+});
+```
+
+## Event Timing
+
+### Immediate Events
+
+Send events immediately when they occur:
+
+```javascript
+// Track immediate user actions
+document.getElementById('download-btn').addEventListener('click', async () => {
+  await tracker.customEvent('download_started', {
+    fileId: 'report_123',
+    fileType: 'pdf'
+  });
+});
+```
+
+### Batched Events
+
+Send multiple events at once:
+
+```javascript
+// Collect events and send them together
+const events = [
+  { name: 'page_view', properties: { page: '/products' } },
+  { name: 'product_view', properties: { productId: 'prod_123' } },
+  { name: 'add_to_cart', properties: { productId: 'prod_123', quantity: 1 } }
+];
+
+// Send all events
+for (const event of events) {
+  await tracker.customEvent(event.name, event.properties);
+}
+```
+
+## Event Context
+
+### User Context
+
+Events automatically include user context:
+
+```javascript
+// The event will include current user information
+await tracker.customEvent('purchase', {
+  productId: 'prod_123',
+  amount: 99.99
+});
+
+// Event data structure:
+{
+  name: 'purchase',
+  properties: {
+    productId: 'prod_123',
+    amount: 99.99
+  },
+  userId: 'user_456',
+  sessionId: 'session_789',
+  timestamp: 1640995200000
+}
+```
+
+### Session Context
+
+Events are associated with the current session:
+
+```javascript
+// Track session-specific events
+await tracker.customEvent('session_start', {
+  referrer: document.referrer,
+  userAgent: navigator.userAgent
+});
+
+await tracker.customEvent('session_end', {
+  duration: sessionDuration,
+  pageViews: pageViewCount
+});
+```
+
+## Event Analytics
+
+### Event Properties in Analytics
+
+Custom events appear in your analytics dashboard with full context:
+
+```javascript
+// Event analytics data
+{
+  eventName: 'purchase',
+  eventCount: 150,
+  uniqueUsers: 120,
+  properties: {
+    productId: { values: ['prod_123', 'prod_456'] },
+    amount: { min: 9.99, max: 299.99, avg: 89.50 }
+  },
+  userSegments: {
+    'premium': 80,
+    'free': 40
+  }
+}
+```
+
+### Event Segmentation
+
+Use event properties for segmentation:
+
+```javascript
+// Track events with segmentation data
+await tracker.customEvent('feature_used', {
+  feature: 'advanced_search',
+  userSegment: 'premium',
+  userPlan: 'enterprise',
+  region: 'US'
+});
+```
+
+## Best Practices
+
+### Event Naming
+
+Use consistent, descriptive event names:
+
+```javascript
+// Good event names
+await tracker.customEvent('user_signup_completed');
+await tracker.customEvent('product_added_to_cart');
+await tracker.customEvent('payment_method_selected');
+
+// Avoid generic names
+await tracker.customEvent('click'); // Too generic
+await tracker.customEvent('action'); // Too generic
+```
+
+### Property Consistency
+
+Use consistent property names and types:
+
+```javascript
+// Consistent property naming
+await tracker.customEvent('purchase', {
+  productId: 'prod_123', // Always use 'productId'
+  amount: 99.99,         // Always use 'amount'
+  currency: 'USD'        // Always use 'currency'
+});
+
+// Avoid inconsistent naming
+await tracker.customEvent('purchase', {
+  product_id: 'prod_123', // Inconsistent
+  price: 99.99,          // Inconsistent
+  curr: 'USD'            // Inconsistent
+});
+```
+
+### Data Types
+
+Use appropriate data types for properties:
+
+```javascript
+// Use appropriate types
+await tracker.customEvent('form_submit', {
+  formId: 'contact-form',     // String
+  fieldCount: 5,              // Number
+  isComplete: true,           // Boolean
+  submittedAt: Date.now(),    // Number (timestamp)
+  userData: {                 // Object
+    name: 'John Doe',
+    email: 'john@example.com'
+  }
+});
+```
+
+## Error Handling
+
+### Handle Event Failures
+
+Implement proper error handling:
+
+```javascript
+async function trackEvent(eventName, properties = {}) {
+  try {
+    await tracker.customEvent(eventName, properties);
+    console.log(`Event tracked: ${eventName}`);
+  } catch (error) {
+    console.error(`Failed to track event ${eventName}:`, error);
+    // Optionally retry or store for later
+  }
+}
+
+// Usage
+trackEvent('button_click', { buttonId: 'submit' });
+```
+
+### Event Validation
+
+Validate event data before sending:
+
+```javascript
+function validateEvent(name, properties) {
+  if (!name || typeof name !== 'string') {
+    throw new Error('Event name must be a non-empty string');
+  }
+  
+  if (properties && typeof properties !== 'object') {
+    throw new Error('Event properties must be an object');
+  }
+  
+  return true;
+}
+
+async function safeTrackEvent(name, properties = {}) {
+  validateEvent(name, properties);
+  await tracker.customEvent(name, properties);
+}
+```
+
+## React Integration
+
+### Using with React Hook
+
+**Note:** The `customEvent` method is **not available** in the React interface. Use `addEvent` instead:
+
+```javascript
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function MyComponent() {
+  const tracker = useHumanBehavior();
+  
+  const handleClick = () => {
+    // Use addEvent for custom events in React
+    tracker.addEvent({
+      type: 'custom',
+      data: {
+        eventName: 'button_click',
+        buttonId: 'submit-form',
+        page: '/checkout'
+      }
+    });
+  };
+  
+  return <button onClick={handleClick}>Click me</button>;
+}
+```
+
+### React vs Direct Usage
+
+```javascript
+// Direct tracker usage (all methods available)
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker = new HumanBehaviorTracker('api-key', 'ingestion-url');
+await tracker.customEvent('button_click', { buttonId: 'submit' });
+
+// React hook usage (limited interface)
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function Component() {
+  const tracker = useHumanBehavior();
+  
+  // customEvent not available - use addEvent instead
+  tracker.addEvent({
+    type: 'custom',
+    data: {
+      eventName: 'button_click',
+      buttonId: 'submit'
+    }
+  });
+}
+```
+
+<Note>
+  Custom events are automatically associated with the current user and session, providing rich context for analytics and debugging.
+</Note>
+
+<Warning>
+  Be mindful of the data you include in event properties, especially personal information. Always respect user privacy and data protection regulations.
+</Warning> 

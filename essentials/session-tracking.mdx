@@ -1,0 +1,248 @@
+---
+title: 'Session Tracking'
+description: 'Learn how to track and record user sessions with HumanBehavior SDK'
+---
+
+# Session Tracking
+
+HumanBehavior SDK automatically captures and records user sessions using the powerful [rrweb](https://github.com/rrweb-io/rrweb) library. This provides high-fidelity session recordings that can be replayed exactly as the user experienced them.
+
+## How Session Tracking Works
+
+The SDK captures various types of user interactions:
+
+- **Mouse movements and clicks**
+- **Keyboard input**
+- **Scroll events**
+- **Form interactions**
+- **Page navigation**
+- **DOM changes**
+- **Network requests**
+
+## Basic Session Tracking
+
+Start recording sessions with a single method call:
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker = new HumanBehaviorTracker(
+  'your-api-key',
+  'https://ingestion.humanbehavior.ai'
+);
+
+// Start recording the session
+tracker.start();
+```
+
+## Session Management
+
+### Session Lifecycle
+
+Sessions are automatically managed by the SDK:
+
+1. **Creation**: A new session is created when `start()` is called
+2. **Persistence**: Sessions persist across page refreshes for 30 minutes
+3. **Completion**: Sessions are marked complete when the page is closed or hidden
+
+### Session Duration
+
+Sessions automatically continue for 30 minutes of inactivity. After that, a new session is created:
+
+```javascript
+// Sessions automatically handle:
+// - Page refreshes (continues same session)
+// - Tab switching (continues same session)
+// - 30+ minutes of inactivity (creates new session)
+```
+
+### Manual Session Control
+
+You can manually control session recording:
+
+```javascript
+// Start recording
+tracker.start();
+
+// Stop recording (but keep session alive)
+tracker.stop();
+
+// Start recording again (continues same session)
+tracker.start();
+```
+
+## Session Data
+
+### What Gets Recorded
+
+The SDK captures comprehensive session data:
+
+```javascript
+// Example session event structure
+{
+  type: 'dom',
+  data: {
+    adds: [...], // DOM additions
+    removes: [...], // DOM removals
+    attributes: [...] // Attribute changes
+  },
+  timestamp: 1640995200000
+}
+```
+
+### Event Types
+
+- **`dom`**: DOM mutations and changes
+- **`mouse`**: Mouse movements and clicks
+- **`scroll`**: Scroll events
+- **`input`**: Form input changes
+- **`focus`**: Focus/blur events
+- **`viewport`**: Viewport size changes
+- **`fullsnapshot`**: Complete page snapshot
+
+## Performance Considerations
+
+### Automatic Optimization
+
+The SDK automatically optimizes performance:
+
+- **Throttling**: Mouse movements are throttled to reduce data
+- **Batching**: Events are batched and sent in chunks
+- **Compression**: Data is compressed before transmission
+- **Background processing**: Events are processed in the background
+
+### Custom Optimization
+
+You can customize recording behavior:
+
+```javascript
+// Start with custom options
+tracker.start({
+  // Reduce mouse movement frequency
+  mouseThrottle: 50,
+  
+  // Only record specific elements
+  blockClass: 'no-record',
+  
+  // Ignore certain elements
+  ignoreClass: 'ignore-record'
+});
+```
+
+## Session Storage
+
+### Local Storage
+
+Session data is temporarily stored locally before transmission:
+
+```javascript
+// Check session storage
+const sessionId = localStorage.getItem('human_behavior_session_id');
+const lastActivity = localStorage.getItem('human_behavior_last_activity');
+```
+
+### Data Transmission
+
+Events are automatically sent to your ingestion server:
+
+- **Real-time**: Events are sent as they occur
+- **Batched**: Multiple events are batched for efficiency
+- **Retry logic**: Failed transmissions are retried
+- **Beacon API**: Uses `navigator.sendBeacon` for reliable delivery
+
+## Session Analytics
+
+### Session Properties
+
+Each session includes metadata:
+
+```javascript
+{
+  sessionId: 'uuid-v4-session-id',
+  userId: 'user-identifier',
+  startTime: '2024-01-01T00:00:00Z',
+  duration: 300000, // milliseconds
+  pageViews: 5,
+  events: 150
+}
+```
+
+### Session Events
+
+Track custom events within sessions:
+
+```javascript
+// Add custom events to the session
+await tracker.customEvent('button_click', {
+  buttonId: 'submit-form',
+  page: '/checkout'
+});
+
+await tracker.customEvent('form_submit', {
+  formId: 'contact-form',
+  fields: ['name', 'email']
+});
+```
+
+## Debugging Sessions
+
+### View Session Logs
+
+Debug session recording with built-in logging:
+
+```javascript
+// View session logs in console
+tracker.viewLogs();
+
+// Logs include:
+// - Session start/stop events
+// - Event transmission status
+// - Error messages
+// - Performance metrics
+```
+
+### Session Status
+
+Check session status:
+
+```javascript
+// Check if recording is active
+const isRecording = tracker.isRecording();
+
+// Get current session ID
+const sessionId = tracker.getSessionId();
+
+// Get session duration
+const duration = tracker.getSessionDuration();
+```
+
+## Privacy and Security
+
+### Data Redaction
+
+Protect sensitive data during recording:
+
+```javascript
+// Redact sensitive fields
+tracker.setRedactedFields([
+  'input[type="password"]',
+  'input[type="email"]',
+  '.sensitive-data'
+]);
+```
+
+### User Consent
+
+The SDK is designed for privacy compliance:
+
+- **User consent**: Only record when user consents
+- **Data minimization**: Only collect necessary data
+- **Transparency**: Clear logging of what's recorded
+
+<Note>
+  Session recordings are automatically processed and sent to your HumanBehavior ingestion server. You can view and analyze sessions in your HumanBehavior dashboard.
+</Note>
+
+<Warning>
+  Always ensure you have user consent before recording sessions, especially in regions with strict privacy laws.
+</Warning> 
