@@ -105,11 +105,16 @@ identifyUser({
 
 If you're using the CDN version:
 
+### Step 1: Add the SDK Script
+
+First, add the HumanBehavior SDK script to your HTML file:
+
 ```html
 <!DOCTYPE html>
 <html>
 <head>
     <title>My App</title>
+    <!-- Add the HumanBehavior SDK from unpkg -->
     <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
 </head>
 <body>
@@ -137,13 +142,20 @@ If you're using the CDN version:
 </html>
 ```
 
-Or if you have the SDK files locally:
+<Note>
+  The script tag must be added in the `<head>` section before any JavaScript that uses the SDK. This ensures the `HumanBehaviorTracker` class is available globally.
+</Note>
+
+### Alternative: Local SDK Files
+
+If you have the SDK files locally:
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
     <title>My App</title>
+    <!-- Add the HumanBehavior SDK from local files -->
     <script src="./dist/index.min.js"></script>
 </head>
 <body>
