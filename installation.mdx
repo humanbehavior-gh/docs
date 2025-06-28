@@ -74,10 +74,7 @@ The SDK includes TypeScript definitions:
 ```typescript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker: HumanBehaviorTracker = new HumanBehaviorTracker(
-  'your-api-key',
-  'https://ingestion.humanbehavior.ai'
-);
+const tracker: HumanBehaviorTracker = new HumanBehaviorTracker('your-api-key');
 ```
 
 ## Framework Integration
@@ -120,10 +117,7 @@ import App from './App.vue';
 const app = createApp(App);
 
 // Initialize tracker
-const tracker = new HumanBehaviorTracker(
-  'your-api-key',
-  'https://ingestion.humanbehavior.ai'
-);
+const tracker = new HumanBehaviorTracker('your-api-key');
 
 // Make tracker available globally
 app.config.globalProperties.$tracker = tracker;
@@ -139,7 +133,7 @@ For security, store your API key in environment variables:
 
 ```bash
 HUMANBEHAVIOR_API_KEY=your-api-key-here
-HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
 ### Production
@@ -147,7 +141,44 @@ HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
 ```bash
 # Set environment variables in your hosting platform
 HUMANBEHAVIOR_API_KEY=your-production-api-key
-HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-production-api-key
+```
+
+## Ingestion Server Configuration
+
+The SDK supports multiple ingestion server configurations:
+
+### Default Configuration
+
+By default, the SDK uses a development server:
+
+```javascript
+// Uses default development server
+const tracker = new HumanBehaviorTracker('your-api-key');
+```
+
+### Custom Ingestion Server
+
+You can specify a custom ingestion server:
+
+```javascript
+// Use custom ingestion server
+const tracker = new HumanBehaviorTracker(
+  'your-api-key',
+  'https://your-custom-server.com'
+);
+```
+
+### Environment-based Configuration
+
+For different environments:
+
+```javascript
+const ingestionUrl = process.env.NODE_ENV === 'production' 
+  ? 'https://production-ingestion-server.com'
+  : 'http://localhost:3000';
+
+const tracker = new HumanBehaviorTracker('your-api-key', ingestionUrl);
 ```
 
 ## Browser Compatibility
@@ -174,7 +205,7 @@ The SDK is optimized for size:
 - **CDN version**: ~65KB (gzipped)
 
 <Note>
-  Version 0.0.7+ includes data redaction functionality, which adds approximately 5KB to the bundle size.
+  Version 0.0.8 includes enhanced URL tracking and improved session management, with minimal impact on bundle size.
 </Note>
 
 ## Dependencies
@@ -198,22 +229,14 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 
-### TypeScript Errors
+### Version Compatibility
 
-Make sure you have TypeScript installed:
+Make sure you're using a compatible version:
 
 ```bash
-npm install --save-dev typescript @types/node
-```
+# Check current version
+npm list humanbehavior-js
 
-### CDN Issues
-
-If the CDN is unavailable, you can use a specific version:
-
-```html
-<script src="https://unpkg.com/humanbehavior-js@0.0.5/dist/index.min.js"></script>
-```
-
-<Note>
-  For production applications, we recommend using a package manager rather than CDN for better reliability and version control.
-</Note> 
+# Update to latest version
+npm update humanbehavior-js
+``` 

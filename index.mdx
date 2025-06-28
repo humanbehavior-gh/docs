@@ -62,10 +62,7 @@ Get up and running in just a few minutes:
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 // Initialize the tracker
-const tracker = new HumanBehaviorTracker(
-  'your-api-key-here',
-  'https://ingestion.humanbehavior.ai'
-);
+const tracker = new HumanBehaviorTracker('your-api-key-here');
 
 // Start recording
 tracker.start();
@@ -108,4 +105,8 @@ HumanBehavior SDK supports all modern browsers:
 
 <Note>
   HumanBehavior SDK automatically handles user identification using cookies, but you can also provide explicit user information for better tracking and analytics.
+</Note>
+
+<Note>
+  **Version 0.0.8**: The SDK now includes enhanced URL tracking, improved session management, better error handling, and comprehensive React integration. The default ingestion server is configured for development use.
 </Note>

@@ -9,13 +9,13 @@ The `HumanBehaviorTracker` class is the main entry point for the HumanBehavior S
 
 ## Constructor
 
-### `new HumanBehaviorTracker(apiKey, ingestionUrl)`
+### `new HumanBehaviorTracker(apiKey, ingestionUrl?)`
 
 Creates a new tracker instance.
 
 **Parameters:**
 - `apiKey` (string, required): Your HumanBehavior API key
-- `ingestionUrl` (string, required): Your ingestion server URL
+- `ingestionUrl` (string, optional): Your custom ingestion server URL
 
 **Returns:** `HumanBehaviorTracker` instance
 
@@ -23,14 +23,18 @@ Creates a new tracker instance.
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
+// Use default ingestion server
+const tracker = new HumanBehaviorTracker('your-api-key-here');
+
+// Use custom ingestion server
 const tracker = new HumanBehaviorTracker(
   'your-api-key-here',
-  'https://ingestion.humanbehavior.ai'
+  'https://your-custom-server.com'
 );
 ```
 
 **Throws:**
-- `Error`: If API key or ingestion URL is not provided
+- `Error`: If API key is not provided
 
 ## Core Methods
 
@@ -49,6 +53,7 @@ await tracker.start();
 - Automatically initializes the tracker if not already initialized
 - Begins recording DOM events, mouse movements, and user interactions
 - Sets up automatic event batching and transmission
+- Captures entry URL and referrer information
 
 ### `stop()`
 
@@ -204,9 +209,13 @@ const isActive = tracker.isRedactionActive();
 console.log('Redaction active:', isActive);
 ```
 
+**Notes:**
+- Returns `true` if any fields are set for redaction
+- Returns `false` if no fields are redacted
+
 ### `getRedactedFields()`
 
-Gets the current list of redacted fields.
+Gets the currently selected fields for redaction.
 
 **Returns:** `string[]`
 
@@ -216,29 +225,36 @@ const fields = tracker.getRedactedFields();
 console.log('Redacted fields:', fields);
 ```
 
+**Notes:**
+- Returns array of CSS selectors currently set for redaction
+- Returns empty array if no redaction is configured
+
 ### `redact(options)`
 
-Starts redaction functionality with optional configuration.
+Configures redaction with custom options.
 
 **Parameters:**
-- `options` (RedactionOptions, optional): Configuration for redaction behavior
+- `options` (object, optional): Redaction configuration options
+  - `redactedText` (string, optional): Custom text to use for redaction
+  - `excludeSelectors` (string[], optional): Selectors to exclude from redaction
+  - `userFields` (string[], optional): Fields to redact
 
 **Returns:** `Promise<void>`
 
 **Example:**
 ```javascript
 await tracker.redact({
-  redactedText: '[REDACTED]',
-  excludeSelectors: ['.no-redact'],
+  redactedText: '[HIDDEN]',
+  excludeSelectors: ['.public-data'],
   userFields: ['input[type="password"]']
 });
 ```
 
-## Debugging
+## Debug and Logging
 
 ### `viewLogs()`
 
-Displays all SDK logs in the console.
+Displays SDK logs in the browser console.
 
 **Returns:** `void`
 
@@ -248,13 +264,13 @@ tracker.viewLogs();
 ```
 
 **Notes:**
-- Logs include session events, user identification, and errors
-- Logs are stored in localStorage
-- Calling this method clears the logs
+- Shows logs from the current session
+- Clears logs after displaying them
+- Useful for debugging and troubleshooting
 
 ### `logToStorage(message)`
 
-Logs a message to storage for debugging.
+Logs a message to local storage for debugging.
 
 **Parameters:**
 - `message` (string, required): Message to log
@@ -267,7 +283,7 @@ HumanBehaviorTracker.logToStorage('Custom debug message');
 ```
 
 **Notes:**
-- Static method
+- Static method for logging messages
 - Messages are stored in localStorage
 - Can be viewed with `viewLogs()`
 
@@ -281,80 +297,99 @@ Promise that resolves when the tracker is fully initialized.
 
 **Example:**
 ```javascript
+// Wait for initialization
 await tracker.initializationPromise;
 console.log('Tracker initialized');
+```
+
+**Notes:**
+- `null` if initialization failed
+- Resolves when tracker is ready to use
+- Rejects if initialization fails
+
+## Session Management
+
+### Session Persistence
+
+Sessions automatically persist for 30 minutes of inactivity:
+
+```javascript
+// Session continues across:
+// - Page refreshes
+// - Tab switching
+// - Short periods of inactivity
+
+// New session created after:
+// - 30+ minutes of inactivity
+// - Manual session reset
+```
+
+### URL Tracking
+
+The SDK automatically tracks URL information:
+
+```javascript
+// Entry URL captured when session starts
+// All URL changes tracked during session
+// End URL captured when session completes
+// Referrer information included
 ```
 
 ## Error Handling
 
 ### Common Errors
 
-```javascript
-// Error: API key not provided
-const tracker = new HumanBehaviorTracker(); // Throws error
-
-// Error: Ingestion URL not provided
-const tracker = new HumanBehaviorTracker('api-key'); // Throws error
-
-// Error: Tracker not initialized
-await tracker.addUserInfo({}); // Throws error if not initialized
-
-// Error: No user info available
-await tracker.auth(['email']); // Throws error if addUserInfo not called first
-```
-
-### Error Handling Example
-
+**Initialization Errors:**
 ```javascript
 try {
-  await tracker.addUserInfo({
-    email: 'user@example.com'
-  });
+  const tracker = new HumanBehaviorTracker('invalid-key');
+  await tracker.start();
 } catch (error) {
-  console.error('Failed to add user info:', error);
-  // Handle error appropriately
+  console.error('Initialization failed:', error.message);
 }
 ```
 
-## Lifecycle
+**Method Call Errors:**
+```javascript
+try {
+  await tracker.addUserInfo({ email: 'test@example.com' });
+} catch (error) {
+  console.error('Failed to add user info:', error.message);
+}
+```
 
-### Initialization Flow
+### Error Recovery
 
-1. **Constructor**: Creates tracker instance
-2. **Automatic Initialization**: Begins when instance is created
-3. **API Call**: Sends initialization request to server
-4. **Cookie Setup**: Sets up user identification cookies
-5. **Ready State**: Tracker is ready for use
+The SDK includes automatic error recovery:
 
-### Session Flow
-
-1. **Start**: Begin recording user interactions
-2. **Event Capture**: Automatically capture DOM, mouse, and input events
-3. **Batching**: Events are batched for efficient transmission
-4. **Transmission**: Events are sent to ingestion server
-5. **Stop**: Stop recording (optional)
+- Failed network requests are retried
+- Events are queued during network issues
+- Session data is preserved during errors
+- Automatic reconnection to ingestion server
 
 ## Performance Considerations
 
 ### Event Batching
 
-Events are automatically batched and sent every 5 seconds:
+Events are automatically batched for efficiency:
 
-```javascript
-// Events are batched automatically
-tracker.customEvent('event1', { data: 'value1' });
-tracker.customEvent('event2', { data: 'value2' });
-tracker.customEvent('event3', { data: 'value3' });
-// All events sent together after 5 seconds
-```
+- Events are collected in memory
+- Batches are sent every 5 seconds
+- Large events are chunked automatically
+- Failed batches are retried
 
 ### Memory Management
 
-The SDK automatically manages memory:
+The SDK manages memory efficiently:
 
 - Events are cleared after successful transmission
-- Failed events are retried automatically
-- Session data is cleaned up when sessions end
+- Session data is limited to prevent memory leaks
+- Automatic cleanup of old data
+- Garbage collection friendly
+
+<Note>
+  **Version 0.0.8**: Enhanced URL tracking, improved session management, and better error handling. The SDK now automatically captures entry URLs, navigation paths, and end URLs for comprehensive session analysis.
+</Note>
 
 ## Browser Compatibility
 

@@ -12,7 +12,6 @@ Get started with HumanBehavior SDK and begin tracking user sessions in just a fe
 Before you begin, make sure you have:
 
 - A HumanBehavior account and API key
-- Your ingestion server URL
 - A modern web browser
 - Basic knowledge of JavaScript
 
@@ -38,20 +37,17 @@ pnpm add humanbehavior-js
 
 ## Step 2: Initialize the Tracker
 
-Create a new instance of the tracker with your API key and ingestion URL:
+Create a new instance of the tracker with your API key:
 
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = new HumanBehaviorTracker(
-  'your-api-key-here',
-  'https://ingestion.humanbehavior.ai'
-);
+const tracker = new HumanBehaviorTracker('your-api-key-here');
 ```
 
-    <Note>
-  Replace `'your-api-key-here'` with your actual API key from your HumanBehavior dashboard.
-    </Note>
+<Note>
+  Replace `'your-api-key-here'` with your actual API key from your HumanBehavior dashboard. The SDK will automatically use the appropriate ingestion server based on your configuration.
+</Note>
 
 ## Step 3: Start Recording
 
@@ -83,10 +79,7 @@ Here's a complete working example:
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 // Initialize tracker
-const tracker = new HumanBehaviorTracker(
-  'your-api-key-here',
-  'https://ingestion.humanbehavior.ai'
-);
+const tracker = new HumanBehaviorTracker('your-api-key-here');
 
 // Start recording immediately
 tracker.start();
@@ -124,10 +117,7 @@ If you're using the CDN version:
     
     <script>
         // Initialize tracker
-        const tracker = new HumanBehaviorTracker(
-            'your-api-key-here',
-            'https://ingestion.humanbehavior.ai'
-        );
+        const tracker = new HumanBehaviorTracker('your-api-key-here');
         
         // Start recording
         tracker.start();
@@ -161,16 +151,39 @@ Or if you have the SDK files locally:
     
     <script>
         // Initialize tracker
-        const tracker = new HumanBehaviorTracker(
-            'your-api-key-here',
-            'https://ingestion.humanbehavior.ai'
-        );
+        const tracker = new HumanBehaviorTracker('your-api-key-here');
         
         // Start recording
         tracker.start();
     </script>
 </body>
 </html>
+```
+
+## React Example
+
+For React applications:
+
+```javascript
+import { HumanBehaviorProvider, useHumanBehavior } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key-here">
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+
+function MyComponent() {
+  const tracker = useHumanBehavior();
+  
+  useEffect(() => {
+    tracker.start();
+  }, [tracker]);
+  
+  return <div>Your app content</div>;
+}
 ```
 
 ## What Happens Next?
@@ -198,25 +211,44 @@ Now that you have the basics set up, explore these advanced features:
     title="Data Redaction"
     icon="shield"
     href="/essentials/data-redaction"
->
-    Protect sensitive data from being recorded
+  >
+    Protect sensitive data during recording
+</Card>
+<Card
+    title="User Authentication"
+    icon="user"
+    href="/essentials/user-identification"
+  >
+    Authenticate users against your database
 </Card>
 <Card
     title="React Integration"
     icon="react"
     href="/essentials/react-integration"
->
-    Use the SDK with React applications
-</Card>
-<Card
-    title="API Reference"
-    icon="book"
-    href="/api-reference/tracker"
->
-    Complete API documentation
+  >
+    Use hooks and context providers
 </Card>
 </CardGroup>
 
+## Troubleshooting
+
+### Common Issues
+
+**Tracker not initializing**: Make sure your API key is valid and you have an internet connection.
+
+**Events not being sent**: Check your browser's network tab for any failed requests to the ingestion server.
+
+**User identification failing**: Ensure you're calling `addUserInfo()` after the tracker has initialized.
+
+### Debug Mode
+
+Enable debug logging to troubleshoot issues:
+
+```javascript
+// View logs in console
+tracker.viewLogs();
+```
+
 <Note>
-  The SDK automatically handles session management, user identification, and data transmission. You don't need to worry about these low-level details unless you want to customize the behavior.
+  **Version 0.0.8**: The SDK now includes enhanced URL tracking, improved session management, and better error handling. Sessions automatically persist for 30 minutes of inactivity.
 </Note>

@@ -18,6 +18,7 @@ The SDK captures various types of user interactions:
 - **Page navigation**
 - **DOM changes**
 - **Network requests**
+- **URL changes and navigation**
 
 ## Basic Session Tracking
 
@@ -26,10 +27,7 @@ Start recording sessions with a single method call:
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = new HumanBehaviorTracker(
-  'your-api-key',
-  'https://ingestion.humanbehavior.ai'
-);
+const tracker = new HumanBehaviorTracker('your-api-key');
 
 // Start recording the session
 tracker.start();
@@ -44,6 +42,7 @@ Sessions are automatically managed by the SDK:
 1. **Creation**: A new session is created when `start()` is called
 2. **Persistence**: Sessions persist across page refreshes for 30 minutes
 3. **Completion**: Sessions are marked complete when the page is closed or hidden
+4. **URL Tracking**: Entry URL and navigation URLs are automatically tracked
 
 ### Session Duration
 
@@ -54,6 +53,7 @@ Sessions automatically continue for 30 minutes of inactivity. After that, a new 
 // - Page refreshes (continues same session)
 // - Tab switching (continues same session)
 // - 30+ minutes of inactivity (creates new session)
+// - URL changes (tracks navigation)
 ```
 
 ### Manual Session Control
@@ -69,6 +69,35 @@ tracker.stop();
 
 // Start recording again (continues same session)
 tracker.start();
+```
+
+## URL Tracking
+
+### Automatic URL Capture
+
+The SDK automatically captures URL information:
+
+```javascript
+// Entry URL is captured when session starts
+// All URL changes are tracked during the session
+// End URL is captured when session completes
+```
+
+### URL Data Structure
+
+Each session includes comprehensive URL data:
+
+```javascript
+{
+  entryURL: 'https://example.com/start',
+  allURLs: [
+    'https://example.com/start',
+    'https://example.com/products',
+    'https://example.com/checkout'
+  ],
+  endURL: 'https://example.com/checkout',
+  referrer: 'https://google.com'
+}
 ```
 
 ## Session Data
@@ -163,7 +192,9 @@ Each session includes metadata:
   startTime: '2024-01-01T00:00:00Z',
   duration: 300000, // milliseconds
   pageViews: 5,
-  events: 150
+  events: 150,
+  entryURL: 'https://example.com/start',
+  endURL: 'https://example.com/checkout'
 }
 ```
 
@@ -198,23 +229,24 @@ tracker.viewLogs();
 // - Session start/stop events
 // - Event transmission status
 // - Error messages
-// - Performance metrics
+// - URL tracking information
 ```
 
 ### Session Status
 
-Check session status:
+Check the current session status:
 
 ```javascript
-// Check if recording is active
-const isRecording = tracker.isRecording();
+// Check if session is active
+const isActive = tracker.isInitialized();
 
-// Get current session ID
-const sessionId = tracker.getSessionId();
-
-// Get session duration
-const duration = tracker.getSessionDuration();
+// View current session ID
+console.log('Session ID:', tracker.sessionId);
 ```
+
+<Note>
+  **Version 0.0.8**: Enhanced URL tracking automatically captures entry URLs, navigation paths, and end URLs for comprehensive session analysis.
+</Note>
 
 ## Privacy and Security
 
