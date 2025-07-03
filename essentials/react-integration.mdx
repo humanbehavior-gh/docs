@@ -5,7 +5,7 @@ description: 'Seamless React integration with hooks and context providers for ea
 
 # React Integration
 
-HumanBehavior SDK provides seamless React integration with hooks and context providers, making it easy to implement session recording in React applications.
+HumanBehavior SDK provides seamless React integration with hooks and context providers, making it easy to implement session recording in React applications. The React integration includes performance optimizations to minimize re-renders and ensure smooth operation.
 
 ## Quick Start
 
@@ -153,6 +153,27 @@ function UserProfile({ user }) {
   
   return <div>Welcome, {user.name}!</div>;
 }
+```
+
+## Performance Optimizations
+
+The React integration includes several performance optimizations:
+
+### Memoized Context Value
+
+The provider uses `useMemo` to prevent unnecessary re-renders when the context value hasn't changed.
+
+### Optimized Dependencies
+
+The `useEffect` hooks are optimized to avoid infinite re-render loops and unnecessary effect triggers.
+
+### Event Queue Management
+
+Events are queued efficiently during initialization and processed once the tracker is ready.
+
+### SSR Compatibility
+
+The integration is fully compatible with server-side rendering frameworks like Next.js and Gatsby.
 ```
 
 ### Custom Events

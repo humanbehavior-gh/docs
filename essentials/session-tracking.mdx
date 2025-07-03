@@ -12,13 +12,14 @@ HumanBehavior SDK automatically captures and records user sessions using the pow
 The SDK captures various types of user interactions:
 
 - **Mouse movements and clicks**
-- **Keyboard input**
+- **Keyboard input and keypress events**
 - **Scroll events**
 - **Form interactions**
 - **Page navigation**
 - **DOM changes**
 - **Network requests**
 - **URL changes and navigation**
+- **Input field interactions**
 
 ## Basic Session Tracking
 
@@ -124,10 +125,11 @@ The SDK captures comprehensive session data:
 - **`dom`**: DOM mutations and changes
 - **`mouse`**: Mouse movements and clicks
 - **`scroll`**: Scroll events
-- **`input`**: Form input changes
+- **`input`**: Form input changes and keypress events
 - **`focus`**: Focus/blur events
 - **`viewport`**: Viewport size changes
 - **`fullsnapshot`**: Complete page snapshot
+- **`custom`**: Custom events and interactions
 
 ## Performance Considerations
 
@@ -183,7 +185,7 @@ Events are automatically sent to your ingestion server:
 
 ### Session Properties
 
-Each session includes metadata:
+Each session includes comprehensive metadata:
 
 ```javascript
 {
@@ -193,10 +195,33 @@ Each session includes metadata:
   duration: 300000, // milliseconds
   pageViews: 5,
   events: 150,
+  clickCount: 25,
+  keypressCount: 45,
+  mouseActivityCount: 120,
   entryURL: 'https://example.com/start',
-  endURL: 'https://example.com/checkout'
+  endURL: 'https://example.com/checkout',
+  uniqueURLsVisitedCount: 3
 }
 ```
+
+## Enhanced Session Metrics
+
+The SDK automatically tracks detailed interaction metrics:
+
+### Interaction Counts
+
+- **`clickCount`**: Number of button and link clicks
+- **`keypressCount`**: Number of keyboard interactions in input fields
+- **`mouseActivityCount`**: Total mouse movements and interactions
+- **`pageviewCount`**: Number of page views during the session
+- **`autocaptureCount`**: Number of automatically captured interactions
+
+### URL Tracking
+
+- **`entryURL`**: The first URL visited in the session
+- **`endURL`**: The last URL visited before session completion
+- **`allURLs`**: Array of all URLs visited during the session
+- **`uniqueURLsVisitedCount`**: Number of unique pages visited
 
 ### Session Events
 

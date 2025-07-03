@@ -5,15 +5,15 @@ description: 'Protect sensitive data by selectively redacting form fields and co
 
 # Data Redaction
 
-HumanBehavior SDK provides powerful data redaction capabilities to protect sensitive information during session recording. This ensures compliance with privacy regulations while maintaining the value of your session recordings.
+HumanBehavior SDK provides powerful data redaction capabilities to protect sensitive information during session recording. This ensures compliance with privacy regulations while maintaining the value of your session recordings. The redaction system automatically processes events in real-time to ensure sensitive data is never captured.
 
 <Note>
-  **Version Requirement**: Data redaction is available in version 0.0.7 and later. Make sure you're using at least version 0.0.7 of the SDK.
+  **Version Requirement**: Data redaction is available in version 0.0.7 and later. Enhanced redaction capabilities are available in version 0.0.9+. Make sure you're using at least version 0.0.7 of the SDK.
 </Note>
 
 ## How Redaction Works
 
-The SDK uses CSS selectors to identify and redact sensitive elements from session recordings:
+The SDK uses CSS selectors to identify and redact sensitive elements from session recordings. The redaction system processes events in real-time, ensuring sensitive data is never captured or transmitted.
 
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
@@ -107,6 +107,26 @@ tracker.setRedactedFields([
   'input[autocomplete="cc-number"]' // Credit card autocomplete
 ]);
 ```
+
+## Enhanced Redaction Features
+
+### Real-time Processing
+
+The redaction system processes events in real-time as they occur, ensuring sensitive data is never captured:
+
+- **Input Events**: Text input and form interactions are redacted immediately
+- **DOM Mutations**: Changes to sensitive elements are automatically redacted
+- **Mouse Interactions**: Interactions with sensitive fields are processed
+- **Full Snapshots**: Complete page snapshots are scanned and redacted
+
+### Comprehensive Coverage
+
+Redaction covers all types of sensitive data:
+
+- **Form Inputs**: Text fields, passwords, emails, phone numbers
+- **Dynamic Content**: Content added via JavaScript
+- **Nested Elements**: Complex form structures and nested inputs
+- **Attribute Changes**: Value attributes and other sensitive properties
 
 ### Dynamic Redaction
 
