@@ -17,7 +17,6 @@ Static method to initialize the tracker with global persistence.
 static init(
   apiKey: string, 
   options?: {
-    ingestionUrl?: string;
     redactFields?: string[];
   }
 ): HumanBehaviorTracker
@@ -26,7 +25,6 @@ static init(
 **Parameters:**
 - `apiKey` (string): Your HumanBehavior API key
 - `options` (object, optional): Configuration options
-  - `ingestionUrl` (string, optional): Custom ingestion server URL
   - `redactFields` (string[], optional): CSS selectors for fields to redact
 
 **Returns:** `HumanBehaviorTracker` instance
@@ -34,29 +32,26 @@ static init(
 **Example:**
 ```javascript
 const tracker = HumanBehaviorTracker.init('your-api-key', {
-  ingestionUrl: 'http://localhost:3000',
   redactFields: ['input[type="password"]', '#email']
 });
 ```
 
-### `new HumanBehaviorTracker(apiKey, ingestionUrl?)`
+### `new HumanBehaviorTracker(apiKey)`
 
 Constructor method (legacy, still supported).
 
 ```typescript
 constructor(
-  apiKey: string, 
-  ingestionUrl?: string
+  apiKey: string
 )
 ```
 
 **Parameters:**
 - `apiKey` (string): Your HumanBehavior API key
-- `ingestionUrl` (string, optional): Custom ingestion server URL
 
 **Example:**
 ```javascript
-const tracker = new HumanBehaviorTracker('your-api-key', 'http://localhost:3000');
+const tracker = new HumanBehaviorTracker('your-api-key');
 await tracker.start(); // Must call start() manually
 ```
 

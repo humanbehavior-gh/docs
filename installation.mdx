@@ -144,43 +144,9 @@ HUMANBEHAVIOR_API_KEY=your-production-api-key
 NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-production-api-key
 ```
 
-## Ingestion Server Configuration
+## Server Configuration
 
-The SDK supports multiple ingestion server configurations:
-
-### Default Configuration
-
-By default, the SDK uses a development server:
-
-```javascript
-// Uses default development server
-const tracker = HumanBehaviorTracker.init('your-api-key');
-```
-
-### Custom Ingestion Server
-
-You can specify a custom ingestion server:
-
-```javascript
-// Use custom ingestion server
-const tracker = HumanBehaviorTracker.init('your-api-key', {
-  ingestionUrl: 'https://your-custom-server.com'
-});
-```
-
-### Environment-based Configuration
-
-For different environments:
-
-```javascript
-const options = {
-  ingestionUrl: process.env.NODE_ENV === 'production' 
-    ? 'https://production-ingestion-server.com'
-    : 'http://localhost:3000'
-};
-
-const tracker = HumanBehaviorTracker.init('your-api-key', options);
-```
+The SDK automatically uses the appropriate ingestion server based on your API key configuration. No additional setup is required.
 
 ## Browser Compatibility
 
@@ -223,9 +189,6 @@ The SDK supports various initialization options:
 
 ```javascript
 const tracker = HumanBehaviorTracker.init('your-api-key', {
-  // Custom ingestion server
-  ingestionUrl: 'https://your-server.com',
-  
   // Fields to redact (CSS selectors)
   redactFields: [
     'input[type="password"]',

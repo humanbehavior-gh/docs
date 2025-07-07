@@ -26,19 +26,7 @@ Your HumanBehavior API key. Required if no `client` is provided.
 </HumanBehaviorProvider>
 ```
 
-### `ingestionUrl` (string, optional)
 
-Your ingestion server URL. Defaults to `'https://ingestion.humanbehavior.ai'`.
-
-**Example:**
-```javascript
-<HumanBehaviorProvider 
-  apiKey="your-api-key-here"
-  ingestionUrl="https://your-ingestion-server.com"
->
-  <App />
-</HumanBehaviorProvider>
-```
 
 ### `client` (HumanBehaviorTracker, optional)
 
@@ -48,10 +36,7 @@ An existing tracker instance to use instead of creating a new one.
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = new HumanBehaviorTracker(
-  'your-api-key',
-  'https://ingestion.humanbehavior.ai'
-);
+const tracker = new HumanBehaviorTracker('your-api-key');
 
 <HumanBehaviorProvider client={tracker}>
   <App />
@@ -83,7 +68,6 @@ function App() {
   return (
     <HumanBehaviorProvider 
       apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
-      ingestionUrl={process.env.REACT_APP_HUMANBEHAVIOR_INGESTION_URL}
     >
       <YourApp />
     </HumanBehaviorProvider>
@@ -98,10 +82,7 @@ import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 // Create custom tracker
-const tracker = new HumanBehaviorTracker(
-  'your-api-key',
-  'https://ingestion.humanbehavior.ai'
-);
+const tracker = new HumanBehaviorTracker('your-api-key');
 
 function App() {
   return (

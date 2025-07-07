@@ -76,8 +76,6 @@ function App() {
     <HumanBehaviorProvider 
       apiKey="your-api-key"
       options={{
-        ingestionUrl: 'http://localhost:3000',
-        logLevel: 'debug',
         redactFields: ['input[type="password"]', '#email']
       }}
     >
@@ -94,10 +92,6 @@ import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 
 function App() {
   const options = {
-    ingestionUrl: process.env.NODE_ENV === 'production' 
-      ? 'https://production-server.com'
-      : 'http://localhost:3000',
-    logLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'error',
     redactFields: ['input[type="password"]']
   };
 

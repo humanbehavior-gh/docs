@@ -46,7 +46,7 @@ const tracker = HumanBehaviorTracker.init('your-api-key-here');
 ```
 
 <Note>
-  Replace `'your-api-key-here'` with your actual API key from your HumanBehavior dashboard. The SDK will automatically use the appropriate ingestion server based on your configuration.
+  Replace `'your-api-key-here'` with your actual API key from your HumanBehavior dashboard.
 </Note>
 
 ## Step 3: Add User Information (Optional)
@@ -71,7 +71,6 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 // Initialize tracker with options
 const tracker = HumanBehaviorTracker.init('your-api-key-here', {
-  ingestionUrl: 'http://localhost:3000', // optional custom server
   redactFields: ['input[type="password"]', '#email'] // optional sensitive fields
 });
 
