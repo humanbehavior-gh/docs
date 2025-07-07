@@ -38,11 +38,7 @@ The SDK automatically captures these user interactions:
 - **Copy/paste** operations
 - **Form submissions**
 
-### Navigation
-- **Page loads** and refreshes
-- **SPA route changes** (React Router, Vue Router, etc.)
-- **Browser navigation** (back/forward buttons)
-- **Hash changes** and URL updates
+
 
 ### Console Activity
 - **Console logs** and debug messages
@@ -72,12 +68,7 @@ Sessions automatically persist across page reloads and navigation:
 // - Browser restart
 ```
 
-### Cross-Page Continuity
-```javascript
-// Session persists when navigating between pages on the same domain
-// Example: /home → /products → /checkout
-// All interactions are part of the same session
-```
+
 
 ## Session Management
 
@@ -122,25 +113,7 @@ if (tracker.initializationPromise) {
 }
 ```
 
-## Navigation Tracking
 
-### Automatic Navigation Detection
-```javascript
-// The SDK automatically tracks:
-// - pushState() and replaceState() calls
-// - popstate events (browser back/forward)
-// - hashchange events
-// - window.location changes
-```
-
-### Manual Navigation Tracking
-```javascript
-// Track custom navigation events
-await tracker.trackNavigationEvent('custom', '/home', '/products');
-
-// Track page views
-await tracker.trackPageView('/checkout');
-```
 
 ## Console Tracking
 
@@ -258,20 +231,22 @@ console.log('Current session:', sessionId);
 // Check initialization status
 if (tracker.initializationPromise) {
   await tracker.initializationPromise;
-  console.log('Tracker initialized');
 }
 
 // Test connection
 const status = await tracker.testConnection();
-console.log('Connection status:', status);
+if (!status.success) {
+  console.error('Connection failed:', status.error);
+}
 ```
 
 ### Performance Issues
 ```javascript
-// Check event queue size
+// Check connection status
 const connectionInfo = tracker.getConnectionStatus();
-console.log('Connection blocked:', connectionInfo.blocked);
-console.log('Recommendations:', connectionInfo.recommendations);
+if (connectionInfo.blocked) {
+  console.error('Connection blocked by ad blocker');
+}
 ```
 
 ## Best Practices
@@ -306,7 +281,7 @@ if (getUserConsent()) {
 
 ### 4. Monitor Performance
 ```javascript
-// Check connection status periodically
+// Monitor connection status
 setInterval(() => {
   const status = tracker.getConnectionStatus();
   if (status.blocked) {

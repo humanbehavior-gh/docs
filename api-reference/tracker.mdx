@@ -18,7 +18,6 @@ static init(
   apiKey: string, 
   options?: {
     ingestionUrl?: string;
-    logLevel?: 'none' | 'error' | 'warn' | 'info' | 'debug';
     redactFields?: string[];
   }
 ): HumanBehaviorTracker
@@ -28,7 +27,6 @@ static init(
 - `apiKey` (string): Your HumanBehavior API key
 - `options` (object, optional): Configuration options
   - `ingestionUrl` (string, optional): Custom ingestion server URL
-  - `logLevel` (string, optional): Logging level
   - `redactFields` (string[], optional): CSS selectors for fields to redact
 
 **Returns:** `HumanBehaviorTracker` instance
@@ -37,7 +35,6 @@ static init(
 ```javascript
 const tracker = HumanBehaviorTracker.init('your-api-key', {
   ingestionUrl: 'http://localhost:3000',
-  logLevel: 'debug',
   redactFields: ['input[type="password"]', '#email']
 });
 ```
@@ -148,46 +145,11 @@ async auth(authFields: string[]): Promise<void>
 await tracker.auth(['email', 'phoneNumber']);
 ```
 
-## Event Tracking
+## Custom Events
 
-### `trackPageView(url?)`
 
-Track a page view event.
 
-```typescript
-async trackPageView(url?: string): Promise<void>
-```
 
-**Parameters:**
-- `url` (string, optional): URL to track (defaults to current URL)
-
-**Example:**
-```javascript
-await tracker.trackPageView();
-await tracker.trackPageView('/checkout');
-```
-
-### `trackNavigationEvent(type, fromUrl, toUrl)`
-
-Track navigation between pages.
-
-```typescript
-async trackNavigationEvent(
-  type: string, 
-  fromUrl: string, 
-  toUrl: string
-): Promise<void>
-```
-
-**Parameters:**
-- `type` (string): Navigation type ('push', 'pop', 'replace', etc.)
-- `fromUrl` (string): Source URL
-- `toUrl` (string): Destination URL
-
-**Example:**
-```javascript
-await tracker.trackNavigationEvent('push', '/home', '/products');
-```
 
 ### `customEvent(eventName, properties?)`
 
@@ -315,20 +277,9 @@ const fields = tracker.getRedactedFields();
 console.log('Redacted fields:', fields);
 ```
 
-## Debugging & Logging
+## Connection Testing
 
-### `viewLogs()`
 
-View stored logs in the console.
-
-```typescript
-viewLogs(): void
-```
-
-**Example:**
-```javascript
-tracker.viewLogs();
-```
 
 ### `testConnection()`
 
@@ -401,48 +352,9 @@ console.log('Current URL:', currentUrl);
 
 ## Static Methods
 
-### `HumanBehaviorTracker.configureLogging(config)`
 
-Configure logging behavior.
 
-```typescript
-static configureLogging(config: {
-  level?: 'none' | 'error' | 'warn' | 'info' | 'debug';
-  enableConsole?: boolean;
-  enableStorage?: boolean;
-}): void
-```
 
-**Parameters:**
-- `config` (object): Logging configuration
-  - `level` (string, optional): Log level
-  - `enableConsole` (boolean, optional): Enable console logging
-  - `enableStorage` (boolean, optional): Enable storage logging
-
-**Example:**
-```javascript
-HumanBehaviorTracker.configureLogging({
-  level: 'debug',
-  enableConsole: true,
-  enableStorage: true
-});
-```
-
-### `HumanBehaviorTracker.logToStorage(message)`
-
-Log a message to storage.
-
-```typescript
-static logToStorage(message: string): void
-```
-
-**Parameters:**
-- `message` (string): Message to log
-
-**Example:**
-```javascript
-HumanBehaviorTracker.logToStorage('User logged in');
-```
 
 ## Properties
 
@@ -469,7 +381,6 @@ The tracker automatically captures these events:
 - **Mouse movements** and clicks
 - **Keyboard input** and form interactions
 - **Scroll events** and viewport changes
-- **Navigation events** (SPA routing, browser navigation)
 - **Console logs**, warnings, and errors
 - **Custom events** via `customEvent()` method
 

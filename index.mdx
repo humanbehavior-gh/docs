@@ -45,13 +45,7 @@ A powerful JavaScript SDK for recording user sessions and tracking behavior anal
   >
     Seamless React integration with hooks and context providers
   </Card>
-  <Card
-    title="Navigation Tracking"
-    icon="navigation"
-    href="/essentials/session-tracking"
-  >
-    Automatic SPA navigation tracking and URL change detection
-  </Card>
+
 </CardGroup>
 
 ## Quick Start
@@ -69,7 +63,6 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 // One-line initialization with global persistence
 const tracker = HumanBehaviorTracker.init('your-api-key', {
-  logLevel: 'debug',
   redactFields: ['input[type="password"]']
 });
 ```
@@ -97,7 +90,7 @@ The SDK automatically captures:
 - **Mouse movements** and clicks
 - **Keyboard input** and form interactions  
 - **Scroll events** and viewport changes
-- **Navigation events** (SPA routing, browser navigation)
+
 - **Console logs**, warnings, and errors
 - **Custom events** via `customEvent()` method
 
@@ -109,7 +102,6 @@ Sessions automatically persist for 30 minutes of inactivity:
 // Session continues across:
 // - Page refreshes within 30 minutes
 // - Tab switching and reopening
-// - SPA navigation
 // - Short periods of inactivity
 
 // New session created after:
@@ -183,12 +175,8 @@ The SDK includes robust anti-blocking measures:
 // Test connection status
 const status = await tracker.testConnection();
 if (!status.success) {
-  console.log('Connection blocked by ad blocker');
+  console.error('Connection failed:', status.error);
 }
-
-// Get recommendations
-const connectionInfo = tracker.getConnectionStatus();
-console.log('Recommendations:', connectionInfo.recommendations);
 ```
 
 ## Browser Compatibility

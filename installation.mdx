@@ -176,8 +176,7 @@ For different environments:
 const options = {
   ingestionUrl: process.env.NODE_ENV === 'production' 
     ? 'https://production-ingestion-server.com'
-    : 'http://localhost:3000',
-  logLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'error'
+    : 'http://localhost:3000'
 };
 
 const tracker = HumanBehaviorTracker.init('your-api-key', options);
@@ -227,9 +226,6 @@ const tracker = HumanBehaviorTracker.init('your-api-key', {
   // Custom ingestion server
   ingestionUrl: 'https://your-server.com',
   
-  // Logging level
-  logLevel: 'debug', // 'none' | 'error' | 'warn' | 'info' | 'debug'
-  
   // Fields to redact (CSS selectors)
   redactFields: [
     'input[type="password"]',
@@ -275,9 +271,11 @@ if (!status.success) {
   console.log('Connection blocked by ad blocker');
 }
 
-// Get recommendations
+// Check connection status
 const connectionInfo = tracker.getConnectionStatus();
-console.log('Recommendations:', connectionInfo.recommendations);
+if (connectionInfo.blocked) {
+  console.log('Connection blocked by ad blocker');
+}
 ```
 
 ### Session Persistence
@@ -286,12 +284,7 @@ If sessions aren't persisting across page reloads:
 
 ```javascript
 // Check if localStorage is available
-if (typeof localStorage !== 'undefined') {
-  console.log('localStorage available');
-} else {
-  console.log('localStorage not available - sessions won\'t persist');
+if (typeof localStorage === 'undefined') {
+  console.error('localStorage not available - sessions won\'t persist');
 }
-
-// Check current session ID
-console.log('Current session:', tracker.getSessionId());
 ``` 

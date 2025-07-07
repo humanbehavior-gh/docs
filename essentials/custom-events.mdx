@@ -102,13 +102,6 @@ await tracker.customEvent('purchase_completed', {
 ### User Journey Events
 
 ```javascript
-// Page views (in addition to automatic tracking)
-await tracker.customEvent('page_viewed', {
-  page: '/pricing',
-  referrer: '/features',
-  userType: 'new'
-});
-
 // Feature usage
 await tracker.customEvent('feature_used', {
   feature: 'search',
@@ -233,22 +226,7 @@ document.addEventListener('submit', async (event) => {
 });
 ```
 
-### Navigation Tracking
 
-```javascript
-// Track custom navigation (in addition to automatic tracking)
-function trackNavigation(from, to, type = 'custom') {
-  tracker.customEvent('navigation', {
-    from: from,
-    to: to,
-    type: type,
-    timestamp: Date.now()
-  });
-}
-
-// Usage
-trackNavigation('/home', '/products', 'menu_click');
-```
 
 ## Error Tracking
 
@@ -297,20 +275,8 @@ async function makeApiRequest(url, options) {
 
 ## Performance Tracking
 
-### User Interaction Timing
-
 ```javascript
-// Track time spent on pages
-let pageStartTime = Date.now();
 
-window.addEventListener('beforeunload', async () => {
-  const timeSpent = Date.now() - pageStartTime;
-  await tracker.customEvent('page_time_spent', {
-    page: window.location.pathname,
-    timeSpent: timeSpent,
-    timeSpentSeconds: Math.round(timeSpent / 1000)
-  });
-});
 ```
 
 ### Feature Usage Timing

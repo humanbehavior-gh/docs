@@ -72,7 +72,6 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
 // Initialize tracker with options
 const tracker = HumanBehaviorTracker.init('your-api-key-here', {
   ingestionUrl: 'http://localhost:3000', // optional custom server
-  logLevel: 'debug', // optional: 'none' | 'error' | 'warn' | 'info' | 'debug'
   redactFields: ['input[type="password"]', '#email'] // optional sensitive fields
 });
 
@@ -125,7 +124,6 @@ If you're using the CDN version:
     <script>
         // Initialize tracker with global persistence
         const tracker = HumanBehaviorTracker.init('your-api-key-here', {
-            logLevel: 'info',
             redactFields: ['input[type="password"]']
         });
         
@@ -290,10 +288,13 @@ If you're experiencing connection issues:
 ```javascript
 // Test connection
 const status = await tracker.testConnection();
-console.log('Connection successful:', status.success);
+if (!status.success) {
+  console.log('Connection failed:', status.error);
+}
 
 // Get connection status
 const connectionInfo = tracker.getConnectionStatus();
-console.log('Blocked:', connectionInfo.blocked);
-console.log('Recommendations:', connectionInfo.recommendations);
+if (connectionInfo.blocked) {
+  console.log('Connection blocked by ad blocker');
+}
 ```
