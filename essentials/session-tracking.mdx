@@ -1,305 +1,320 @@
 ---
 title: 'Session Tracking'
-description: 'Learn how to track and record user sessions with HumanBehavior SDK'
+description: 'Learn how HumanBehavior SDK automatically tracks user sessions'
 ---
 
 # Session Tracking
 
-HumanBehavior SDK automatically captures and records user sessions using the powerful [rrweb](https://github.com/rrweb-io/rrweb) library. This provides high-fidelity session recordings that can be replayed exactly as the user experienced them.
+HumanBehavior SDK automatically captures comprehensive user sessions with minimal setup required.
 
-## How Session Tracking Works
+## Automatic Session Recording
 
-The SDK captures various types of user interactions:
-
-- **Mouse movements and clicks**
-- **Keyboard input and keypress events**
-- **Scroll events**
-- **Form interactions**
-- **Page navigation**
-- **DOM changes**
-- **Network requests**
-- **URL changes and navigation**
-- **Input field interactions**
-
-## Basic Session Tracking
-
-Start recording sessions with a single method call:
+The SDK automatically starts recording when initialized:
 
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = new HumanBehaviorTracker('your-api-key');
+// Initialize and start recording automatically
+const tracker = HumanBehaviorTracker.init('your-api-key');
+```
 
-// Start recording the session
-tracker.start();
+<Note>
+  No manual `start()` call is required with the `init()` method. The SDK automatically begins recording user interactions.
+</Note>
+
+## What Gets Recorded
+
+The SDK automatically captures these user interactions:
+
+### Mouse Interactions
+- **Mouse movements** and hover states
+- **Click events** on buttons, links, and other elements
+- **Right-click** and context menu interactions
+- **Drag and drop** operations
+
+### Keyboard Input
+- **Text input** in form fields
+- **Key combinations** and shortcuts
+- **Copy/paste** operations
+- **Form submissions**
+
+### Navigation
+- **Page loads** and refreshes
+- **SPA route changes** (React Router, Vue Router, etc.)
+- **Browser navigation** (back/forward buttons)
+- **Hash changes** and URL updates
+
+### Console Activity
+- **Console logs** and debug messages
+- **Warnings** and error messages
+- **Performance** and timing information
+
+### Viewport Changes
+- **Scroll events** and scroll position
+- **Window resizing** and orientation changes
+- **Element visibility** and focus changes
+
+## Session Persistence
+
+Sessions automatically persist across page reloads and navigation:
+
+### 30-Minute Session Window
+```javascript
+// Session continues across:
+// - Page refreshes within 30 minutes
+// - Tab switching and reopening
+// - Short periods of inactivity
+// - SPA navigation
+
+// New session created after:
+// - 30+ minutes of inactivity
+// - Manual session reset
+// - Browser restart
+```
+
+### Cross-Page Continuity
+```javascript
+// Session persists when navigating between pages on the same domain
+// Example: /home → /products → /checkout
+// All interactions are part of the same session
 ```
 
 ## Session Management
 
-### Session Lifecycle
-
-Sessions are automatically managed by the SDK:
-
-1. **Creation**: A new session is created when `start()` is called
-2. **Persistence**: Sessions persist across page refreshes for 30 minutes
-3. **Completion**: Sessions are marked complete when the page is closed or hidden
-4. **URL Tracking**: Entry URL and navigation URLs are automatically tracked
-
-### Session Duration
-
-Sessions automatically continue for 30 minutes of inactivity. After that, a new session is created:
-
+### Session ID Generation
 ```javascript
-// Sessions automatically handle:
-// - Page refreshes (continues same session)
-// - Tab switching (continues same session)
-// - 30+ minutes of inactivity (creates new session)
-// - URL changes (tracks navigation)
+// Each session gets a unique ID
+const sessionId = tracker.getSessionId();
+console.log('Current session:', sessionId);
+// Output: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
 ```
 
-### Manual Session Control
-
-You can manually control session recording:
-
+### Session Storage
 ```javascript
-// Start recording
-tracker.start();
-
-// Stop recording (but keep session alive)
-tracker.stop();
-
-// Start recording again (continues same session)
-tracker.start();
+// Sessions are stored in localStorage
+// Check if session persistence is available
+if (typeof localStorage !== 'undefined') {
+  console.log('Session persistence enabled');
+} else {
+  console.log('Session persistence disabled');
+}
 ```
 
-## URL Tracking
+## Manual Session Control
 
-### Automatic URL Capture
-
-The SDK automatically captures URL information:
-
+### Start Recording
 ```javascript
-// Entry URL is captured when session starts
-// All URL changes are tracked during the session
-// End URL is captured when session completes
+// Start recording (if not using init())
+await tracker.start();
 ```
 
-### URL Data Structure
+### Stop Recording
+```javascript
+// Stop recording but keep session alive
+await tracker.stop();
+```
 
-Each session includes comprehensive URL data:
+### Check Recording Status
+```javascript
+// Check if recording is active
+if (tracker.initializationPromise) {
+  console.log('Tracker is initialized and recording');
+}
+```
+
+## Navigation Tracking
+
+### Automatic Navigation Detection
+```javascript
+// The SDK automatically tracks:
+// - pushState() and replaceState() calls
+// - popstate events (browser back/forward)
+// - hashchange events
+// - window.location changes
+```
+
+### Manual Navigation Tracking
+```javascript
+// Track custom navigation events
+await tracker.trackNavigationEvent('custom', '/home', '/products');
+
+// Track page views
+await tracker.trackPageView('/checkout');
+```
+
+## Console Tracking
+
+### Enable Console Tracking
+```javascript
+// Console tracking is enabled by default
+// You can disable it if needed
+tracker.disableConsoleTracking();
+```
+
+### Custom Console Events
+```javascript
+// Console events are automatically captured:
+console.log('User action completed');
+console.warn('Form validation failed');
+console.error('API request failed');
+```
+
+## Session Data Structure
+
+Each session includes:
 
 ```javascript
 {
-  entryURL: 'https://example.com/start',
-  allURLs: [
-    'https://example.com/start',
-    'https://example.com/products',
-    'https://example.com/checkout'
+  sessionId: "unique-session-id",
+  startTime: "2024-01-15T10:30:00Z",
+  endTime: "2024-01-15T10:45:00Z",
+  events: [
+    {
+      type: "dom",
+      data: { /* DOM interaction data */ },
+      timestamp: 1705312200000
+    },
+    {
+      type: "navigation",
+      data: { 
+        fromUrl: "/home",
+        toUrl: "/products",
+        type: "push"
+      },
+      timestamp: 1705312250000
+    },
+    {
+      type: "console",
+      data: {
+        level: "log",
+        message: "User clicked submit button"
+      },
+      timestamp: 1705312300000
+    }
   ],
-  endURL: 'https://example.com/checkout',
-  referrer: 'https://google.com'
+  userInfo: {
+    endUserId: "user-123",
+    properties: {
+      email: "user@example.com",
+      name: "John Doe"
+    }
+  }
 }
 ```
 
-## Session Data
+## Performance Optimization
 
-### What Gets Recorded
-
-The SDK captures comprehensive session data:
-
+### Event Batching
 ```javascript
-// Example session event structure
-{
-  type: 'dom',
-  data: {
-    adds: [...], // DOM additions
-    removes: [...], // DOM removals
-    attributes: [...] // Attribute changes
-  },
-  timestamp: 1640995200000
-}
+// Events are automatically batched and sent every 5 seconds
+// This reduces network requests and improves performance
 ```
 
-### Event Types
-
-- **`dom`**: DOM mutations and changes
-- **`mouse`**: Mouse movements and clicks
-- **`scroll`**: Scroll events
-- **`input`**: Form input changes and keypress events
-- **`focus`**: Focus/blur events
-- **`viewport`**: Viewport size changes
-- **`fullsnapshot`**: Complete page snapshot
-- **`custom`**: Custom events and interactions
-
-## Performance Considerations
-
-### Automatic Optimization
-
-The SDK automatically optimizes performance:
-
-- **Throttling**: Mouse movements are throttled to reduce data
-- **Batching**: Events are batched and sent in chunks
-- **Compression**: Data is compressed before transmission
-- **Background processing**: Events are processed in the background
-
-### Custom Optimization
-
-You can customize recording behavior:
-
+### Memory Management
 ```javascript
-// Start with custom options
-tracker.start({
-  // Reduce mouse movement frequency
-  mouseThrottle: 50,
-  
-  // Only record specific elements
-  blockClass: 'no-record',
-  
-  // Ignore certain elements
-  ignoreClass: 'ignore-record'
-});
+// Events are cleared after successful transmission
+// Session data is limited to prevent memory leaks
+// Automatic cleanup of old data
 ```
-
-## Session Storage
-
-### Local Storage
-
-Session data is temporarily stored locally before transmission:
-
-```javascript
-// Check session storage
-const sessionId = localStorage.getItem('human_behavior_session_id');
-const lastActivity = localStorage.getItem('human_behavior_last_activity');
-```
-
-### Data Transmission
-
-Events are automatically sent to your ingestion server:
-
-- **Real-time**: Events are sent as they occur
-- **Batched**: Multiple events are batched for efficiency
-- **Retry logic**: Failed transmissions are retried
-- **Beacon API**: Uses `navigator.sendBeacon` for reliable delivery
-
-## Session Analytics
-
-### Session Properties
-
-Each session includes comprehensive metadata:
-
-```javascript
-{
-  sessionId: 'uuid-v4-session-id',
-  userId: 'user-identifier',
-  startTime: '2024-01-01T00:00:00Z',
-  duration: 300000, // milliseconds
-  pageViews: 5,
-  events: 150,
-  clickCount: 25,
-  keypressCount: 45,
-  mouseActivityCount: 120,
-  entryURL: 'https://example.com/start',
-  endURL: 'https://example.com/checkout',
-  uniqueURLsVisitedCount: 3
-}
-```
-
-## Enhanced Session Metrics
-
-The SDK automatically tracks detailed interaction metrics:
-
-### Interaction Counts
-
-- **`clickCount`**: Number of button and link clicks
-- **`keypressCount`**: Number of keyboard interactions in input fields
-- **`mouseActivityCount`**: Total mouse movements and interactions
-- **`pageviewCount`**: Number of page views during the session
-- **`autocaptureCount`**: Number of automatically captured interactions
-
-### URL Tracking
-
-- **`entryURL`**: The first URL visited in the session
-- **`endURL`**: The last URL visited before session completion
-- **`allURLs`**: Array of all URLs visited during the session
-- **`uniqueURLsVisitedCount`**: Number of unique pages visited
-
-### Session Events
-
-Track custom events within sessions:
-
-```javascript
-// Add custom events to the session
-await tracker.customEvent('button_click', {
-  buttonId: 'submit-form',
-  page: '/checkout'
-});
-
-await tracker.customEvent('form_submit', {
-  formId: 'contact-form',
-  fields: ['name', 'email']
-});
-```
-
-## Debugging Sessions
-
-### View Session Logs
-
-Debug session recording with built-in logging:
-
-```javascript
-// View session logs in console
-tracker.viewLogs();
-
-// Logs include:
-// - Session start/stop events
-// - Event transmission status
-// - Error messages
-// - URL tracking information
-```
-
-### Session Status
-
-Check the current session status:
-
-```javascript
-// Check if session is active
-const isActive = tracker.isInitialized();
-
-// View current session ID
-console.log('Session ID:', tracker.sessionId);
-```
-
-<Note>
-  **Version 0.0.8**: Enhanced URL tracking automatically captures entry URLs, navigation paths, and end URLs for comprehensive session analysis.
-</Note>
 
 ## Privacy and Security
 
 ### Data Redaction
-
-Protect sensitive data during recording:
-
 ```javascript
-// Redact sensitive fields
+// Redact sensitive information
 tracker.setRedactedFields([
   'input[type="password"]',
-  'input[type="email"]',
+  '#email-field',
   '.sensitive-data'
 ]);
 ```
 
-### User Consent
+### Consent Management
+```javascript
+// Always get user consent before recording
+if (userConsent) {
+  const tracker = HumanBehaviorTracker.init('your-api-key');
+} else {
+  console.log('Session recording disabled - no consent');
+}
+```
 
-The SDK is designed for privacy compliance:
+## Troubleshooting
 
-- **User consent**: Only record when user consents
-- **Data minimization**: Only collect necessary data
-- **Transparency**: Clear logging of what's recorded
+### Session Not Persisting
+```javascript
+// Check localStorage availability
+if (typeof localStorage === 'undefined') {
+  console.error('localStorage not available');
+}
+
+// Check session ID
+const sessionId = tracker.getSessionId();
+console.log('Current session:', sessionId);
+```
+
+### Events Not Recording
+```javascript
+// Check initialization status
+if (tracker.initializationPromise) {
+  await tracker.initializationPromise;
+  console.log('Tracker initialized');
+}
+
+// Test connection
+const status = await tracker.testConnection();
+console.log('Connection status:', status);
+```
+
+### Performance Issues
+```javascript
+// Check event queue size
+const connectionInfo = tracker.getConnectionStatus();
+console.log('Connection blocked:', connectionInfo.blocked);
+console.log('Recommendations:', connectionInfo.recommendations);
+```
+
+## Best Practices
+
+### 1. Initialize Early
+```javascript
+// Initialize as early as possible in your app
+document.addEventListener('DOMContentLoaded', () => {
+  const tracker = HumanBehaviorTracker.init('your-api-key');
+});
+```
+
+### 2. Handle Errors Gracefully
+```javascript
+try {
+  const tracker = HumanBehaviorTracker.init('your-api-key');
+} catch (error) {
+  console.error('Failed to initialize tracker:', error);
+  // Continue without tracking
+}
+```
+
+### 3. Respect User Privacy
+```javascript
+// Always get explicit consent
+if (getUserConsent()) {
+  const tracker = HumanBehaviorTracker.init('your-api-key', {
+    redactFields: ['input[type="password"]']
+  });
+}
+```
+
+### 4. Monitor Performance
+```javascript
+// Check connection status periodically
+setInterval(() => {
+  const status = tracker.getConnectionStatus();
+  if (status.blocked) {
+    console.warn('Connection issues detected');
+  }
+}, 60000); // Check every minute
+```
 
 <Note>
-  Session recordings are automatically processed and sent to your HumanBehavior ingestion server. You can view and analyze sessions in your HumanBehavior dashboard.
-</Note>
-
-<Warning>
-  Always ensure you have user consent before recording sessions, especially in regions with strict privacy laws.
-</Warning> 
+  The SDK automatically handles most session management tasks. Focus on getting user consent and handling errors gracefully.
+</Note> 

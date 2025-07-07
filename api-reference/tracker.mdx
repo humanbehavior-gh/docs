@@ -1,221 +1,311 @@
 ---
-title: 'HumanBehaviorTracker API'
-description: 'Complete API reference for the HumanBehaviorTracker class'
+title: 'Tracker API'
+description: 'Complete API reference for HumanBehaviorTracker'
 ---
 
 # HumanBehaviorTracker API
 
-The `HumanBehaviorTracker` class is the main entry point for the HumanBehavior SDK. It handles session recording, user identification, and event tracking.
+The main tracker class for recording user sessions and events.
 
-## Constructor
+## Initialization
 
-### `new HumanBehaviorTracker(apiKey, ingestionUrl?)`
+### `HumanBehaviorTracker.init(apiKey, options?)`
 
-Creates a new tracker instance.
+Static method to initialize the tracker with global persistence.
+
+```typescript
+static init(
+  apiKey: string, 
+  options?: {
+    ingestionUrl?: string;
+    logLevel?: 'none' | 'error' | 'warn' | 'info' | 'debug';
+    redactFields?: string[];
+  }
+): HumanBehaviorTracker
+```
 
 **Parameters:**
-- `apiKey` (string, required): Your HumanBehavior API key
-- `ingestionUrl` (string, optional): Your custom ingestion server URL
+- `apiKey` (string): Your HumanBehavior API key
+- `options` (object, optional): Configuration options
+  - `ingestionUrl` (string, optional): Custom ingestion server URL
+  - `logLevel` (string, optional): Logging level
+  - `redactFields` (string[], optional): CSS selectors for fields to redact
 
 **Returns:** `HumanBehaviorTracker` instance
 
 **Example:**
 ```javascript
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-// Use default ingestion server
-const tracker = new HumanBehaviorTracker('your-api-key-here');
-
-// Use custom ingestion server
-const tracker = new HumanBehaviorTracker(
-  'your-api-key-here',
-  'https://your-custom-server.com'
-);
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  ingestionUrl: 'http://localhost:3000',
+  logLevel: 'debug',
+  redactFields: ['input[type="password"]', '#email']
+});
 ```
 
-**Throws:**
-- `Error`: If API key is not provided
+### `new HumanBehaviorTracker(apiKey, ingestionUrl?)`
+
+Constructor method (legacy, still supported).
+
+```typescript
+constructor(
+  apiKey: string, 
+  ingestionUrl?: string
+)
+```
+
+**Parameters:**
+- `apiKey` (string): Your HumanBehavior API key
+- `ingestionUrl` (string, optional): Custom ingestion server URL
+
+**Example:**
+```javascript
+const tracker = new HumanBehaviorTracker('your-api-key', 'http://localhost:3000');
+await tracker.start(); // Must call start() manually
+```
 
 ## Core Methods
 
 ### `start()`
 
-Starts session recording and begins capturing user interactions.
+Start recording user sessions and events.
 
-**Returns:** `Promise<void>`
+```typescript
+async start(): Promise<void>
+```
 
 **Example:**
 ```javascript
 await tracker.start();
 ```
 
-**Notes:**
-- Automatically initializes the tracker if not already initialized
-- Begins recording DOM events, mouse movements, and user interactions
-- Sets up automatic event batching and transmission
-- Captures entry URL and referrer information
-
 ### `stop()`
 
-Stops session recording but keeps the session alive.
+Stop recording and cleanup resources.
 
-**Returns:** `Promise<void>`
+```typescript
+async stop(): Promise<void>
+```
 
 **Example:**
 ```javascript
 await tracker.stop();
 ```
 
-**Notes:**
-- Stops recording new events
-- Keeps the current session active
-- Can be resumed with `start()`
+### `addEvent(event)`
+
+Add a custom event to the recording queue.
+
+```typescript
+async addEvent(event: any): Promise<void>
+```
+
+**Parameters:**
+- `event` (any): Event object to record
+
+**Example:**
+```javascript
+await tracker.addEvent({
+  type: 'custom',
+  data: { action: 'button_click' }
+});
+```
 
 ## User Management
 
 ### `addUserInfo(userProperties)`
 
-Adds or updates user information for the current session.
+Add user information for identification.
+
+```typescript
+async addUserInfo(userProperties: Record<string, any>): Promise<void>
+```
 
 **Parameters:**
-- `userProperties` (object, required): User properties to track
-
-**Returns:** `Promise<void>`
+- `userProperties` (object): User properties (email, name, etc.)
 
 **Example:**
 ```javascript
 await tracker.addUserInfo({
   email: 'user@example.com',
   name: 'John Doe',
-  userId: '12345',
-  plan: 'premium'
+  userId: '12345'
 });
 ```
-
-**Notes:**
-- User information is automatically associated with all future events
-- Can be called multiple times to update user data
-- Requires tracker to be initialized
 
 ### `auth(authFields)`
 
-Authenticates the current user against your database.
+Authenticate user using existing user data.
+
+```typescript
+async auth(authFields: string[]): Promise<void>
+```
 
 **Parameters:**
-- `authFields` (string[], required): Array of field names to use for authentication
-
-**Returns:** `Promise<void>`
+- `authFields` (string[]): Array of field names to check for existing users
 
 **Example:**
 ```javascript
-// First add user info
-await tracker.addUserInfo({
-  email: 'user@example.com',
-  phone: '+1234567890'
-});
-
-// Then authenticate
-await tracker.auth(['email', 'phone']);
+await tracker.auth(['email', 'phoneNumber']);
 ```
-
-**Notes:**
-- Must be called after `addUserInfo()`
-- Uses the provided fields to match against existing users
-- Requires tracker to be initialized
 
 ## Event Tracking
 
-### `customEvent(eventName, properties)`
+### `trackPageView(url?)`
 
-Tracks a custom event with optional properties.
+Track a page view event.
+
+```typescript
+async trackPageView(url?: string): Promise<void>
+```
 
 **Parameters:**
-- `eventName` (string, required): Name of the event
+- `url` (string, optional): URL to track (defaults to current URL)
+
+**Example:**
+```javascript
+await tracker.trackPageView();
+await tracker.trackPageView('/checkout');
+```
+
+### `trackNavigationEvent(type, fromUrl, toUrl)`
+
+Track navigation between pages.
+
+```typescript
+async trackNavigationEvent(
+  type: string, 
+  fromUrl: string, 
+  toUrl: string
+): Promise<void>
+```
+
+**Parameters:**
+- `type` (string): Navigation type ('push', 'pop', 'replace', etc.)
+- `fromUrl` (string): Source URL
+- `toUrl` (string): Destination URL
+
+**Example:**
+```javascript
+await tracker.trackNavigationEvent('push', '/home', '/products');
+```
+
+### `customEvent(eventName, properties?)`
+
+Track a custom event with properties.
+
+```typescript
+async customEvent(
+  eventName: string, 
+  properties?: Record<string, any>
+): Promise<void>
+```
+
+**Parameters:**
+- `eventName` (string): Name of the event
 - `properties` (object, optional): Event properties
 
-**Returns:** `Promise<void>`
-
 **Example:**
 ```javascript
-await tracker.customEvent('button_click', {
-  buttonId: 'submit-form',
-  page: '/checkout',
-  timestamp: Date.now()
+await tracker.customEvent('purchase_completed', {
+  productId: '123',
+  amount: 99.99,
+  currency: 'USD'
 });
 ```
 
-**Notes:**
-- Event is automatically associated with current user and session
-- Properties can include any serializable data
-- Event is sent immediately to the ingestion server
+## Console Tracking
 
-### `addEvent(event)`
+### `enableConsoleTracking()`
 
-Adds a raw event to the session recording.
+Enable tracking of console logs, warnings, and errors.
 
-**Parameters:**
-- `event` (object, required): Raw event object
-
-**Returns:** `Promise<void>`
+```typescript
+enableConsoleTracking(): void
+```
 
 **Example:**
 ```javascript
-tracker.addEvent({
-  type: 'custom',
-  data: { action: 'test' },
-  timestamp: Date.now()
-});
+tracker.enableConsoleTracking();
 ```
 
-**Notes:**
-- Used internally by the SDK
-- Generally not needed for normal usage
-- Events are automatically batched and sent
+### `disableConsoleTracking()`
+
+Disable console tracking.
+
+```typescript
+disableConsoleTracking(): void
+```
+
+**Example:**
+```javascript
+tracker.disableConsoleTracking();
+```
 
 ## Data Redaction
 
-### `setRedactedFields(fields)`
+### `redact(options?)`
 
-Sets the fields that should be redacted during recording.
+Enable data redaction for sensitive fields.
+
+```typescript
+async redact(options?: RedactionOptions): Promise<void>
+```
 
 **Parameters:**
-- `fields` (string[], required): Array of CSS selectors for fields to redact
+- `options` (RedactionOptions, optional): Redaction configuration
 
-**Returns:** `void`
+**Example:**
+```javascript
+await tracker.redact({
+  maskTextInputs: true,
+  maskAllText: false
+});
+```
+
+### `setRedactedFields(fields)`
+
+Set specific fields to be redacted.
+
+```typescript
+setRedactedFields(fields: string[]): void
+```
+
+**Parameters:**
+- `fields` (string[]): Array of CSS selectors for fields to redact
 
 **Example:**
 ```javascript
 tracker.setRedactedFields([
   'input[type="password"]',
-  'input[type="email"]',
+  '#email-field',
   '.sensitive-data'
 ]);
 ```
 
-**Notes:**
-- Fields are redacted in real-time during recording
-- Can be called multiple times to update redaction rules
-- Only user-selected fields are redacted (no automatic redaction)
-
 ### `isRedactionActive()`
 
-Checks if redaction is currently active.
+Check if redaction is currently active.
+
+```typescript
+isRedactionActive(): boolean
+```
 
 **Returns:** `boolean`
 
 **Example:**
 ```javascript
-const isActive = tracker.isRedactionActive();
-console.log('Redaction active:', isActive);
+if (tracker.isRedactionActive()) {
+  console.log('Redaction is enabled');
+}
 ```
-
-**Notes:**
-- Returns `true` if any fields are set for redaction
-- Returns `false` if no fields are redacted
 
 ### `getRedactedFields()`
 
-Gets the currently selected fields for redaction.
+Get the currently selected fields for redaction.
+
+```typescript
+getRedactedFields(): string[]
+```
 
 **Returns:** `string[]`
 
@@ -225,185 +315,177 @@ const fields = tracker.getRedactedFields();
 console.log('Redacted fields:', fields);
 ```
 
-**Notes:**
-- Returns array of CSS selectors currently set for redaction
-- Returns empty array if no redaction is configured
-
-### `redact(options)`
-
-Configures redaction with custom options.
-
-**Parameters:**
-- `options` (object, optional): Redaction configuration options
-  - `redactedText` (string, optional): Custom text to use for redaction
-  - `excludeSelectors` (string[], optional): Selectors to exclude from redaction
-  - `userFields` (string[], optional): Fields to redact
-
-**Returns:** `Promise<void>`
-
-**Example:**
-```javascript
-await tracker.redact({
-  redactedText: '[HIDDEN]',
-  excludeSelectors: ['.public-data'],
-  userFields: ['input[type="password"]']
-});
-```
-
-## Debug and Logging
+## Debugging & Logging
 
 ### `viewLogs()`
 
-Displays SDK logs in the browser console.
+View stored logs in the console.
 
-**Returns:** `void`
+```typescript
+viewLogs(): void
+```
 
 **Example:**
 ```javascript
 tracker.viewLogs();
 ```
 
-**Notes:**
-- Shows logs from the current session
-- Clears logs after displaying them
-- Useful for debugging and troubleshooting
+### `testConnection()`
 
-### `logToStorage(message)`
+Test if the tracker can reach the ingestion server.
 
-Logs a message to local storage for debugging.
+```typescript
+async testConnection(): Promise<{ success: boolean; error?: string }>
+```
 
-**Parameters:**
-- `message` (string, required): Message to log
-
-**Returns:** `void`
+**Returns:** `Promise<{ success: boolean; error?: string }>`
 
 **Example:**
 ```javascript
-HumanBehaviorTracker.logToStorage('Custom debug message');
+const status = await tracker.testConnection();
+if (status.success) {
+  console.log('Connection successful');
+} else {
+  console.log('Connection failed:', status.error);
+}
 ```
 
-**Notes:**
-- Static method for logging messages
-- Messages are stored in localStorage
-- Can be viewed with `viewLogs()`
+### `getConnectionStatus()`
+
+Get connection status and recommendations.
+
+```typescript
+getConnectionStatus(): { blocked: boolean; recommendations: string[] }
+```
+
+**Returns:** `{ blocked: boolean; recommendations: string[] }`
+
+**Example:**
+```javascript
+const status = tracker.getConnectionStatus();
+console.log('Blocked:', status.blocked);
+console.log('Recommendations:', status.recommendations);
+```
+
+### `getSessionId()`
+
+Get the current session ID.
+
+```typescript
+getSessionId(): string
+```
+
+**Returns:** `string`
+
+**Example:**
+```javascript
+const sessionId = tracker.getSessionId();
+console.log('Current session:', sessionId);
+```
+
+### `getCurrentUrl()`
+
+Get the current URL being tracked.
+
+```typescript
+getCurrentUrl(): string
+```
+
+**Returns:** `string`
+
+**Example:**
+```javascript
+const currentUrl = tracker.getCurrentUrl();
+console.log('Current URL:', currentUrl);
+```
+
+## Static Methods
+
+### `HumanBehaviorTracker.configureLogging(config)`
+
+Configure logging behavior.
+
+```typescript
+static configureLogging(config: {
+  level?: 'none' | 'error' | 'warn' | 'info' | 'debug';
+  enableConsole?: boolean;
+  enableStorage?: boolean;
+}): void
+```
+
+**Parameters:**
+- `config` (object): Logging configuration
+  - `level` (string, optional): Log level
+  - `enableConsole` (boolean, optional): Enable console logging
+  - `enableStorage` (boolean, optional): Enable storage logging
+
+**Example:**
+```javascript
+HumanBehaviorTracker.configureLogging({
+  level: 'debug',
+  enableConsole: true,
+  enableStorage: true
+});
+```
+
+### `HumanBehaviorTracker.logToStorage(message)`
+
+Log a message to storage.
+
+```typescript
+static logToStorage(message: string): void
+```
+
+**Parameters:**
+- `message` (string): Message to log
+
+**Example:**
+```javascript
+HumanBehaviorTracker.logToStorage('User logged in');
+```
 
 ## Properties
 
+### `navigationTrackingEnabled`
+
+Whether navigation tracking is enabled.
+
+```typescript
+navigationTrackingEnabled: boolean
+```
+
 ### `initializationPromise`
 
-Promise that resolves when the tracker is fully initialized.
+Promise that resolves when initialization is complete.
 
-**Type:** `Promise<void> | null`
-
-**Example:**
-```javascript
-// Wait for initialization
-await tracker.initializationPromise;
-console.log('Tracker initialized');
+```typescript
+initializationPromise: Promise<void> | null
 ```
 
-**Notes:**
-- `null` if initialization failed
-- Resolves when tracker is ready to use
-- Rejects if initialization fails
+## Events
 
-## Session Management
+The tracker automatically captures these events:
 
-### Session Persistence
-
-Sessions automatically persist for 30 minutes of inactivity:
-
-```javascript
-// Session continues across:
-// - Page refreshes
-// - Tab switching
-// - Short periods of inactivity
-
-// New session created after:
-// - 30+ minutes of inactivity
-// - Manual session reset
-```
-
-### URL Tracking
-
-The SDK automatically tracks URL information:
-
-```javascript
-// Entry URL captured when session starts
-// All URL changes tracked during session
-// End URL captured when session completes
-// Referrer information included
-```
+- **Mouse movements** and clicks
+- **Keyboard input** and form interactions
+- **Scroll events** and viewport changes
+- **Navigation events** (SPA routing, browser navigation)
+- **Console logs**, warnings, and errors
+- **Custom events** via `customEvent()` method
 
 ## Error Handling
 
-### Common Errors
+The tracker includes robust error handling:
 
-**Initialization Errors:**
-```javascript
-try {
-  const tracker = new HumanBehaviorTracker('invalid-key');
-  await tracker.start();
-} catch (error) {
-  console.error('Initialization failed:', error.message);
-}
-```
+- **Connection failures** are handled gracefully
+- **Ad blocker detection** with fallback mechanisms
+- **Session expiration** with automatic retry
+- **Network issues** with event queuing and retry
 
-**Method Call Errors:**
-```javascript
-try {
-  await tracker.addUserInfo({ email: 'test@example.com' });
-} catch (error) {
-  console.error('Failed to add user info:', error.message);
-}
-```
+## Session Persistence
 
-### Error Recovery
+Sessions automatically persist for 30 minutes of inactivity:
 
-The SDK includes automatic error recovery:
-
-- Failed network requests are retried
-- Events are queued during network issues
-- Session data is preserved during errors
-- Automatic reconnection to ingestion server
-
-## Performance Considerations
-
-### Event Batching
-
-Events are automatically batched for efficiency:
-
-- Events are collected in memory
-- Batches are sent every 5 seconds
-- Large events are chunked automatically
-- Failed batches are retried
-
-### Memory Management
-
-The SDK manages memory efficiently:
-
-- Events are cleared after successful transmission
-- Session data is limited to prevent memory leaks
-- Automatic cleanup of old data
-- Garbage collection friendly
-
-<Note>
-  **Version 0.0.8**: Enhanced URL tracking, improved session management, and better error handling. The SDK now automatically captures entry URLs, navigation paths, and end URLs for comprehensive session analysis.
-</Note>
-
-## Browser Compatibility
-
-The SDK supports all modern browsers:
-
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
-
-<Note>
-  The tracker automatically handles browser compatibility and falls back gracefully for unsupported features.
-</Note>
-
-<Warning>
-  Always ensure you have user consent before starting session recording, especially in regions with strict privacy laws.
-</Warning> 
+- **localStorage** is used for session storage
+- **Cookies** are used for user identification
+- **Cross-page continuity** is maintained within the same domain 

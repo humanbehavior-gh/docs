@@ -1,13 +1,13 @@
 ---
-title: Introduction
-description: "HumanBehavior SDK - Session recording and user behavior tracking for web applications"
+title: 'HumanBehavior SDK'
+description: 'Powerful session recording and user behavior analytics for web applications'
 ---
 
 # HumanBehavior SDK
 
-HumanBehavior SDK is a powerful JavaScript library for tracking user sessions, recording user interactions, and analyzing user behavior in web applications. Built on top of [rrweb](https://github.com/rrweb-io/rrweb), it provides high-fidelity session recordings with advanced features like data redaction, user identification, and custom event tracking.
+A powerful JavaScript SDK for recording user sessions and tracking behavior analytics in web applications. Built on top of [rrweb](https://github.com/rrweb-io/rrweb) for high-fidelity session recordings.
 
-## Key Features
+## Features
 
 <CardGroup cols={2}>
   <Card
@@ -15,57 +15,73 @@ HumanBehavior SDK is a powerful JavaScript library for tracking user sessions, r
     icon="video"
     href="/essentials/session-tracking"
   >
-    Automatically capture and replay user sessions with high fidelity using rrweb technology
+    High-fidelity session recordings with mouse movements, clicks, scrolls, and form interactions
   </Card>
   <Card
     title="User Identification"
     icon="user"
     href="/essentials/user-identification"
   >
-    Identify and track users across sessions with automatic cookie-based persistence
-  </Card>
-  <Card
-    title="Data Redaction"
-    icon="shield"
-    href="/essentials/data-redaction"
-  >
-    Protect sensitive data by selectively redacting form fields and content
+    Identify and track users across sessions with persistent user IDs and properties
   </Card>
   <Card
     title="Custom Events"
     icon="code"
     href="/essentials/custom-events"
   >
-    Track custom user interactions and business events with flexible event properties
+    Track specific user actions and business events with custom properties
+  </Card>
+  <Card
+    title="Data Redaction"
+    icon="shield"
+    href="/essentials/data-redaction"
+  >
+    Protect sensitive information by redacting passwords, emails, and other sensitive fields
   </Card>
   <Card
     title="React Integration"
     icon="react"
     href="/essentials/react-integration"
   >
-    Seamless React integration with hooks and context providers for easy implementation
+    Seamless React integration with hooks and context providers
   </Card>
   <Card
-    title="SSR Compatible"
-    icon="server"
-    href="/essentials/nextjs-setup"
+    title="Navigation Tracking"
+    icon="navigation"
+    href="/essentials/session-tracking"
   >
-    Works with server-side rendering frameworks like Next.js and Gatsby
+    Automatic SPA navigation tracking and URL change detection
   </Card>
 </CardGroup>
 
 ## Quick Start
 
-Get up and running in just a few minutes:
+### 1. Install the SDK
+
+```bash
+npm install humanbehavior-js
+```
+
+### 2. Initialize the Tracker
 
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-// Initialize the tracker
-const tracker = new HumanBehaviorTracker('your-api-key-here');
+// One-line initialization with global persistence
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  logLevel: 'debug',
+  redactFields: ['input[type="password"]']
+});
+```
 
-// Start recording
-tracker.start();
+### 3. Track Custom Events
+
+```javascript
+// Track user actions
+await tracker.customEvent('button_clicked', {
+  buttonId: 'submit',
+  page: '/checkout'
+});
 
 // Add user information
 await tracker.addUserInfo({
@@ -74,39 +90,231 @@ await tracker.addUserInfo({
 });
 ```
 
-## Installation
+## What Gets Recorded
 
-Choose your preferred installation method:
+The SDK automatically captures:
 
-<CodeGroup>
+- **Mouse movements** and clicks
+- **Keyboard input** and form interactions  
+- **Scroll events** and viewport changes
+- **Navigation events** (SPA routing, browser navigation)
+- **Console logs**, warnings, and errors
+- **Custom events** via `customEvent()` method
 
-```bash npm
-npm install humanbehavior-js
+## Session Persistence
+
+Sessions automatically persist for 30 minutes of inactivity:
+
+```javascript
+// Session continues across:
+// - Page refreshes within 30 minutes
+// - Tab switching and reopening
+// - SPA navigation
+// - Short periods of inactivity
+
+// New session created after:
+// - 30+ minutes of inactivity
+// - Manual session reset
+// - Browser restart
 ```
 
-```bash yarn
-yarn add humanbehavior-js
+## React Integration
+
+For React applications, use the dedicated React integration:
+
+```javascript
+import { HumanBehaviorProvider, useHumanBehavior } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key">
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+
+function MyComponent() {
+  const tracker = useHumanBehavior();
+  
+  const handleClick = async () => {
+    await tracker.customEvent('button_clicked', {
+      buttonId: 'submit'
+    });
+  };
+  
+  return <button onClick={handleClick}>Submit</button>;
+}
 ```
 
-```bash pnpm
-pnpm add humanbehavior-js
+## Data Privacy & Security
+
+### Automatic Redaction
+
+```javascript
+// Redact sensitive fields during recording
+tracker.setRedactedFields([
+  'input[type="password"]',
+  '#email-field',
+  '.sensitive-data'
+]);
 ```
 
-</CodeGroup>
+### Consent Management
 
-## Browser Support
+```javascript
+// Only track with user consent
+if (userConsent) {
+  const tracker = HumanBehaviorTracker.init('your-api-key');
+} else {
+  console.log('Session recording disabled - no consent');
+}
+```
 
-HumanBehavior SDK supports all modern browsers:
+## Anti-Blocking Features
 
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
+The SDK includes robust anti-blocking measures:
+
+- **Automatic fallback** from `sendBeacon` to `fetch`
+- **Connection testing** and status reporting
+- **Graceful error handling** for ad blockers
+- **Event queuing** during network issues
+
+```javascript
+// Test connection status
+const status = await tracker.testConnection();
+if (!status.success) {
+  console.log('Connection blocked by ad blocker');
+}
+
+// Get recommendations
+const connectionInfo = tracker.getConnectionStatus();
+console.log('Recommendations:', connectionInfo.recommendations);
+```
+
+## Browser Compatibility
+
+The SDK supports all modern browsers:
+
+| Browser | Version |
+|---------|---------|
+| Chrome | 60+ |
+| Firefox | 55+ |
+| Safari | 12+ |
+| Edge | 79+ |
+
+<Warning>
+  Internet Explorer is not supported. The SDK uses modern JavaScript features that are not available in IE.
+</Warning>
+
+## Bundle Size
+
+The SDK is optimized for size:
+
+- **Core SDK**: ~45KB (gzipped)
+- **With React integration**: ~50KB (gzipped)
+- **CDN version**: ~60KB (gzipped)
+
+## Getting Started
+
+<CardGroup cols={2}>
+  <Card
+    title="Quickstart Guide"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Get up and running in under 5 minutes
+  </Card>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation"
+  >
+    Installation options and setup instructions
+  </Card>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/tracker"
+  >
+    Complete API documentation
+  </Card>
+  <Card
+    title="React Integration"
+    icon="react"
+    href="/essentials/react-integration"
+  >
+    React hooks and context providers
+  </Card>
+</CardGroup>
+
+## Examples
+
+### Vanilla JavaScript
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+</head>
+<body>
+  <button id="submit-btn">Submit</button>
+  
+  <script>
+    const tracker = HumanBehaviorTracker.init('your-api-key');
+    
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+      await tracker.customEvent('button_clicked', {
+        buttonId: 'submit-btn',
+        page: window.location.pathname
+      });
+    });
+  </script>
+</body>
+</html>
+```
+
+### React Application
+
+```javascript
+import { HumanBehaviorProvider, useHumanBehavior } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key">
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+
+function ContactForm() {
+  const tracker = useHumanBehavior();
+  
+  const handleSubmit = async (formData) => {
+    await tracker.customEvent('form_submitted', {
+      formId: 'contact-form',
+      fields: ['name', 'email', 'message']
+    });
+  };
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <input name="name" placeholder="Name" />
+      <input name="email" placeholder="Email" />
+      <textarea name="message" placeholder="Message" />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+## Support
+
+- **Documentation**: Comprehensive guides and API reference
+- **Examples**: Code examples for common use cases
+- **Troubleshooting**: Solutions for common issues
+- **Privacy**: Built-in privacy and security features
 
 <Note>
-  HumanBehavior SDK automatically handles user identification using cookies, but you can also provide explicit user information for better tracking and analytics.
-</Note>
-
-<Note>
-  **Version 0.0.9**: The SDK now includes enhanced session tracking with improved keypress detection, comprehensive React integration with performance optimizations, advanced data redaction capabilities, and robust error handling. The default ingestion server is configured for development use.
+  Version 0.0.9 includes enhanced session persistence, improved navigation tracking, and better anti-blocking measures for a more robust user experience.
 </Note>

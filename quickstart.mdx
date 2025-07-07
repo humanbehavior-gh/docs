@@ -37,28 +37,19 @@ pnpm add humanbehavior-js
 
 ## Step 2: Initialize the Tracker
 
-Create a new instance of the tracker with your API key:
+Use the recommended static `init()` method for one-line initialization:
 
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = new HumanBehaviorTracker('your-api-key-here');
+const tracker = HumanBehaviorTracker.init('your-api-key-here');
 ```
 
 <Note>
   Replace `'your-api-key-here'` with your actual API key from your HumanBehavior dashboard. The SDK will automatically use the appropriate ingestion server based on your configuration.
 </Note>
 
-## Step 3: Start Recording
-
-Begin recording user sessions:
-
-```javascript
-// Start the session recording
-tracker.start();
-```
-
-## Step 4: Add User Information (Optional)
+## Step 3: Add User Information (Optional)
 
 Identify users for better analytics:
 
@@ -78,11 +69,12 @@ Here's a complete working example:
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-// Initialize tracker
-const tracker = new HumanBehaviorTracker('your-api-key-here');
-
-// Start recording immediately
-tracker.start();
+// Initialize tracker with options
+const tracker = HumanBehaviorTracker.init('your-api-key-here', {
+  ingestionUrl: 'http://localhost:3000', // optional custom server
+  logLevel: 'debug', // optional: 'none' | 'error' | 'warn' | 'info' | 'debug'
+  redactFields: ['input[type="password"]', '#email'] // optional sensitive fields
+});
 
 // Add user information when available
 async function identifyUser(userData) {
@@ -94,10 +86,23 @@ async function identifyUser(userData) {
   }
 }
 
+// Track custom events
+async function trackButtonClick(buttonId) {
+  await tracker.customEvent('button_clicked', {
+    buttonId: buttonId,
+    page: window.location.pathname
+  });
+}
+
 // Example usage
 identifyUser({
   email: 'user@example.com',
   name: 'John Doe'
+});
+
+// Track a button click
+document.getElementById('submit-btn').addEventListener('click', () => {
+  trackButtonClick('submit-btn');
 });
 ```
 
@@ -115,13 +120,14 @@ If you're using the CDN version:
 </head>
 <body>
     <h1>Welcome to My App</h1>
+    <button id="submit-btn">Submit</button>
     
     <script>
-        // Initialize tracker
-        const tracker = new HumanBehaviorTracker('your-api-key-here');
-        
-        // Start recording
-        tracker.start();
+        // Initialize tracker with global persistence
+        const tracker = HumanBehaviorTracker.init('your-api-key-here', {
+            logLevel: 'info',
+            redactFields: ['input[type="password"]']
+        });
         
         // Add user info when form is submitted
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -131,6 +137,14 @@ If you're using the CDN version:
             await tracker.addUserInfo({
                 email: formData.get('email'),
                 name: formData.get('name')
+            });
+        });
+
+        // Track button clicks
+        document.getElementById('submit-btn').addEventListener('click', async () => {
+            await tracker.customEvent('button_clicked', {
+                buttonId: 'submit-btn',
+                page: window.location.pathname
             });
         });
     </script>
@@ -159,10 +173,7 @@ If you have the SDK files locally:
     
     <script>
         // Initialize tracker
-        const tracker = new HumanBehaviorTracker('your-api-key-here');
-        
-        // Start recording
-        tracker.start();
+        const tracker = HumanBehaviorTracker.init('your-api-key-here');
     </script>
 </body>
 </html>
@@ -186,11 +197,18 @@ function App() {
 function MyComponent() {
   const tracker = useHumanBehavior();
   
-  useEffect(() => {
-    tracker.start();
-  }, [tracker]);
+  const handleButtonClick = async () => {
+    await tracker.customEvent('button_clicked', {
+      buttonId: 'my-button',
+      page: window.location.pathname
+    });
+  };
   
-  return <div>Your app content</div>;
+  return (
+    <button onClick={handleButtonClick}>
+      Click me
+    </button>
+  );
 }
 ```
 
@@ -198,10 +216,25 @@ function MyComponent() {
 
 Once you've completed the setup:
 
-1. **Session Recording**: The SDK automatically captures user interactions
-2. **Data Processing**: Events are processed and sent to your ingestion server
-3. **User Identification**: Users are automatically identified using cookies
-4. **Analytics**: View session recordings and analytics in your HumanBehavior dashboard
+1. **Automatic Session Recording**: The SDK automatically captures user interactions using rrweb
+2. **Session Persistence**: Sessions persist across page reloads for 30 minutes
+3. **Navigation Tracking**: SPA navigation and URL changes are automatically tracked
+4. **Console Tracking**: Console logs, warnings, and errors are captured
+5. **Data Processing**: Events are processed and sent to your ingestion server
+6. **User Identification**: Users are automatically identified using cookies
+7. **Analytics**: View session recordings and analytics in your HumanBehavior dashboard
+
+## Key Features
+
+The SDK automatically provides:
+
+- **Session Recording**: Mouse movements, clicks, scrolls, form inputs
+- **Navigation Tracking**: SPA route changes, browser navigation
+- **Console Tracking**: Log, warn, error messages
+- **Custom Events**: Track specific user actions
+- **Data Redaction**: Protect sensitive information
+- **Anti-blocking**: Handles ad blockers gracefully
+- **Session Continuity**: Persists across page reloads
 
 ## Next Steps
 
@@ -244,19 +277,23 @@ Now that you have the basics set up, explore these advanced features:
 
 **Tracker not initializing**: Make sure your API key is valid and you have an internet connection.
 
-**Events not being sent**: Check your browser's network tab for any failed requests to the ingestion server.
+**Events not being sent**: Check your browser's network tab for any failed requests to the ingestion server. The SDK includes anti-blocking measures for ad blockers.
 
 **User identification failing**: Ensure you're calling `addUserInfo()` after the tracker has initialized.
 
-### Debug Mode
+**Session not persisting**: The SDK automatically persists sessions for 30 minutes. Check that localStorage is available in your browser.
 
-Enable debug logging to troubleshoot issues:
+### Connection Issues
+
+If you're experiencing connection issues:
 
 ```javascript
-// View logs in console
-tracker.viewLogs();
-```
+// Test connection
+const status = await tracker.testConnection();
+console.log('Connection successful:', status.success);
 
-<Note>
-  **Version 0.0.8**: The SDK now includes enhanced URL tracking, improved session management, and better error handling. Sessions automatically persist for 30 minutes of inactivity.
-</Note>
+// Get connection status
+const connectionInfo = tracker.getConnectionStatus();
+console.log('Blocked:', connectionInfo.blocked);
+console.log('Recommendations:', connectionInfo.recommendations);
+```

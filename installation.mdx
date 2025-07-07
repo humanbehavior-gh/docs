@@ -74,7 +74,7 @@ The SDK includes TypeScript definitions:
 ```typescript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker: HumanBehaviorTracker = new HumanBehaviorTracker('your-api-key');
+const tracker: HumanBehaviorTracker = HumanBehaviorTracker.init('your-api-key');
 ```
 
 ## Framework Integration
@@ -117,7 +117,7 @@ import App from './App.vue';
 const app = createApp(App);
 
 // Initialize tracker
-const tracker = new HumanBehaviorTracker('your-api-key');
+const tracker = HumanBehaviorTracker.init('your-api-key');
 
 // Make tracker available globally
 app.config.globalProperties.$tracker = tracker;
@@ -154,7 +154,7 @@ By default, the SDK uses a development server:
 
 ```javascript
 // Uses default development server
-const tracker = new HumanBehaviorTracker('your-api-key');
+const tracker = HumanBehaviorTracker.init('your-api-key');
 ```
 
 ### Custom Ingestion Server
@@ -163,10 +163,9 @@ You can specify a custom ingestion server:
 
 ```javascript
 // Use custom ingestion server
-const tracker = new HumanBehaviorTracker(
-  'your-api-key',
-  'https://your-custom-server.com'
-);
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  ingestionUrl: 'https://your-custom-server.com'
+});
 ```
 
 ### Environment-based Configuration
@@ -174,11 +173,14 @@ const tracker = new HumanBehaviorTracker(
 For different environments:
 
 ```javascript
-const ingestionUrl = process.env.NODE_ENV === 'production' 
-  ? 'https://production-ingestion-server.com'
-  : 'http://localhost:3000';
+const options = {
+  ingestionUrl: process.env.NODE_ENV === 'production' 
+    ? 'https://production-ingestion-server.com'
+    : 'http://localhost:3000',
+  logLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'error'
+};
 
-const tracker = new HumanBehaviorTracker('your-api-key', ingestionUrl);
+const tracker = HumanBehaviorTracker.init('your-api-key', options);
 ```
 
 ## Browser Compatibility
@@ -200,12 +202,12 @@ The SDK supports all modern browsers:
 
 The SDK is optimized for size:
 
-- **Core SDK**: ~50KB (gzipped)
-- **With React integration**: ~55KB (gzipped)
-- **CDN version**: ~65KB (gzipped)
+- **Core SDK**: ~45KB (gzipped)
+- **With React integration**: ~50KB (gzipped)
+- **CDN version**: ~60KB (gzipped)
 
 <Note>
-  Version 0.0.8 includes enhanced URL tracking and improved session management, with minimal impact on bundle size.
+  Version 0.0.9 includes enhanced session persistence, improved navigation tracking, and better anti-blocking measures.
 </Note>
 
 ## Dependencies
@@ -215,6 +217,27 @@ The SDK has minimal dependencies:
 - `rrweb`: Session recording engine
 - `uuid`: Unique identifier generation
 - `react`: Only for React integration
+
+## Initialization Options
+
+The SDK supports various initialization options:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  // Custom ingestion server
+  ingestionUrl: 'https://your-server.com',
+  
+  // Logging level
+  logLevel: 'debug', // 'none' | 'error' | 'warn' | 'info' | 'debug'
+  
+  // Fields to redact (CSS selectors)
+  redactFields: [
+    'input[type="password"]',
+    '#email-field',
+    '.sensitive-data'
+  ]
+});
+```
 
 ## Troubleshooting
 
@@ -239,4 +262,36 @@ npm list humanbehavior-js
 
 # Update to latest version
 npm update humanbehavior-js
+```
+
+### Ad Blocker Issues
+
+If you're experiencing issues with ad blockers:
+
+```javascript
+// Test connection
+const status = await tracker.testConnection();
+if (!status.success) {
+  console.log('Connection blocked by ad blocker');
+}
+
+// Get recommendations
+const connectionInfo = tracker.getConnectionStatus();
+console.log('Recommendations:', connectionInfo.recommendations);
+```
+
+### Session Persistence
+
+If sessions aren't persisting across page reloads:
+
+```javascript
+// Check if localStorage is available
+if (typeof localStorage !== 'undefined') {
+  console.log('localStorage available');
+} else {
+  console.log('localStorage not available - sessions won\'t persist');
+}
+
+// Check current session ID
+console.log('Current session:', tracker.getSessionId());
 ``` 
