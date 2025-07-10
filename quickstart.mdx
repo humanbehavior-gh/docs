@@ -49,6 +49,16 @@ const tracker = HumanBehaviorTracker.init('your-api-key-here');
   Replace `'your-api-key-here'` with your actual API key from your HumanBehavior dashboard.
 </Note>
 
+### Advanced Initialization
+
+You can also configure additional options during initialization:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key-here', {
+  redactFields: ['input[type="password"]', '#email'] // optional sensitive fields
+});
+```
+
 ## Step 3: Add User Information (Optional)
 
 Identify users for better analytics:
@@ -84,13 +94,7 @@ async function identifyUser(userData) {
   }
 }
 
-// Track custom events
-async function trackButtonClick(buttonId) {
-  await tracker.customEvent('button_clicked', {
-    buttonId: buttonId,
-    page: window.location.pathname
-  });
-}
+
 
 // Example usage
 identifyUser({
@@ -98,10 +102,7 @@ identifyUser({
   name: 'John Doe'
 });
 
-// Track a button click
-document.getElementById('submit-btn').addEventListener('click', () => {
-  trackButtonClick('submit-btn');
-});
+
 ```
 
 ## HTML Example
@@ -137,13 +138,7 @@ If you're using the CDN version:
             });
         });
 
-        // Track button clicks
-        document.getElementById('submit-btn').addEventListener('click', async () => {
-            await tracker.customEvent('button_clicked', {
-                buttonId: 'submit-btn',
-                page: window.location.pathname
-            });
-        });
+
     </script>
 </body>
 </html>

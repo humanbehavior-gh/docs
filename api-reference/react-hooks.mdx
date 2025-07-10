@@ -71,14 +71,21 @@ Returns an object with the following methods:
 interface HumanBehaviorInterface {
   addEvent: (event: any) => void;
   addUserInfo: (userProperties: Record<string, any>) => Promise<void>;
-  customEvent: (eventName: string, eventProperties?: Record<string, any>) => Promise<void>;
   start: () => Promise<void>;
   stop: () => Promise<void>;
-  viewLogs: () => void;
   setRedactedFields: (fields: string[]) => void;
   isRedactionActive: () => boolean;
   getRedactedFields: () => string[];
+  redact: (options?: RedactionOptions) => Promise<void>;
   auth: (authFields: string[]) => Promise<void>;
+  getUserInfo: () => {
+    endUserId: string | null;
+    sessionId: string;
+    isPreexistingUser: boolean;
+    initialized: boolean;
+  };
+  getSessionId: () => string;
+  getCurrentUrl: () => string;
 }
 ```
 
@@ -144,27 +151,6 @@ await tracker.addUserInfo({
 });
 ```
 
-### `customEvent(eventName, properties)`
-
-Tracks a custom event with optional properties.
-
-**Parameters:**
-- `eventName` (string, required): Name of the event
-- `properties` (object, optional): Event properties
-
-**Returns:** `Promise<void>`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-await tracker.customEvent('purchase_completed', {
-  productId: '123',
-  price: 99.99,
-  currency: 'USD'
-});
-```
-
 ### `start()`
 
 Starts session recording.
@@ -195,20 +181,7 @@ const handleStop = () => {
 };
 ```
 
-### `viewLogs()`
 
-Displays SDK logs in the browser console.
-
-**Returns:** `void`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-const handleDebug = () => {
-  tracker.viewLogs();
-};
-```
 
 ### `setRedactedFields(fields)`
 
@@ -259,6 +232,25 @@ const fields = tracker.getRedactedFields();
 console.log('Redacted fields:', fields);
 ```
 
+### `redact(options)`
+
+Enable data redaction for sensitive fields.
+
+**Parameters:**
+- `options` (RedactionOptions, optional): Redaction configuration
+
+**Returns:** `Promise<void>`
+
+**Example:**
+```javascript
+const tracker = useHumanBehavior();
+
+await tracker.redact({
+  maskTextInputs: true,
+  maskAllText: false
+});
+```
+
 ### `auth(authFields)`
 
 Authenticates the current user against your database.
@@ -281,6 +273,56 @@ await tracker.addUserInfo({
 // Then authenticate
 await tracker.auth(['email', 'phone']);
 ```
+
+
+
+### `getUserInfo()`
+
+Get comprehensive user information.
+
+**Returns:** User information object
+
+**Example:**
+```javascript
+const tracker = useHumanBehavior();
+
+const userInfo = tracker.getUserInfo();
+console.log('User ID:', userInfo.endUserId);
+console.log('Session ID:', userInfo.sessionId);
+console.log('Is existing user:', userInfo.isPreexistingUser);
+```
+
+### `getSessionId()`
+
+Get the current session ID.
+
+**Returns:** `string`
+
+**Example:**
+```javascript
+const tracker = useHumanBehavior();
+
+const sessionId = tracker.getSessionId();
+console.log('Current session:', sessionId);
+```
+
+### `getCurrentUrl()`
+
+Get the current URL being tracked.
+
+**Returns:** `string`
+
+**Example:**
+```javascript
+const tracker = useHumanBehavior();
+
+const currentUrl = tracker.getCurrentUrl();
+console.log('Current URL:', currentUrl);
+```
+
+
+
+
 
 ## Context Usage
 

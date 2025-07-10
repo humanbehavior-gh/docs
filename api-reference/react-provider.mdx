@@ -26,8 +26,6 @@ Your HumanBehavior API key. Required if no `client` is provided.
 </HumanBehaviorProvider>
 ```
 
-
-
 ### `client` (HumanBehaviorTracker, optional)
 
 An existing tracker instance to use instead of creating a new one.
@@ -39,6 +37,29 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
 const tracker = new HumanBehaviorTracker('your-api-key');
 
 <HumanBehaviorProvider client={tracker}>
+  <App />
+</HumanBehaviorProvider>
+```
+
+### `options` (object, optional)
+
+Configuration options for the tracker.
+
+**Properties:**
+- `redactFields` (string[], optional): CSS selectors for fields to redact
+
+<Note>
+  The React provider's `options` parameter is defined but not yet implemented. For `redactFields`, you'll need to configure it after initialization using the tracker methods.
+</Note>
+
+**Example:**
+```javascript
+<HumanBehaviorProvider 
+  apiKey="your-api-key-here"
+  options={{
+    redactFields: ['input[type="password"]', '#email']
+  }}
+>
   <App />
 </HumanBehaviorProvider>
 ```

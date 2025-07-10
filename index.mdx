@@ -67,15 +67,9 @@ const tracker = HumanBehaviorTracker.init('your-api-key', {
 });
 ```
 
-### 3. Track Custom Events
+### 3. Add User Information
 
 ```javascript
-// Track user actions
-await tracker.customEvent('button_clicked', {
-  buttonId: 'submit',
-  page: '/checkout'
-});
-
 // Add user information
 await tracker.addUserInfo({
   email: 'user@example.com',
@@ -90,9 +84,6 @@ The SDK automatically captures:
 - **Mouse movements** and clicks
 - **Keyboard input** and form interactions  
 - **Scroll events** and viewport changes
-
-- **Console logs**, warnings, and errors
-- **Custom events** via `customEvent()` method
 
 ## Session Persistence
 
@@ -167,17 +158,9 @@ if (userConsent) {
 The SDK includes robust anti-blocking measures:
 
 - **Automatic fallback** from `sendBeacon` to `fetch`
-- **Connection testing** and status reporting
 - **Graceful error handling** for ad blockers
 - **Event queuing** during network issues
-
-```javascript
-// Test connection status
-const status = await tracker.testConnection();
-if (!status.success) {
-  console.error('Connection failed:', status.error);
-}
-```
+- **Session persistence** across page reloads
 
 ## Browser Compatibility
 

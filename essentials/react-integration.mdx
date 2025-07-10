@@ -36,10 +36,8 @@ function MyComponent() {
   const tracker = useHumanBehavior();
   
   const handleButtonClick = async () => {
-    await tracker.customEvent('button_clicked', {
-      buttonId: 'submit',
-      page: window.location.pathname
-    });
+    // Handle button click
+    console.log('Button clicked');
   };
   
   return (
@@ -139,26 +137,15 @@ function useTracking() {
   const tracker = useHumanBehavior();
   
   const trackEvent = async (eventName, properties = {}) => {
-    await tracker.customEvent(eventName, {
-      ...properties,
-      page: window.location.pathname,
-      timestamp: Date.now()
-    });
+    console.log('Event tracked:', eventName, properties);
   };
   
   const trackButtonClick = async (buttonId, additionalProps = {}) => {
-    await trackEvent('button_clicked', {
-      buttonId,
-      ...additionalProps
-    });
+    console.log('Button clicked:', buttonId, additionalProps);
   };
   
   const trackFormSubmit = async (formId, fields = []) => {
-    await trackEvent('form_submitted', {
-      formId,
-      fields,
-      page: window.location.pathname
-    });
+    console.log('Form submitted:', formId, fields);
   };
   
   return {

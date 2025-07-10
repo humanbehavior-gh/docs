@@ -140,63 +140,11 @@ async auth(authFields: string[]): Promise<void>
 await tracker.auth(['email', 'phoneNumber']);
 ```
 
-## Custom Events
 
 
 
 
 
-### `customEvent(eventName, properties?)`
-
-Track a custom event with properties.
-
-```typescript
-async customEvent(
-  eventName: string, 
-  properties?: Record<string, any>
-): Promise<void>
-```
-
-**Parameters:**
-- `eventName` (string): Name of the event
-- `properties` (object, optional): Event properties
-
-**Example:**
-```javascript
-await tracker.customEvent('purchase_completed', {
-  productId: '123',
-  amount: 99.99,
-  currency: 'USD'
-});
-```
-
-## Console Tracking
-
-### `enableConsoleTracking()`
-
-Enable tracking of console logs, warnings, and errors.
-
-```typescript
-enableConsoleTracking(): void
-```
-
-**Example:**
-```javascript
-tracker.enableConsoleTracking();
-```
-
-### `disableConsoleTracking()`
-
-Disable console tracking.
-
-```typescript
-disableConsoleTracking(): void
-```
-
-**Example:**
-```javascript
-tracker.disableConsoleTracking();
-```
 
 ## Data Redaction
 
@@ -272,45 +220,29 @@ const fields = tracker.getRedactedFields();
 console.log('Redacted fields:', fields);
 ```
 
-## Connection Testing
+## User Information
 
+### `getUserInfo()`
 
-
-### `testConnection()`
-
-Test if the tracker can reach the ingestion server.
+Get comprehensive user information.
 
 ```typescript
-async testConnection(): Promise<{ success: boolean; error?: string }>
-```
-
-**Returns:** `Promise<{ success: boolean; error?: string }>`
-
-**Example:**
-```javascript
-const status = await tracker.testConnection();
-if (status.success) {
-  console.log('Connection successful');
-} else {
-  console.log('Connection failed:', status.error);
+getUserInfo(): {
+  endUserId: string | null;
+  sessionId: string;
+  isPreexistingUser: boolean;
+  initialized: boolean;
 }
 ```
 
-### `getConnectionStatus()`
-
-Get connection status and recommendations.
-
-```typescript
-getConnectionStatus(): { blocked: boolean; recommendations: string[] }
-```
-
-**Returns:** `{ blocked: boolean; recommendations: string[] }`
+**Returns:** User information object
 
 **Example:**
 ```javascript
-const status = tracker.getConnectionStatus();
-console.log('Blocked:', status.blocked);
-console.log('Recommendations:', status.recommendations);
+const userInfo = tracker.getUserInfo();
+console.log('User ID:', userInfo.endUserId);
+console.log('Session ID:', userInfo.sessionId);
+console.log('Is existing user:', userInfo.isPreexistingUser);
 ```
 
 ### `getSessionId()`
@@ -345,11 +277,36 @@ const currentUrl = tracker.getCurrentUrl();
 console.log('Current URL:', currentUrl);
 ```
 
+
+
 ## Static Methods
 
+### `HumanBehaviorTracker.init(apiKey, options?)`
 
+Static method to initialize the tracker with global persistence.
 
+```typescript
+static init(
+  apiKey: string, 
+  options?: {
+    redactFields?: string[];
+  }
+): HumanBehaviorTracker
+```
 
+**Parameters:**
+- `apiKey` (string): Your HumanBehavior API key
+- `options` (object, optional): Configuration options
+  - `redactFields` (string[], optional): CSS selectors for fields to redact
+
+**Returns:** `HumanBehaviorTracker` instance
+
+**Example:**
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  redactFields: ['input[type="password"]', '#email']
+});
+```
 
 ## Properties
 
@@ -376,17 +333,16 @@ The tracker automatically captures these events:
 - **Mouse movements** and clicks
 - **Keyboard input** and form interactions
 - **Scroll events** and viewport changes
-- **Console logs**, warnings, and errors
-- **Custom events** via `customEvent()` method
 
 ## Error Handling
 
 The tracker includes robust error handling:
 
-- **Connection failures** are handled gracefully
+- **Connection failures** are handled gracefully with automatic retry
 - **Ad blocker detection** with fallback mechanisms
-- **Session expiration** with automatic retry
+- **Session expiration** with automatic retry and event queuing
 - **Network issues** with event queuing and retry
+- **Graceful degradation** when services are unavailable
 
 ## Session Persistence
 
@@ -394,4 +350,5 @@ Sessions automatically persist for 30 minutes of inactivity:
 
 - **localStorage** is used for session storage
 - **Cookies** are used for user identification
-- **Cross-page continuity** is maintained within the same domain 
+- **Cross-page continuity** is maintained within the same domain
+- **Automatic session restoration** when returning within 30 minutes 
