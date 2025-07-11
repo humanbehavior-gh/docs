@@ -5,6 +5,98 @@ description: 'Track specific user actions and business events with HumanBehavior
 
 Track specific user actions, business events, and custom interactions with HumanBehavior SDK's custom event system.
 
+## Automatic Tracking
+
+The SDK can automatically track common user interactions without any manual code:
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+// Initialize with automatic tracking (enabled by default)
+const tracker = HumanBehaviorTracker.init('your-api-key');
+
+// All button clicks, link clicks, and form submissions are automatically tracked!
+```
+
+### What Gets Tracked Automatically
+
+#### Button Clicks (`button_clicked`)
+```javascript
+// Automatically captured when user clicks any button
+{
+  eventName: 'button_clicked',
+  properties: {
+    buttonId: 'submit-btn',
+    buttonType: 'submit',
+    buttonText: 'Submit Order',
+    page: '/checkout',
+    timestamp: 1705312200000
+  }
+}
+```
+
+#### Link Clicks (`link_clicked`)
+```javascript
+// Automatically captured when user clicks any link
+{
+  eventName: 'link_clicked',
+  properties: {
+    linkUrl: 'https://example.com/features',
+    linkId: 'features-link',
+    linkText: 'Learn More',
+    linkTarget: '_blank',
+    page: '/home',
+    timestamp: 1705312200000
+  }
+}
+```
+
+#### Form Submissions (`form_submitted`)
+```javascript
+// Automatically captured when user submits any form
+{
+  eventName: 'form_submitted',
+  properties: {
+    formId: 'contact-form',
+    formAction: '/api/contact',
+    formMethod: 'post',
+    fields: ['name', 'email', 'message'],
+    page: '/contact',
+    timestamp: 1705312200000
+  }
+}
+```
+
+### Customizing Automatic Tracking
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  automaticTrackingOptions: {
+    trackButtons: true,     // Track button clicks
+    trackLinks: true,       // Track link clicks
+    trackForms: true,       // Track form submissions
+    includeText: true,      // Include text content
+    includeClasses: false   // Include CSS classes
+  }
+});
+```
+
+### Manual vs Automatic Tracking
+
+You can use both automatic and manual tracking together:
+
+```javascript
+// Automatic tracking handles common interactions
+const tracker = HumanBehaviorTracker.init('your-api-key');
+
+// Manual tracking for specific business events
+await tracker.customEvent('purchase_completed', {
+  orderId: 'order-123',
+  total: 99.99,
+  products: ['headphones', 'case']
+});
+```
+
 ## Basic Custom Events
 
 Track any user action or business event:

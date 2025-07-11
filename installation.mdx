@@ -132,6 +132,54 @@ app.config.globalProperties.$tracker = tracker;
 app.mount('#app');
 ```
 
+### Raw HTML
+
+For static HTML pages or simple websites, use the CDN version:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Website</title>
+    <!-- Add the HumanBehavior SDK from CDN -->
+    <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+</head>
+<body>
+    <h1>Welcome to My Website</h1>
+    <button id="contact-btn">Contact Us</button>
+    
+    <script>
+        // Initialize tracker
+        const tracker = HumanBehaviorTracker.init('your-api-key', {
+            redactFields: ['input[type="password"]', '#email-field']
+        });
+        
+        // Track button clicks
+        document.getElementById('contact-btn').addEventListener('click', async () => {
+            await tracker.customEvent('contact_button_clicked', {
+                buttonId: 'contact-btn',
+                page: window.location.pathname
+            });
+        });
+        
+        // Track form submissions
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                await tracker.customEvent('form_submitted', {
+                    formId: form.id || 'unnamed-form',
+                    action: form.action
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+<Note>
+  The script tag must be placed in the `<head>` section before any JavaScript that uses the SDK. This ensures the `HumanBehaviorTracker` class is available globally.
+</Note>
+
 ## Environment Variables
 
 For security, store your API key in environment variables:
@@ -179,7 +227,7 @@ The SDK is optimized for size:
 - **CDN version**: ~60KB (gzipped)
 
 <Note>
-  Version 0.1.0 includes enhanced session persistence, improved navigation tracking, and better anti-blocking measures.
+  Version 0.1.0 includes enhanced session persistence and improved navigation tracking.
 </Note>
 
 ## Dependencies
@@ -201,7 +249,70 @@ const tracker = HumanBehaviorTracker.init('your-api-key', {
     'input[type="password"]',
     '#email-field',
     '.sensitive-data'
-  ]
+  ],
+  
+  // Automatic tracking (enabled by default)
+  enableAutomaticTracking: true,
+  
+  // Fine-tune automatic tracking behavior
+  automaticTrackingOptions: {
+    trackButtons: true,     // Track button clicks
+    trackLinks: true,       // Track link clicks  
+    trackForms: true,       // Track form submissions
+    includeText: true,      // Include button/link text content
+    includeClasses: false   // Include CSS classes
+  }
+});
+```
+
+### Automatic Tracking
+
+The SDK can automatically track user interactions without any manual code:
+
+#### Button Tracking
+Automatically tracks all button clicks with properties:
+- `buttonId`: Button's ID attribute
+- `buttonType`: Button type (submit, button, reset)
+- `buttonText`: Button text content (if enabled)
+- `buttonClass`: CSS classes (if enabled)
+- `page`: Current page path
+- `timestamp`: Click timestamp
+
+#### Link Tracking  
+Automatically tracks all link clicks with properties:
+- `linkUrl`: Link destination URL
+- `linkId`: Link's ID attribute
+- `linkTarget`: Link target attribute (_blank, _self, etc.)
+- `linkText`: Link text content (if enabled)
+- `linkClass`: CSS classes (if enabled)
+- `page`: Current page path
+- `timestamp`: Click timestamp
+
+#### Form Tracking
+Automatically tracks all form submissions with properties:
+- `formId`: Form's ID attribute
+- `formAction`: Form action URL
+- `formMethod`: Form method (get, post, etc.)
+- `fields`: Array of form field names
+- `formClass`: CSS classes (if enabled)
+- `page`: Current page path
+- `timestamp`: Submission timestamp
+
+#### Disabling Automatic Tracking
+
+```javascript
+// Disable all automatic tracking
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableAutomaticTracking: false
+});
+
+// Disable specific tracking types
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  automaticTrackingOptions: {
+    trackButtons: false,  // Don't track buttons
+    trackLinks: true,     // Still track links
+    trackForms: true      // Still track forms
+  }
 });
 ```
 

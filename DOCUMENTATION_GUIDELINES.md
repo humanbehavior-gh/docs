@@ -14,6 +14,11 @@ This file tracks what should and shouldn't be included in the HumanBehavior SDK 
 - `getSessionId()` - Get current session ID
 - `getCurrentUrl()` - Get current URL
 
+### **Custom Events**
+- `customEvent()` - Custom event tracking
+- Automatic event tracking (button clicks, link clicks, form submissions)
+- Manual vs automatic tracking configuration
+
 ### **Data Redaction**
 - `redact()` - Enable data redaction
 - `setRedactedFields()` - Set fields to redact
@@ -22,6 +27,8 @@ This file tracks what should and shouldn't be included in the HumanBehavior SDK 
 
 ### **Configuration Options**
 - `redactFields` - CSS selectors for sensitive fields
+- `enableAutomaticTracking` - Enable/disable automatic tracking
+- `automaticTrackingOptions` - Configure automatic tracking behavior
 
 ### **React Integration**
 - `HumanBehaviorProvider` - React context provider
@@ -33,7 +40,7 @@ This file tracks what should and shouldn't be included in the HumanBehavior SDK 
 - Session persistence (30-minute window)
 - User identification and properties
 - Data redaction for sensitive fields
-- Anti-blocking features (graceful degradation)
+- Automatic event tracking (buttons, links, forms)
 
 ## ❌ **DO NOT INCLUDE in Documentation**
 
@@ -51,10 +58,6 @@ This file tracks what should and shouldn't be included in the HumanBehavior SDK 
 - `getConnectionStatus()` - Connection status
 - `isPreexistingUser()` - User status checking
 
-### **Unimplemented Features**
-- `customEvent()` - Custom event tracking (server-side not fully implemented)
-- `ingestionUrl` configuration (hardcoded in SDK)
-
 ### **Server-Side Features**
 - Any mention of server endpoints
 - Database schema details
@@ -66,9 +69,10 @@ This file tracks what should and shouldn't be included in the HumanBehavior SDK 
 1. **Quick Start** - Basic setup and initialization
 2. **Installation** - Package installation methods
 3. **Core API Reference** - Main tracker methods
-4. **React Integration** - React hooks and provider
-5. **Data Redaction** - Privacy and security features
-6. **Session Management** - How sessions work
+4. **Custom Events** - Manual and automatic event tracking
+5. **React Integration** - React hooks and provider
+6. **Data Redaction** - Privacy and security features
+7. **Session Management** - How sessions work
 
 ### **Optional Sections**
 1. **Examples** - Real-world usage examples
@@ -90,6 +94,7 @@ This file tracks what should and shouldn't be included in the HumanBehavior SDK 
 - Focus on common use cases
 - Include error handling where appropriate
 - Show both vanilla JS and React usage
+- Demonstrate automatic vs manual tracking
 
 ### **Configuration**
 - Only document user-configurable options

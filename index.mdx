@@ -5,6 +5,18 @@ description: 'Powerful session recording and user behavior analytics for web app
 
 A powerful JavaScript SDK for recording user sessions and tracking behavior analytics in web applications. Built on top of [rrweb](https://github.com/rrweb-io/rrweb) for high-fidelity session recordings.
 
+## Key Features
+
+The SDK automatically provides:
+
+- **Session Recording**: Mouse movements, clicks, scrolls, form inputs
+- **Automatic Event Tracking**: Button clicks, link clicks, form submissions
+- **Navigation Tracking**: SPA route changes, browser navigation
+- **Console Tracking**: Log, warn, error messages
+- **Custom Events**: Track specific user actions
+- **Data Redaction**: Protect sensitive information
+- **Session Continuity**: Persists across page reloads
+
 ## Features
 
 <CardGroup cols={2}>
@@ -160,14 +172,7 @@ if (userConsent) {
 }
 ```
 
-## Anti-Blocking Features
 
-The SDK includes robust anti-blocking measures:
-
-- **Automatic fallback** from `sendBeacon` to `fetch`
-- **Graceful error handling** for ad blockers
-- **Event queuing** during network issues
-- **Session persistence** across page reloads
 
 ## Browser Compatibility
 
@@ -239,12 +244,21 @@ The SDK is optimized for size:
   <button id="submit-btn">Submit</button>
   
   <script>
+    // Initialize tracker with automatic tracking
     const tracker = HumanBehaviorTracker.init('your-api-key');
     
+    // Button clicks are automatically tracked!
+    // No manual event listeners needed
+    
+    // You can still add custom events for business logic
     document.getElementById('submit-btn').addEventListener('click', async () => {
-      await tracker.customEvent('button_clicked', {
-        buttonId: 'submit-btn',
-        page: window.location.pathname
+      // Your business logic here
+      console.log('Processing submission...');
+      
+      // Track custom business event
+      await tracker.customEvent('order_submitted', {
+        orderId: 'order-123',
+        total: 99.99
       });
     });
   </script>
@@ -294,5 +308,5 @@ function ContactForm() {
 - **Privacy**: Built-in privacy and security features
 
 <Note>
-  Version 0.1.0 includes enhanced session persistence, improved navigation tracking, and better anti-blocking measures for a more robust user experience.
+  Version 0.1.0 includes enhanced session persistence and improved navigation tracking for a more robust user experience.
 </Note>
