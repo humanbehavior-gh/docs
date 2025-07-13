@@ -548,6 +548,18 @@ export function DebugTracking() {
 }
 ```
 
+## ⚠️ Important: Using the Provider in Next.js App Router
+
+<Warning>
+If you are using the Next.js App Router (the `/app` directory), **React components are server components by default**. The `HumanBehaviorProvider` (and any component using React context or hooks) must be used in a <strong>client component</strong>.<br/><br/>
+
+To do this, either:
+- Add <code>"use client"</code> to the top of your layout or wrapper file that uses the provider, <strong>or</strong>
+- Create a separate client component that wraps your provider, and use that in your layout.
+
+See the <a href="https://nextjs.org/docs/getting-started/react-essentials#the-use-client-directive">Next.js docs on the "use client" directive</a> for more info.
+</Warning>
+
 <Note>
   The HumanBehavior SDK is fully compatible with Next.js and automatically handles SSR, static generation, and dynamic imports.
 </Note>
