@@ -53,7 +53,6 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <HumanBehaviorProvider 
       apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
-      ingestionUrl={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL || 'https://ingest.humanbehavior.co'}
     >
       <Component {...pageProps} />
     </HumanBehaviorProvider>
@@ -70,7 +69,6 @@ Create a `.env.local` file in your project root:
 ```bash
 # .env.local
 NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingest.humanbehavior.co
 ```
 
 ### Production Environment
@@ -79,12 +77,10 @@ For production deployments, set environment variables in your hosting platform:
 
 ```bash
 # Vercel
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-production-api-key
-NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingest.humanbehavior.co
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 
 # Netlify
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-production-api-key
-NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingest.humanbehavior.co
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
 ## Installation
@@ -109,8 +105,7 @@ import { useHumanBehavior } from 'humanbehavior-js/react';
 
 // Full TypeScript support
 const tracker: HumanBehaviorTracker = new HumanBehaviorTracker(
-  'your-api-key',
-  'https://ingestion.humanbehavior.ai'
+  'your-api-key'
 );
 ```
 
@@ -206,8 +201,7 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 export function createTracker() {
   return new HumanBehaviorTracker(
-    process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!,
-    process.env.NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL || 'https://ingestion.humanbehavior.ai'
+    process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!
   );
 }
 ```
@@ -499,13 +493,13 @@ For other deployment platforms, ensure environment variables are set:
 
 ```bash
 # Netlify
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-key
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 
 # Railway
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-key
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 
 # AWS Amplify
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-key
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
 ## Troubleshooting
@@ -517,7 +511,7 @@ NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-key
 // Solution: Ensure provider is at the root level
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <HumanBehaviorProvider apiKey="your-key">
+    <HumanBehaviorProvider apiKey="your-api-key-here">
       <Component {...pageProps} />
     </HumanBehaviorProvider>
   );
@@ -525,7 +519,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
 // Issue: Environment variables not working
 // Solution: Use NEXT_PUBLIC_ prefix
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-key
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 
 // Issue: SSR errors
 // Solution: Use 'use client' directive for client components

@@ -191,12 +191,7 @@ For security, store your API key in environment variables:
 ### Development (.env)
 
 ```bash
-# For client-side usage (React, Vue, etc.)
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-REACT_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
-VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
-
-# For server-side usage (Node.js)
+# .env
 HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
@@ -204,14 +199,15 @@ HUMANBEHAVIOR_API_KEY=your-api-key-here
 
 ```bash
 # Set environment variables in your hosting platform
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-production-api-key
-REACT_APP_HUMANBEHAVIOR_API_KEY=your-production-api-key
-VITE_HUMANBEHAVIOR_API_KEY=your-production-api-key
-HUMANBEHAVIOR_API_KEY=your-production-api-key
+HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
 <Note>
   The SDK automatically uses the correct ingestion server (https://ingest.humanbehavior.co) based on your API key. No additional configuration is required.
+</Note>
+
+<Note>
+  For client-side frameworks, you may need to use the framework-specific prefix (e.g., `REACT_APP_` for Create React App, `NEXT_PUBLIC_` for Next.js, `VITE_` for Vite).
 </Note>
 
 ## Server Configuration

@@ -295,7 +295,6 @@ Use environment variables for configuration:
 ```bash
 # .env
 REACT_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
-REACT_APP_HUMANBEHAVIOR_INGESTION_URL=https://ingest.humanbehavior.co
 ```
 
 ```javascript
@@ -304,7 +303,6 @@ function App() {
   return (
     <HumanBehaviorProvider 
       apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
-      ingestionUrl={process.env.REACT_APP_HUMANBEHAVIOR_INGESTION_URL}
     >
       <YourApp />
     </HumanBehaviorProvider>
@@ -341,7 +339,7 @@ import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 
 // Issue: API key not working
 // Solution: Check environment variable naming
-REACT_APP_HUMANBEHAVIOR_API_KEY=your-key // Must start with REACT_APP_
+REACT_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
 
 // Issue: SSR errors
 // Solution: Provider handles SSR automatically

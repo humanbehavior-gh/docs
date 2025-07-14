@@ -14,9 +14,7 @@ The SDK automatically handles user identification using cookies:
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = HumanBehaviorTracker.init('your-api-key', {
-  ingestionUrl: 'https://ingest.humanbehavior.co'
-});
+const tracker = HumanBehaviorTracker.init('your-api-key');
 
 // User is automatically identified using cookies
 // No additional setup required
