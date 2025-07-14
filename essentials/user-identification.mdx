@@ -1,9 +1,11 @@
 ---
 title: 'User Identification'
-description: 'Learn how to identify and track users across sessions with HumanBehavior SDK'
+description: 'Identify and track users across sessions with persistent user IDs and properties'
 ---
 
-HumanBehavior SDK provides powerful user identification capabilities that allow you to track users across sessions and associate session recordings with specific individuals.
+
+
+HumanBehavior SDK automatically identifies and tracks users across sessions using persistent user IDs and properties.
 
 ## Automatic User Identification
 
@@ -12,10 +14,9 @@ The SDK automatically handles user identification using cookies:
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = new HumanBehaviorTracker(
-  'your-api-key',
-  'https://ingestion.humanbehavior.ai'
-);
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  ingestionUrl: 'https://ingest.humanbehavior.co'
+});
 
 // User is automatically identified using cookies
 // No additional setup required

@@ -3,6 +3,10 @@ title: 'Installation'
 description: 'Installation options and setup for HumanBehavior SDK'
 ---
 
+<Warning>
+  **Important:** By using the HumanBehavior SDK, you agree to comply with our [Terms of Service](https://organic-panther-09d.notion.site/Human-Behavior-Terms-of-Service-1d785c32eb888021a5fefa9732fddd97) and [Privacy Policy](https://organic-panther-09d.notion.site/Human-Behavior-Privacy-Policy-1d785c32eb8880b98336cd9059fb9d42).
+</Warning>
+
 HumanBehavior SDK can be installed in several ways depending on your project setup and preferences.
 
 ## Package Managers
@@ -187,17 +191,28 @@ For security, store your API key in environment variables:
 ### Development (.env)
 
 ```bash
-HUMANBEHAVIOR_API_KEY=your-api-key-here
+# For client-side usage (React, Vue, etc.)
 NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
+REACT_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
+VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
+
+# For server-side usage (Node.js)
+HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
 ### Production
 
 ```bash
 # Set environment variables in your hosting platform
-HUMANBEHAVIOR_API_KEY=your-production-api-key
 NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-production-api-key
+REACT_APP_HUMANBEHAVIOR_API_KEY=your-production-api-key
+VITE_HUMANBEHAVIOR_API_KEY=your-production-api-key
+HUMANBEHAVIOR_API_KEY=your-production-api-key
 ```
+
+<Note>
+  The SDK automatically uses the correct ingestion server (https://ingest.humanbehavior.co) based on your API key. No additional configuration is required.
+</Note>
 
 ## Server Configuration
 

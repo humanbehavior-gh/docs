@@ -3,6 +3,12 @@ title: 'React Integration'
 description: 'Use HumanBehavior SDK with React applications using hooks and context providers'
 ---
 
+
+
+<Warning>
+If you are using the Next.js App Router, the `HumanBehaviorProvider` must be used in a <strong>client component</strong> because the SDK requires browser APIs and cannot run during server-side rendering. Add <code>"use client"</code> to your provider file or create a separate client component wrapper.
+</Warning>
+
 HumanBehavior SDK provides seamless integration with React applications through hooks and context providers.
 
 ## Quick Start
@@ -539,16 +545,4 @@ function TrackedButton({ eventName, eventProperties }: TrackingProps) {
 
 <Note>
   The React integration provides the same functionality as the vanilla JavaScript SDK, with the added benefit of React hooks and context for easier integration.
-</Note> 
-
-## ⚠️ Important: Using with Next.js App Router
-
-<Warning>
-If you are using the Next.js App Router (the `/app` directory), <strong>React components are server components by default</strong>. The `HumanBehaviorProvider` (and any component using React context or hooks) must be used in a <strong>client component</strong>.<br/><br/>
-
-To do this, either:
-- Add <code>"use client"</code> to the top of your layout or wrapper file that uses the provider, <strong>or</strong>
-- Create a separate client component that wraps your provider, and use that in your layout.
-
-See the <a href="https://nextjs.org/docs/getting-started/react-essentials#the-use-client-directive">Next.js docs on the "use client" directive</a> for more info.
-</Warning> 
+</Note>

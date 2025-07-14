@@ -1,9 +1,15 @@
 ---
 title: 'Next.js Setup'
-description: 'Complete setup guide for HumanBehavior SDK with Next.js applications'
+description: 'Set up HumanBehavior SDK with Next.js applications'
 ---
 
-HumanBehavior SDK is fully compatible with Next.js and provides seamless integration for both App Router and Pages Router. This guide covers everything you need to set up session recording in your Next.js application.
+
+
+<Warning>
+If you are using the Next.js App Router, the `HumanBehaviorProvider` must be used in a <strong>client component</strong> because the SDK requires browser APIs and cannot run during server-side rendering. Add <code>"use client"</code> to your provider file or create a separate client component wrapper.
+</Warning>
+
+HumanBehavior SDK is fully compatible with Next.js and provides seamless integration with both client-side and server-side rendering.
 
 ## Quick Start
 
@@ -47,6 +53,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <HumanBehaviorProvider 
       apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+      ingestionUrl={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL || 'https://ingest.humanbehavior.co'}
     >
       <Component {...pageProps} />
     </HumanBehaviorProvider>
@@ -63,7 +70,7 @@ Create a `.env.local` file in your project root:
 ```bash
 # .env.local
 NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingest.humanbehavior.co
 ```
 
 ### Production Environment
@@ -73,11 +80,11 @@ For production deployments, set environment variables in your hosting platform:
 ```bash
 # Vercel
 NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-production-api-key
-NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingest.humanbehavior.co
 
 # Netlify
 NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-production-api-key
-NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+NEXT_PUBLIC_HUMANBEHAVIOR_INGESTION_URL=https://ingest.humanbehavior.co
 ```
 
 ## Installation
@@ -548,22 +555,10 @@ export function DebugTracking() {
 }
 ```
 
-## ⚠️ Important: Using the Provider in Next.js App Router
-
-<Warning>
-If you are using the Next.js App Router (the `/app` directory), **React components are server components by default**. The `HumanBehaviorProvider` (and any component using React context or hooks) must be used in a <strong>client component</strong>.<br/><br/>
-
-To do this, either:
-- Add <code>"use client"</code> to the top of your layout or wrapper file that uses the provider, <strong>or</strong>
-- Create a separate client component that wraps your provider, and use that in your layout.
-
-See the <a href="https://nextjs.org/docs/getting-started/react-essentials#the-use-client-directive">Next.js docs on the "use client" directive</a> for more info.
-</Warning>
-
 <Note>
   The HumanBehavior SDK is fully compatible with Next.js and automatically handles SSR, static generation, and dynamic imports.
 </Note>
 
 <Warning>
   Always ensure you have user consent before starting session recording, especially in regions with strict privacy laws.
-</Warning> 
+</Warning>

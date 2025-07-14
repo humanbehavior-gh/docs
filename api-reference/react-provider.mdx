@@ -5,6 +5,10 @@ description: 'React context provider for HumanBehavior SDK integration'
 
 # HumanBehaviorProvider
 
+<Warning>
+If you are using the Next.js App Router, the `HumanBehaviorProvider` must be used in a <strong>client component</strong> because the SDK requires browser APIs and cannot run during server-side rendering. Add <code>"use client"</code> to your provider file or create a separate client component wrapper.
+</Warning>
+
 The `HumanBehaviorProvider` is a React context provider that makes the HumanBehavior tracker available throughout your React component tree.
 
 <Info>
@@ -288,11 +292,13 @@ function App() {
 
 Use environment variables for configuration:
 
-```javascript
-// .env
+```bash
+# .env
 REACT_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
-REACT_APP_HUMANBEHAVIOR_INGESTION_URL=https://ingestion.humanbehavior.ai
+REACT_APP_HUMANBEHAVIOR_INGESTION_URL=https://ingest.humanbehavior.co
+```
 
+```javascript
 // App.js
 function App() {
   return (
@@ -377,16 +383,4 @@ function DebugComponent() {
 
 <Warning>
   Always ensure you have user consent before starting session recording, especially in regions with strict privacy laws.
-</Warning> 
-
-## ⚠️ Important: Using with Next.js App Router
-
-<Warning>
-If you are using the Next.js App Router (the `/app` directory), <strong>React components are server components by default</strong>. The `HumanBehaviorProvider` (and any component using React context or hooks) must be used in a <strong>client component</strong>.<br/><br/>
-
-To do this, either:
-- Add <code>"use client"</code> to the top of your layout or wrapper file that uses the provider, <strong>or</strong>
-- Create a separate client component that wraps your provider, and use that in your layout.
-
-See the <a href="https://nextjs.org/docs/getting-started/react-essentials#the-use-client-directive">Next.js docs on the "use client" directive</a> for more info.
-</Warning> 
+</Warning>
