@@ -9,7 +9,7 @@ description: 'Set up HumanBehavior SDK with Next.js applications'
 If you are using the Next.js App Router, the `HumanBehaviorProvider` must be used in a <strong>client component</strong> because the SDK requires browser APIs and cannot run during server-side rendering. Add <code>"use client"</code> to your provider file or create a separate client component wrapper.
 </Warning>
 
-HumanBehavior SDK is fully compatible with Next.js and provides seamless integration with both client-side and server-side rendering.
+The HumanBehavior SDK is fully compatible with Next.js and automatically handles SSR, static generation, and dynamic imports.
 
 ## Quick Start
 
@@ -548,10 +548,6 @@ export function DebugTracking() {
   return null;
 }
 ```
-
-<Note>
-  The HumanBehavior SDK is fully compatible with Next.js and automatically handles SSR, static generation, and dynamic imports.
-</Note>
 
 <Warning>
   Always ensure you have user consent before starting session recording, especially in regions with strict privacy laws.
