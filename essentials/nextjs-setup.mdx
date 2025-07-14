@@ -3,17 +3,28 @@ title: 'Next.js Setup'
 description: 'Set up HumanBehavior SDK with Next.js applications'
 ---
 
-
-
-<Warning>
-If you are using the Next.js App Router, the `HumanBehaviorProvider` must be used in a <strong>client component</strong> because the SDK requires browser APIs and cannot run during server-side rendering. Add <code>"use client"</code> to your provider file or create a separate client component wrapper.
-</Warning>
-
 The HumanBehavior SDK is fully compatible with Next.js and automatically handles SSR, static generation, and dynamic imports.
 
 ## Quick Start
 
-### App Router (Next.js 13+)
+### 1. Install the SDK
+
+```bash
+npm install humanbehavior-js
+```
+
+### 2. Set up Environment Variables
+
+Create a `.env.local` file in your project root:
+
+```bash
+# .env.local
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+### 3. Add the Provider
+
+#### App Router (Next.js 13+)
 
 Create a root layout with the provider:
 
@@ -40,7 +51,7 @@ export default function RootLayout({
 }
 ```
 
-### Pages Router (Next.js 12 and below)
+#### Pages Router (Next.js 12 and below)
 
 Wrap your app in `_app.tsx`:
 
@@ -60,42 +71,11 @@ export default function App({ Component, pageProps }: AppProps) {
 }
 ```
 
-## Environment Configuration
+<Note>
+**That's it!** The SDK automatically tracks user interactions, navigation, and console events. You don't need to add any custom event tracking unless you want to track specific business events.
+</Note>
 
-### Environment Variables
-
-Create a `.env.local` file in your project root:
-
-```bash
-# .env.local
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-```
-
-### Production Environment
-
-For production deployments, set environment variables in your hosting platform:
-
-```bash
-# Vercel
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-
-# Netlify
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-```
-
-## Installation
-
-### Install the SDK
-
-```bash
-npm install humanbehavior-js
-# or
-yarn add humanbehavior-js
-# or
-pnpm add humanbehavior-js
-```
-
-### TypeScript Support
+## TypeScript Support
 
 The SDK includes TypeScript definitions. No additional setup required:
 
@@ -109,96 +89,19 @@ const tracker: HumanBehaviorTracker = new HumanBehaviorTracker(
 );
 ```
 
-## Usage Examples
+## Production Environment
 
-### Basic Page Component
+For production deployments, set environment variables in your hosting platform:
 
-```typescript
-// app/page.tsx (App Router)
-'use client';
+```bash
+# Vercel
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 
-import { useHumanBehavior } from 'humanbehavior-js/react';
-import { useEffect } from 'react';
-
-export default function HomePage() {
-  const tracker = useHumanBehavior();
-  
-  useEffect(() => {
-    // Start recording when page loads
-    tracker.start();
-    
-    // Track page view
-    tracker.customEvent('page_view', {
-      page: '/',
-      title: 'Home Page'
-    });
-  }, [tracker]);
-  
-  return (
-    <div>
-      <h1>Welcome to My App</h1>
-      <button onClick={() => tracker.customEvent('cta_click', { location: 'hero' })}>
-        Get Started
-      </button>
-    </div>
-  );
-}
+# Netlify
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
-### Dynamic Routes
-
 ```typescript
-// app/products/[id]/page.tsx
-'use client';
-
-import { useHumanBehavior } from 'humanbehavior-js/react';
-import { useEffect } from 'react';
-
-export default function ProductPage({ params }: { params: { id: string } }) {
-  const tracker = useHumanBehavior();
-  
-  useEffect(() => {
-    tracker.customEvent('product_view', {
-      productId: params.id,
-      page: `/products/${params.id}`
-    });
-  }, [tracker, params.id]);
-  
-  return (
-    <div>
-      <h1>Product {params.id}</h1>
-      <button onClick={() => tracker.customEvent('add_to_cart', { productId: params.id })}>
-        Add to Cart
-      </button>
-    </div>
-  );
-}
-```
-
-### API Routes Integration
-
-```typescript
-// app/api/track/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-
-export async function POST(request: NextRequest) {
-  const { eventName, properties } = await request.json();
-  
-  // Server-side tracking (if needed)
-  console.log('Server-side event:', eventName, properties);
-  
-  return NextResponse.json({ success: true });
-}
-```
-
-## Advanced Configuration
-
-### Custom Provider Setup
-
-```typescript
-// lib/humanbehavior.ts
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
 export function createTracker() {
   return new HumanBehaviorTracker(
     process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!

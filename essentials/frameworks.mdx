@@ -1,0 +1,75 @@
+---
+title: 'Framework Integration'
+description: 'Setup guides for popular frameworks and libraries'
+---
+
+# Framework Integration
+
+Choose your framework below for optimized setup instructions and best practices.
+
+## Popular Frameworks
+
+<CardGroup cols={2}>
+  <Card
+    title="React"
+    icon="react"
+    href="/essentials/react-integration"
+  >
+    React hooks, context providers, and component integration
+  </Card>
+  <Card
+    title="Next.js"
+    icon="nextjs"
+    href="/essentials/nextjs-setup"
+  >
+    Next.js App Router and Pages Router setup
+  </Card>
+</CardGroup>
+
+## Vanilla JavaScript
+
+For vanilla JavaScript applications, use the standard SDK initialization:
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker = HumanBehaviorTracker.init('your-api-key');
+```
+
+
+
+## CDN Usage
+
+For any framework, you can also use the CDN version:
+
+```html
+<script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+<script>
+  const tracker = HumanBehaviorTracker.init('your-api-key');
+</script>
+```
+
+## Framework-Specific Considerations
+
+### React
+- Use the dedicated React integration for hooks and context
+- Automatic cleanup on component unmount
+- TypeScript support included
+
+### Next.js
+- Server-side rendering considerations
+- API key environment variables
+- App Router vs Pages Router differences
+
+
+
+## Getting Help
+
+- **Framework Guides**: Detailed setup for React and Next.js
+- **API Reference**: Complete SDK documentation
+- **Examples**: Code examples for common use cases
+- **Support**: Contact us for framework-specific help
+
+<Note>
+  Don't see your framework listed? The standard JavaScript SDK works with any framework. Check our [API Reference](/api-reference/tracker) for complete documentation.
+</Note> 

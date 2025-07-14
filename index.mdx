@@ -9,6 +9,52 @@ description: 'Powerful session recording and user behavior analytics for web app
 
 A powerful JavaScript SDK for recording user sessions and tracking behavior analytics in web applications. Built on top of [rrweb](https://github.com/rrweb-io/rrweb) for high-fidelity session recordings.
 
+## Quick Start
+
+<Info>
+**Framework Guides:** If you're using Next.js, React, or another framework, we recommend checking out our [framework guides](/essentials/frameworks) for optimized setup instructions.
+</Info>
+
+### 1. Install the SDK
+
+```bash
+npm install humanbehavior-js
+```
+
+<Info>
+<strong>How to find your Public API Key:</strong><br/>
+<b>Flow:</b> Project Home → Settings (on sidebar) → Public API Key
+</Info>
+
+<img src="/images/APIKey.png" alt="Where to find your Public API Key" style={{ borderRadius: '0.5rem', margin: '1rem 0', maxWidth: '100%' }} />
+
+<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+
+### 2. Initialize the Tracker
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+// One-line initialization with global persistence
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  redactFields: ['input[type="password"]']
+});
+```
+
+<Note>
+**That's it!** The SDK automatically tracks user interactions, navigation, and console events. You don't need to add any custom event tracking unless you want to track specific business events.
+</Note>
+
+### 3. Add User Information (Optional)
+
+```javascript
+// Add user information when available
+await tracker.addUserInfo({
+  email: 'user@example.com',
+  name: 'John Doe'
+});
+```
+
 ## Key Features
 
 The SDK automatically provides:
@@ -17,7 +63,7 @@ The SDK automatically provides:
 - **Automatic Event Tracking**: Button clicks, link clicks, form submissions
 - **Navigation Tracking**: SPA route changes, browser navigation
 - **Console Tracking**: Log, warn, error messages
-- **Custom Events**: Track specific user actions
+- **Custom Events**: Track specific user actions (optional)
 - **Data Redaction**: Protect sensitive information
 - **Session Continuity**: Persists across page reloads
 
@@ -62,44 +108,6 @@ The SDK automatically provides:
 
 </CardGroup>
 
-## Quick Start
-
-### 1. Install the SDK
-
-```bash
-npm install humanbehavior-js
-```
-
-<Info>
-<strong>How to find your Public API Key:</strong><br/>
-<b>Flow:</b> Project Home → Settings (on sidebar) → Public API Key
-</Info>
-
-<img src="/images/APIKey.png" alt="Where to find your Public API Key" style={{ borderRadius: '0.5rem', margin: '1rem 0', maxWidth: '100%' }} />
-
-<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
-
-### 2. Initialize the Tracker
-
-```javascript
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-// One-line initialization with global persistence
-const tracker = HumanBehaviorTracker.init('your-api-key', {
-  redactFields: ['input[type="password"]']
-});
-```
-
-### 3. Add User Information
-
-```javascript
-// Add user information
-await tracker.addUserInfo({
-  email: 'user@example.com',
-  name: 'John Doe'
-});
-```
-
 ## What Gets Recorded
 
 The SDK automatically captures:
@@ -142,10 +150,10 @@ function App() {
 function MyComponent() {
   const tracker = useHumanBehavior();
   
-  const handleClick = async () => {
-    await tracker.customEvent('button_clicked', {
-      buttonId: 'submit'
-    });
+  const handleClick = () => {
+    // Your business logic here
+    console.log('Button clicked!');
+    // Custom events are optional - the SDK automatically tracks clicks
   };
   
   return <button onClick={handleClick}>Submit</button>;
@@ -254,16 +262,11 @@ The SDK is optimized for size:
     // Button clicks are automatically tracked!
     // No manual event listeners needed
     
-    // You can still add custom events for business logic
-    document.getElementById('submit-btn').addEventListener('click', async () => {
-      // Your business logic here
+    // Your business logic here
+    document.getElementById('submit-btn').addEventListener('click', () => {
       console.log('Processing submission...');
-      
-      // Track custom business event
-      await tracker.customEvent('order_submitted', {
-        orderId: 'order-123',
-        total: 99.99
-      });
+      // The SDK automatically tracks button clicks
+      // Custom events are optional for additional business tracking
     });
   </script>
 </body>
@@ -286,11 +289,11 @@ function App() {
 function ContactForm() {
   const tracker = useHumanBehavior();
   
-  const handleSubmit = async (formData) => {
-    await tracker.customEvent('form_submitted', {
-      formId: 'contact-form',
-      fields: ['name', 'email', 'message']
-    });
+  const handleSubmit = (formData) => {
+    // Your form processing logic here
+    console.log('Form submitted!');
+    // The SDK automatically tracks form submissions
+    // Custom events are optional for additional business tracking
   };
   
   return (

@@ -34,6 +34,7 @@
           {
             "group": "Frameworks",
             "pages": [
+              "essentials/frameworks",
               "essentials/react-integration",
               "essentials/nextjs-setup"
             ]

@@ -3,17 +3,17 @@ title: 'React Integration'
 description: 'Use HumanBehavior SDK with React applications using hooks and context providers'
 ---
 
-
-
-<Warning>
-If you are using the Next.js App Router, the `HumanBehaviorProvider` must be used in a <strong>client component</strong> because the SDK requires browser APIs and cannot run during server-side rendering. Add <code>"use client"</code> to your provider file or create a separate client component wrapper.
-</Warning>
-
 The React integration provides the same functionality as the vanilla JavaScript SDK, with the added benefit of React hooks and context for easier integration.
 
 ## Quick Start
 
-### Provider Setup
+### 1. Install the SDK
+
+```bash
+npm install humanbehavior-js
+```
+
+### 2. Add the Provider
 
 Wrap your app with the `HumanBehaviorProvider`:
 
@@ -29,9 +29,13 @@ function App() {
 }
 ```
 
-### Hook Usage
+<Note>
+**That's it!** The SDK automatically tracks user interactions, navigation, and console events. You don't need to add any custom event tracking unless you want to track specific business events.
+</Note>
 
-Use the `useHumanBehavior` hook in your components:
+### 3. Use the Hook (Optional)
+
+Use the `useHumanBehavior` hook in your components when you need access to the tracker:
 
 ```javascript
 import { useHumanBehavior } from 'humanbehavior-js/react';
@@ -39,9 +43,10 @@ import { useHumanBehavior } from 'humanbehavior-js/react';
 function MyComponent() {
   const tracker = useHumanBehavior();
   
-  const handleButtonClick = async () => {
-    // Handle button click
+  const handleButtonClick = () => {
+    // Your business logic here
     console.log('Button clicked');
+    // The SDK automatically tracks clicks - no manual tracking needed
   };
   
   return (
