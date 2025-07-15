@@ -13,16 +13,7 @@ The HumanBehavior SDK is fully compatible with Next.js and automatically handles
 npm install humanbehavior-js
 ```
 
-### 2. Set up Environment Variables
-
-Create a `.env.local` file in your project root:
-
-```bash
-# .env.local
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-```
-
-### 3. Add the Provider
+### 2. Add the Provider
 
 #### App Router (Next.js 13+)
 
@@ -41,7 +32,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <HumanBehaviorProvider 
-          apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+          apiKey="your-api-key-here"
         >
           {children}
         </HumanBehaviorProvider>
@@ -63,7 +54,7 @@ import type { AppProps } from 'next/app';
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <HumanBehaviorProvider 
-      apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+      apiKey="your-api-key-here"
     >
       <Component {...pageProps} />
     </HumanBehaviorProvider>
@@ -84,47 +75,30 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
 import { useHumanBehavior } from 'humanbehavior-js/react';
 
 // Full TypeScript support
-const tracker: HumanBehaviorTracker = new HumanBehaviorTracker(
+const tracker: HumanBehaviorTracker = HumanBehaviorTracker.init(
   'your-api-key'
 );
 ```
 
-## Production Environment
+## Production Deployment
 
-For production deployments, set environment variables in your hosting platform:
-
-```bash
-# Vercel
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-
-# Netlify
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-```
-
-```typescript
-export function createTracker() {
-  return new HumanBehaviorTracker(
-    process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!
-  );
-}
-```
+For production deployments, the SDK works with direct API key configuration:
 
 ```typescript
 // app/layout.tsx
 import { HumanBehaviorProvider } from 'humanbehavior-js/react';
-import { createTracker } from '@/lib/humanbehavior';
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const tracker = createTracker();
-  
   return (
     <html lang="en">
       <body>
-        <HumanBehaviorProvider client={tracker}>
+        <HumanBehaviorProvider 
+          apiKey="your-api-key-here"
+        >
           {children}
         </HumanBehaviorProvider>
       </body>
@@ -250,7 +224,7 @@ export default function RootLayout({
       <body>
         <SessionProvider>
           <HumanBehaviorProvider 
-            apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+            apiKey="your-api-key-here"
           >
             {children}
           </HumanBehaviorProvider>
@@ -386,24 +360,12 @@ test('tracks button click', async () => {
 
 ### Vercel Deployment
 
-1. Set environment variables in Vercel dashboard
-2. Deploy your application
-3. The SDK will automatically work in production
+1. Deploy your application with your API key configured
+2. The SDK will automatically work in production
 
 ### Other Platforms
 
-For other deployment platforms, ensure environment variables are set:
-
-```bash
-# Netlify
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-
-# Railway
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-
-# AWS Amplify
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-```
+The SDK works on any deployment platform with your API key configured.
 
 ## Troubleshooting
 
@@ -420,9 +382,8 @@ export default function App({ Component, pageProps }: AppProps) {
   );
 }
 
-// Issue: Environment variables not working
-// Solution: Use NEXT_PUBLIC_ prefix
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
+// Issue: API key not working
+// Solution: Ensure your API key is valid and properly configured
 
 // Issue: SSR errors
 // Solution: Use 'use client' directive for client components
@@ -443,7 +404,7 @@ export function DebugTracking() {
   const tracker = useHumanBehavior();
   
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
+    if (true) { // Enable in development
       tracker.viewLogs();
     }
   }, [tracker]);

@@ -3,588 +3,66 @@ title: 'Custom Events'
 description: 'Track specific user actions and business events with HumanBehavior SDK'
 ---
 
+HumanBehavior SDK lets you track any user action or business event with custom events.
 
+## What is a Custom Event?
 
-Track specific user actions, business events, and custom interactions with HumanBehavior SDK's custom event system.
+A custom event is any user action you want to track beyond the automatic events (like button clicks, link clicks, and form submissions).
+
+## Example: Tracking a Custom Event
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+const tracker = HumanBehaviorTracker.init('your-api-key');
+await tracker.customEvent('purchase_completed', {
+  orderId: 'order-123',
+  total: 99.99
+});
+```
 
 ## Automatic Tracking
 
-The SDK can automatically track common user interactions without any manual code:
+The SDK automatically tracks button clicks, link clicks, and form submissions. You only need to use custom events for additional business logic or analytics.
 
-```javascript
-import { HumanBehaviorTracker } from 'humanbehavior-js';
+## Advanced Usage
 
-// Initialize with automatic tracking (enabled by default)
-const tracker = HumanBehaviorTracker.init('your-api-key');
+- You can use any event name and any properties (string, number, boolean, array, object)
+- Use custom events for e-commerce, feature usage, error tracking, or any business-specific analytics
+- For best results, use consistent event names and property keys
+- All custom events are associated with the current session and user
 
-// All button clicks, link clicks, and form submissions are automatically tracked!
-```
+## Properties & Options
 
-### What Gets Tracked Automatically
+| Property/Option         | Type     | Description                                                        |
+|------------------------|----------|--------------------------------------------------------------------|
+| `eventName`            | string   | Name of the custom event (e.g., 'purchase_completed').             |
+| `properties`           | object   | Any key-value pairs (string, number, boolean, array, object).      |
+| `customEvent()`        | function | Track a custom event with name and properties.                     |
+| `automaticTracking`    | boolean  | Button, link, and form events are tracked automatically.           |
 
-#### Button Clicks (`button_clicked`)
-```javascript
-// Automatically captured when user clicks any button
-{
-  eventName: 'button_clicked',
-  properties: {
-    buttonId: 'submit-btn',
-    buttonType: 'submit',
-    buttonText: 'Submit Order',
-    page: '/checkout',
-    timestamp: 1705312200000
-  }
-}
-```
+**`properties` fields:**
 
-#### Link Clicks (`link_clicked`)
-```javascript
-// Automatically captured when user clicks any link
-{
-  eventName: 'link_clicked',
-  properties: {
-    linkUrl: 'https://example.com/features',
-    linkId: 'features-link',
-    linkText: 'Learn More',
-    linkTarget: '_blank',
-    page: '/home',
-    timestamp: 1705312200000
-  }
-}
-```
+| Field         | Type     | Description                                 |
+|-------------- |----------|---------------------------------------------|
+| Any           | any      | You can provide any event property fields.   |
+| Example:      |          |                                             |
+| `orderId`     | string   | Order or transaction ID.                    |
+| `total`       | number   | Purchase total, price, or value.             |
+| `feature`     | string   | Feature or action name.                      |
 
-#### Form Submissions (`form_submitted`)
-```javascript
-// Automatically captured when user submits any form
-{
-  eventName: 'form_submitted',
-  properties: {
-    formId: 'contact-form',
-    formAction: '/api/contact',
-    formMethod: 'post',
-    fields: ['name', 'email', 'message'],
-    page: '/contact',
-    timestamp: 1705312200000
-  }
-}
-```
-
-### Customizing Automatic Tracking
-
-```javascript
-const tracker = HumanBehaviorTracker.init('your-api-key', {
-  automaticTrackingOptions: {
-    trackButtons: true,     // Track button clicks
-    trackLinks: true,       // Track link clicks
-    trackForms: true,       // Track form submissions
-    includeText: true,      // Include text content
-    includeClasses: false   // Include CSS classes
-  }
-});
-```
-
-### Manual vs Automatic Tracking
-
-You can use both automatic and manual tracking together:
-
-```javascript
-// Automatic tracking handles common interactions
-const tracker = HumanBehaviorTracker.init('your-api-key');
-
-// Manual tracking for specific business events
-await tracker.customEvent('purchase_completed', {
-  orderId: 'order-123',
-  total: 99.99,
-  products: ['headphones', 'case']
-});
-```
-
-## Basic Custom Events
-
-Track any user action or business event:
+## Example Usage
 
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 const tracker = HumanBehaviorTracker.init('your-api-key');
-
-// Track a simple button click
-await tracker.customEvent('button_clicked', {
-  buttonId: 'submit-form',
-  page: '/checkout'
-});
-```
-
-## Event Structure
-
-Custom events include:
-
-```javascript
-{
-  eventName: 'button_clicked',
-  properties: {
-    buttonId: 'submit-form',
-    page: '/checkout',
-    timestamp: 1705312200000
-  },
-  sessionId: 'session-123',
-  endUserId: 'user-456',
-  timestamp: 1705312200000
-}
-```
-
-## Common Event Types
-
-### User Interactions
-
-```javascript
-// Button clicks
-await tracker.customEvent('button_clicked', {
-  buttonId: 'submit',
-  buttonText: 'Submit Order',
-  page: '/checkout'
-});
-
-// Form submissions
-await tracker.customEvent('form_submitted', {
-  formId: 'contact-form',
-  formType: 'contact',
-  fields: ['name', 'email', 'message']
-});
-
-// Link clicks
-await tracker.customEvent('link_clicked', {
-  linkText: 'Learn More',
-  linkUrl: '/features',
-  linkType: 'navigation'
-});
-```
-
-### E-commerce Events
-
-```javascript
-// Product views
-await tracker.customEvent('product_viewed', {
-  productId: 'prod-123',
-  productName: 'Wireless Headphones',
-  category: 'Electronics',
-  price: 99.99
-});
-
-// Add to cart
-await tracker.customEvent('add_to_cart', {
-  productId: 'prod-123',
-  productName: 'Wireless Headphones',
-  quantity: 1,
-  price: 99.99
-});
-
-// Purchase completed
-await tracker.customEvent('purchase_completed', {
-  orderId: 'order-456',
-  total: 199.98,
-  currency: 'USD',
-  products: [
-    { id: 'prod-123', name: 'Headphones', price: 99.99 },
-    { id: 'prod-124', name: 'Case', price: 99.99 }
-  ]
-});
-```
-
-### User Journey Events
-
-```javascript
-// Feature usage
-await tracker.customEvent('feature_used', {
-  feature: 'search',
-  query: 'wireless headphones',
-  results: 25
-});
-
-// Error events
-await tracker.customEvent('error_occurred', {
-  errorType: 'validation',
-  field: 'email',
-  message: 'Invalid email format'
-});
-```
-
-## Event Properties
-
-### Best Practices
-
-```javascript
-// Use consistent property names
-await tracker.customEvent('user_action', {
-  action: 'click',
-  element: 'button',
-  elementId: 'submit-btn',
-  page: window.location.pathname
-});
-
-// Include relevant context
-await tracker.customEvent('form_error', {
-  formId: 'signup-form',
-  field: 'email',
-  errorType: 'validation',
-  errorMessage: 'Email already exists',
-  userEmail: 'user@example.com' // Be careful with PII
-});
-
-// Use descriptive event names
-await tracker.customEvent('checkout_step_completed', {
-  step: 'shipping',
-  stepNumber: 2,
-  totalSteps: 4,
-  timeSpent: 45000 // milliseconds
-});
-```
-
-### Property Types
-
-```javascript
-// String properties
-await tracker.customEvent('user_preference', {
-  theme: 'dark',
-  language: 'en-US',
-  timezone: 'America/New_York'
-});
-
-// Numeric properties
-await tracker.customEvent('performance_metric', {
-  loadTime: 1250,
-  score: 95.5,
-  attempts: 3
-});
-
-// Boolean properties
-await tracker.customEvent('feature_toggle', {
-  enabled: true,
-  feature: 'advanced_search',
-  userType: 'premium'
-});
-
-// Array properties
-await tracker.customEvent('search_performed', {
-  query: 'wireless headphones',
-  filters: ['brand', 'price'],
-  results: 25,
-  categories: ['Electronics', 'Audio']
-});
-
-// Object properties
-await tracker.customEvent('user_profile_updated', {
-  changes: {
-    name: { from: 'John', to: 'Johnny' },
-    email: { from: 'john@old.com', to: 'john@new.com' }
-  },
-  fieldsUpdated: ['name', 'email']
-});
-```
-
-## Event Tracking Patterns
-
-### Button Click Tracking
-
-```javascript
-// Track all button clicks automatically
-document.addEventListener('click', async (event) => {
-  if (event.target.tagName === 'BUTTON') {
-    await tracker.customEvent('button_clicked', {
-      buttonId: event.target.id,
-      buttonText: event.target.textContent,
-      buttonClass: event.target.className,
-      page: window.location.pathname
-    });
-  }
-});
-```
-
-### Form Tracking
-
-```javascript
-// Track form submissions
-document.addEventListener('submit', async (event) => {
-  const form = event.target;
-  const formData = new FormData(form);
-  
-  await tracker.customEvent('form_submitted', {
-    formId: form.id,
-    formAction: form.action,
-    formMethod: form.method,
-    fields: Array.from(formData.keys()),
-    page: window.location.pathname
-  });
-});
-```
-
-
-
-## Error Tracking
-
-### JavaScript Errors
-
-```javascript
-// Track JavaScript errors
-window.addEventListener('error', async (event) => {
-  await tracker.customEvent('javascript_error', {
-    message: event.message,
-    filename: event.filename,
-    lineno: event.lineno,
-    colno: event.colno,
-    error: event.error?.stack,
-    page: window.location.pathname
-  });
-});
-```
-
-### API Errors
-
-```javascript
-// Track API request failures
-async function makeApiRequest(url, options) {
-  try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      await tracker.customEvent('api_error', {
-        url: url,
-        status: response.status,
-        statusText: response.statusText,
-        method: options.method || 'GET'
-      });
-    }
-    return response;
-  } catch (error) {
-    await tracker.customEvent('api_error', {
-      url: url,
-      error: error.message,
-      method: options.method || 'GET'
-    });
-    throw error;
-  }
-}
-```
-
-## Performance Tracking
-
-```javascript
-
-```
-
-### Feature Usage Timing
-
-```javascript
-// Track feature usage duration
-let featureStartTime;
-
-function startFeatureTracking(featureName) {
-  featureStartTime = Date.now();
-}
-
-async function endFeatureTracking(featureName) {
-  if (featureStartTime) {
-    const timeSpent = Date.now() - featureStartTime;
-    await tracker.customEvent('feature_usage', {
-      feature: featureName,
-      timeSpent: timeSpent,
-      timeSpentSeconds: Math.round(timeSpent / 1000)
-    });
-    featureStartTime = null;
-  }
-}
-```
-
-## React Integration
-
-### Custom Hook
-
-```javascript
-import { useHumanBehavior } from 'humanbehavior-js/react';
-
-function useCustomEvents() {
-  const tracker = useHumanBehavior();
-  
-  const trackEvent = async (eventName, properties = {}) => {
-    await tracker.customEvent(eventName, {
-      ...properties,
-      page: window.location.pathname,
-      timestamp: Date.now()
-    });
-  };
-  
-  return { trackEvent };
-}
-
-// Usage in component
-function ProductCard({ product }) {
-  const { trackEvent } = useCustomEvents();
-  
-  const handleClick = async () => {
-    await trackEvent('product_clicked', {
-      productId: product.id,
-      productName: product.name,
-      category: product.category
-    });
-  };
-  
-  return (
-    <div onClick={handleClick}>
-      <h3>{product.name}</h3>
-      <p>{product.price}</p>
-    </div>
-  );
-}
-```
-
-### Event Tracking Component
-
-```javascript
-import { useHumanBehavior } from 'humanbehavior-js/react';
-
-function TrackedButton({ eventName, eventProperties, children, ...props }) {
-  const tracker = useHumanBehavior();
-  
-  const handleClick = async (event) => {
-    await tracker.customEvent(eventName, {
-      ...eventProperties,
-      timestamp: Date.now()
-    });
-    
-    // Call original onClick if provided
-    if (props.onClick) {
-      props.onClick(event);
-    }
-  };
-  
-  return (
-    <button {...props} onClick={handleClick}>
-      {children}
-    </button>
-  );
-}
-
-// Usage
-<TrackedButton 
-  eventName="signup_clicked"
-  eventProperties={{ source: 'hero_section' }}
-  onClick={() => navigate('/signup')}
->
-  Get Started
-</TrackedButton>
-```
-
-## Data Privacy
-
-### Sensitive Data Handling
-
-```javascript
-// Avoid tracking sensitive information
-await tracker.customEvent('user_action', {
-  action: 'login_attempt',
-  success: true,
-  // Don't include: password, email, personal info
-});
-
-// Use hashed or anonymized data
-await tracker.customEvent('user_identified', {
-  userId: 'user_123', // Use ID instead of email
-  userType: 'premium',
-  // Don't include: email, name, address
-});
-```
-
-### Consent-Based Tracking
-
-```javascript
-// Only track events if user consents
-if (userConsent.tracking) {
-  await tracker.customEvent('user_action', {
-    action: 'preference_changed',
-    preference: 'theme',
-    value: 'dark'
-  });
-}
-```
-
-## Event Analytics
-
-### Event Volume
-
-Track how often events occur:
-
-```javascript
-// Track event frequency
-await tracker.customEvent('feature_usage', {
-  feature: 'search',
-  usageCount: 1,
-  totalUsage: 15 // Increment this on each use
-});
-```
-
-### User Segmentation
-
-```javascript
-// Track events with user context
 await tracker.customEvent('purchase_completed', {
   orderId: 'order-123',
   total: 99.99,
-  userSegment: 'premium',
-  userLifetime: 365, // days since first visit
-  previousPurchases: 5
+  feature: 'checkout'
 });
-```
-
-## Best Practices
-
-### 1. Consistent Naming
-
-```javascript
-// Use snake_case for event names
-await tracker.customEvent('user_signup_completed', {});
-await tracker.customEvent('product_added_to_cart', {});
-await tracker.customEvent('checkout_step_completed', {});
-```
-
-### 2. Meaningful Properties
-
-```javascript
-// Include relevant context
-await tracker.customEvent('error_occurred', {
-  errorType: 'validation',
-  field: 'email',
-  page: '/signup',
-  userType: 'new'
-});
-```
-
-### 3. Avoid Over-Tracking
-
-```javascript
-// Don't track every mouse movement or scroll
-// Focus on meaningful user actions
-await tracker.customEvent('important_action', {
-  action: 'purchase',
-  value: 99.99
-});
-```
-
-### 4. Performance Considerations
-
-```javascript
-// Use async/await for event tracking
-async function handleButtonClick() {
-  try {
-    await tracker.customEvent('button_clicked', {
-      buttonId: 'submit'
-    });
-    // Continue with business logic
-  } catch (error) {
-    console.error('Failed to track event:', error);
-    // Don't let tracking errors break your app
-  }
-}
 ```
 
 <Note>
-  Custom events are automatically associated with the current session and user. They're sent to your ingestion server along with session recording data.
+  For more advanced event analytics, segmentation, or privacy, see the analytics dashboard and data redaction guides.
 </Note> 

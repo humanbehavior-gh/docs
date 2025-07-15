@@ -17,9 +17,7 @@
           {
             "group": "Get Started",
             "pages": [
-              "index",
-              "quickstart",
-              "installation"
+              "index"
             ]
           },
           {

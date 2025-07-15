@@ -92,7 +92,7 @@ function App() {
 }
 ```
 
-### Environment-based Configuration
+### Configuration Options
 
 ```javascript
 import { HumanBehaviorProvider } from 'humanbehavior-js/react';
@@ -104,7 +104,7 @@ function App() {
 
   return (
     <HumanBehaviorProvider 
-      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+      apiKey="your-api-key-here"
       options={options}
     >
       <YourApp />
@@ -514,11 +514,9 @@ function useConditionalTracking(enabled = true) {
 
 // Usage
 function MyComponent() {
-  const { trackEvent } = useConditionalTracking(
-    process.env.NODE_ENV === 'production'
-  );
+  const { trackEvent } = useConditionalTracking(true);
   
-  // Only tracks in production
+  // Only tracks when enabled
   const handleClick = () => trackEvent('button_clicked', { buttonId: 'submit' });
   
   return <button onClick={handleClick}>Submit</button>;

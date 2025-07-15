@@ -52,7 +52,7 @@ function App() {
 
 #### With API Key
 ```javascript
-<HumanBehaviorProvider apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}>
+<HumanBehaviorProvider apiKey="your-api-key-here">
   <YourApp />
 </HumanBehaviorProvider>
 ```
@@ -61,7 +61,7 @@ function App() {
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = new HumanBehaviorTracker('your-api-key');
+const tracker = HumanBehaviorTracker.init('your-api-key');
 
 <HumanBehaviorProvider client={tracker}>
   <YourApp />

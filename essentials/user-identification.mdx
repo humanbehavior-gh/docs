@@ -3,297 +3,84 @@ title: 'User Identification'
 description: 'Identify and track users across sessions with persistent user IDs and properties'
 ---
 
-
-
 HumanBehavior SDK automatically identifies and tracks users across sessions using persistent user IDs and properties.
 
 ## Automatic User Identification
 
-The SDK automatically handles user identification using cookies:
+The SDK handles user identification using cookies:
 
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
-
 const tracker = HumanBehaviorTracker.init('your-api-key');
-
 // User is automatically identified using cookies
-// No additional setup required
-tracker.start();
 ```
 
-### How It Works
-
-1. **Cookie Creation**: When a user first visits, a unique user ID is generated and stored in a cookie
-2. **Persistence**: The cookie persists for 365 days across browser sessions
-3. **Session Association**: All session recordings are automatically associated with the user ID
-4. **Cross-Session Tracking**: Users are identified across multiple sessions and devices
+- A unique user ID is generated and stored in a cookie on first visit
+- The cookie persists for 365 days
+- All session recordings are associated with the user ID
 
 ## Manual User Identification
 
-### Adding User Information
-
-Provide additional user information for better analytics:
-
-```javascript
-// Add user information
-await tracker.addUserInfo({
-  email: 'user@example.com',
-  name: 'John Doe',
-  userId: '12345',
-  plan: 'premium',
-  signupDate: '2024-01-01'
-});
-```
-
-### User Properties
-
-You can include any user properties that are relevant to your analytics:
+Add user information for better analytics:
 
 ```javascript
 await tracker.addUserInfo({
-  // Basic information
   email: 'user@example.com',
   name: 'John Doe',
-  phone: '+1234567890',
-  
-  // Business information
-  userId: '12345',
-  accountType: 'premium',
-  company: 'Acme Corp',
-  
-  // Custom properties
-  signupSource: 'google_ads',
-  lastLogin: '2024-01-15T10:30:00Z',
-  preferences: {
-    theme: 'dark',
-    language: 'en'
-  }
+  userId: '12345'
 });
 ```
 
 ## User Authentication
 
-### Authenticating Existing Users
-
-If you have existing user data, you can authenticate users against your database:
+Authenticate users against your database:
 
 ```javascript
-// First add user info
-await tracker.addUserInfo({
-  email: 'user@example.com',
-  phone: '+1234567890'
-});
-
-// Then authenticate using specific fields
-await tracker.auth(['email', 'phone']);
-```
-
-### Authentication Fields
-
-Specify which fields to use for authentication:
-
-```javascript
-// Authenticate by email only
+// Add user info first
+await tracker.addUserInfo({ email: 'user@example.com' });
+// Then authenticate
 await tracker.auth(['email']);
-
-// Authenticate by multiple fields
-await tracker.auth(['email', 'phone', 'userId']);
-
-// Authenticate by custom field
-await tracker.auth(['customId']);
 ```
 
-## User Session Management
+- You can use any fields for authentication (email, phone, userId, etc.)
 
-### Session Continuity
+## Privacy & Segmentation
 
-Users are automatically tracked across sessions:
+- User properties are available in your analytics dashboard for segmentation and filtering
+- You can update user info at any time (e.g., after signup, plan change)
+- The SDK supports privacy regulations and pseudonymous IDs 
+
+## Properties & Options
+
+| Property/Option         | Type     | Description                                                        |
+|------------------------|----------|--------------------------------------------------------------------|
+| `userId`               | string   | Unique user ID (auto-generated and stored in a cookie by default).  |
+| `addUserInfo()`        | function | Add or update user properties (see below).                         |
+| `auth()`               | function | Authenticate user using specified fields.                          |
+| `userProperties`       | object   | Any key-value pairs (e.g., `email`, `name`, `plan`, etc.).         |
+| `cookie`               | string   | Stores user ID for 365 days.                                       |
+
+**`addUserInfo(userProperties)` fields:**
+
+| Field         | Type     | Description                                 |
+|-------------- |----------|---------------------------------------------|
+| Any           | any      | You can provide any user property fields.    |
+| Example:      |          |                                             |
+| `email`       | string   | User’s email address.                       |
+| `name`        | string   | User’s name.                                |
+| `userId`      | string   | Your internal user ID.                      |
+| `plan`        | string   | User’s plan or segment.                     | 
+
+## Example Usage
 
 ```javascript
-// User visits for the first time
-// → Cookie created with unique user ID
-// → Session recorded and associated with user
+import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-// User returns later
-// → Same cookie is read
-// → New session associated with same user
-// → All sessions linked together
-```
-
-### Cross-Device Tracking
-
-Users are identified across different devices and browsers:
-
-```javascript
-// User logs in on desktop
+const tracker = HumanBehaviorTracker.init('your-api-key');
 await tracker.addUserInfo({
   email: 'user@example.com',
-  userId: '12345'
+  name: 'Jane Doe',
+  userId: '12345',
+  plan: 'pro'
 });
-
-// User later visits on mobile (same browser)
-// → Same user ID is used
-// → Sessions are linked together
-```
-
-## User Analytics
-
-### User Properties in Analytics
-
-User information is available in your analytics dashboard:
-
-```javascript
-// User properties are automatically included in session data
-{
-  sessionId: 'session-123',
-  userId: 'user-456',
-  userProperties: {
-    email: 'user@example.com',
-    name: 'John Doe',
-    plan: 'premium'
-  },
-  events: [...]
-}
-```
-
-### User Segmentation
-
-Use user properties for segmentation and filtering:
-
-```javascript
-// Track user segments
-await tracker.addUserInfo({
-  email: 'user@example.com',
-  segment: 'enterprise',
-  plan: 'premium',
-  region: 'US'
-});
-
-// These properties can be used for:
-// - Filtering sessions by user type
-// - Analyzing behavior by segment
-// - A/B testing by user group
-```
-
-## Privacy and Security
-
-### Cookie Management
-
-The SDK uses secure cookies for user identification:
-
-```javascript
-// Cookie name format
-`human_behavior_end_user_id_${apiKey}`
-
-// Cookie properties
-{
-  expires: 365 days,
-  secure: true,
-  sameSite: 'strict'
-}
-```
-
-### User Privacy
-
-User identification respects privacy regulations:
-
-```javascript
-// Users can be anonymized
-await tracker.addUserInfo({
-  // Use pseudonymous identifiers
-  userId: 'anon-12345',
-  // Don't include PII unless necessary
-  // email: 'user@example.com' // Only if required
-});
-
-// Users can opt out
-// → Cookie is not set
-// → Sessions are anonymous
-```
-
-## Advanced User Tracking
-
-### Custom User IDs
-
-Use your own user ID system:
-
-```javascript
-// Use your existing user ID
-await tracker.addUserInfo({
-  userId: 'your-system-user-id',
-  email: 'user@example.com'
-});
-
-// The SDK will use your user ID for tracking
-```
-
-### User State Changes
-
-Update user information when it changes:
-
-```javascript
-// User upgrades their plan
-await tracker.addUserInfo({
-  email: 'user@example.com',
-  plan: 'premium', // Updated from 'basic'
-  upgradeDate: '2024-01-15'
-});
-
-// User changes their name
-await tracker.addUserInfo({
-  email: 'user@example.com',
-  name: 'Jane Doe', // Updated from 'John Doe'
-  nameChangeDate: '2024-01-15'
-});
-```
-
-### User Deletion
-
-Handle user account deletion:
-
-```javascript
-// When a user deletes their account
-// You can mark sessions for deletion in your backend
-// The SDK will continue to use the same user ID for new sessions
-// unless you explicitly change it
-```
-
-## Debugging User Identification
-
-### Check User Status
-
-Debug user identification issues:
-
-```javascript
-// Check if user is identified
-const isIdentified = tracker.isUserIdentified();
-
-// Get current user ID
-const userId = tracker.getUserId();
-
-// Get user properties
-const userProps = tracker.getUserProperties();
-```
-
-### User Logs
-
-View user-related logs:
-
-```javascript
-// View all logs including user identification
-tracker.viewLogs();
-
-// Logs include:
-// - User ID generation
-// - User info updates
-// - Authentication attempts
-// - Cookie operations
-```
-
-<Note>
-  User identification is automatic and requires no additional setup. The SDK handles all the complexity of cookie management and user persistence.
-</Note>
-
-<Warning>
-  Always ensure you have user consent before collecting and storing user information, especially personal data like email addresses.
-</Warning> 
+``` 

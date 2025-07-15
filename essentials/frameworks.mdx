@@ -43,11 +43,32 @@ const tracker = HumanBehaviorTracker.init('your-api-key');
 For any framework, you can also use the CDN version:
 
 ```html
-<script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
-<script>
-  const tracker = HumanBehaviorTracker.init('your-api-key');
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+  <script>
+    // Initialize tracker as early as possible
+    const tracker = HumanBehaviorTracker.init('your-api-key');
+  </script>
+</head>
+<body>
+  <!-- ... -->
+  <script>
+    // Use the tracker initialized in <head>
+    // Example: track a button click
+    document.getElementById('myButton').addEventListener('click', () => {
+      tracker.customEvent('button_clicked', { buttonId: 'myButton' });
+    });
+    // ...
+  </script>
+</body>
+</html>
 ```
+
+<Note>
+  <b>Best Practice:</b> Always initialize the tracker in the <code>&lt;head&gt;</code> section, before any user interaction can occur. This ensures all events—including those on page load—are captured.
+</Note>
 
 ## Framework-Specific Considerations
 
@@ -58,7 +79,6 @@ For any framework, you can also use the CDN version:
 
 ### Next.js
 - Server-side rendering considerations
-- API key environment variables
 - App Router vs Pages Router differences
 
 

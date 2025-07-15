@@ -3,17 +3,13 @@ title: 'HumanBehavior SDK'
 description: 'Powerful session recording and user behavior analytics for web applications'
 ---
 
+A powerful JavaScript SDK for recording user sessions and tracking behavior analytics in web applications. Built on top of [rrweb](https://github.com/rrweb-io/rrweb) for high-fidelity session recordings.
+
 <Warning>
   **Important:** By using the HumanBehavior SDK, you agree to comply with our [Terms of Service](https://organic-panther-09d.notion.site/Human-Behavior-Terms-of-Service-1d785c32eb888021a5fefa9732fddd97) and [Privacy Policy](https://organic-panther-09d.notion.site/Human-Behavior-Privacy-Policy-1d785c32eb8880b98336cd9059fb9d42).
 </Warning>
 
-A powerful JavaScript SDK for recording user sessions and tracking behavior analytics in web applications. Built on top of [rrweb](https://github.com/rrweb-io/rrweb) for high-fidelity session recordings.
-
-## Quick Start
-
-<Info>
-**Framework Guides:** If you're using Next.js, React, or another framework, we recommend checking out our [framework guides](/essentials/frameworks) for optimized setup instructions.
-</Info>
+## Quickstart
 
 ### 1. Install the SDK
 
@@ -35,39 +31,180 @@ npm install humanbehavior-js
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-// One-line initialization with global persistence
 const tracker = HumanBehaviorTracker.init('your-api-key', {
   redactFields: ['input[type="password"]']
 });
 ```
 
-<Note>
-**That's it!** The SDK automatically tracks user interactions, navigation, and console events. You don't need to add any custom event tracking unless you want to track specific business events.
-</Note>
+### React/Next.js Example
 
-### 3. Add User Information (Optional)
+For React or Next.js applications, use the provider for automatic context and hooks. **Important:** The tracker must be initialized on the client side (not during SSR).
 
 ```javascript
-// Add user information when available
-await tracker.addUserInfo({
-  email: 'user@example.com',
-  name: 'John Doe'
-});
+// For Next.js 13+ App Router, add 'use client' at the top of your component file:
+// 'use client';
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key">
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
 ```
 
-## Key Features
+### HTML Example
 
-The SDK automatically provides:
+For simple HTML pages, use the CDN version:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+  <script>
+    const tracker = HumanBehaviorTracker.init('your-api-key');
+  </script>
+</head>
+<body>
+  <h1>Welcome to My App</h1>
+</body>
+</html>
+```
+
+<Note>
+  In Next.js 13+ (App Router), add <code>'use client'</code> to the top of your component file to ensure the provider runs on the client side. The tracker should never be initialized during server-side rendering.
+</Note>
+
+<Note>
+  **That's it!** The SDK automatically tracks user interactions, navigation, and console events. You don't need to add any custom event tracking unless you want to track specific business events. See [Custom Events](/essentials/custom-events) for more information.
+</Note>
+
+---
+
+## Key Features
 
 - **Session Recording**: Mouse movements, clicks, scrolls, form inputs
 - **Automatic Event Tracking**: Button clicks, link clicks, form submissions
 - **Navigation Tracking**: SPA route changes, browser navigation
 - **Console Tracking**: Log, warn, error messages
-- **Custom Events**: Track specific user actions (optional)
+- **Custom Events**: Track specific user actions
 - **Data Redaction**: Protect sensitive information
 - **Session Continuity**: Persists across page reloads
 
-## Features
+## Browser Compatibility
+
+The SDK supports all modern browsers:
+
+| Browser | Version |
+|---------|---------|
+| Chrome | 60+ |
+| Firefox | 55+ |
+| Safari | 12+ |
+| Edge | 79+ |
+
+<Warning>
+  Internet Explorer is not supported. The SDK uses modern JavaScript features that are not available in IE.
+</Warning>
+
+## Bundle Size
+
+The SDK is optimized for size:
+
+- **Core SDK**: ~45KB (gzipped)
+- **With React integration**: ~50KB (gzipped)
+- **CDN version**: ~60KB (gzipped)
+
+## Examples
+
+### HTML Example (CDN)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+  <script>
+    // Initialize tracker as early as possible
+    const tracker = HumanBehaviorTracker.init('your-api-key');
+  </script>
+</head>
+<body>
+  <h1>Welcome to My App</h1>
+  <button id="submit-btn">Submit</button>
+</body>
+</html>
+```
+<Note>
+  <b>Best Practice:</b> Always initialize the tracker in the <code>&lt;head&gt;</code> section, before any user interaction can occur. This ensures all events—including those on page load—are captured.
+</Note>
+
+---
+
+## Complete Examples
+
+### JavaScript Example
+
+Here's a complete working example:
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+// Initialize tracker with options
+const tracker = HumanBehaviorTracker.init('your-api-key-here', {
+  redactFields: ['input[type="password"]', '#email'] // optional sensitive fields
+});
+
+// Add user information when available
+async function identifyUser(userData) {
+  try {
+    await tracker.addUserInfo(userData);
+    console.log('User identified successfully');
+  } catch (error) {
+    console.error('Failed to identify user:', error);
+  }
+}
+
+// Example usage
+identifyUser({
+  email: 'user@example.com',
+  name: 'John Doe'
+});
+```
+
+### React Example
+
+For React applications:
+
+```javascript
+import { HumanBehaviorProvider, useHumanBehavior } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider apiKey="your-api-key-here">
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+## What Happens Next?
+
+Once you've completed the setup:
+
+1. **Automatic Session Recording**: The SDK automatically captures user interactions using rrweb
+2. **Automatic Event Tracking**: Button clicks, link clicks, and form submissions are tracked automatically
+3. **Session Persistence**: Sessions persist across page reloads for 30 minutes
+4. **Navigation Tracking**: SPA navigation and URL changes are automatically tracked
+5. **Console Tracking**: Console logs, warnings, and errors are captured
+6. **Data Processing**: Events are processed and sent to your dashboard
+7. **User Identification**: Users are automatically identified using cookies
+8. **Analytics**: View session recordings and analytics in your HumanBehavior dashboard
+
+---
+
+## Learn More
 
 <CardGroup cols={2}>
   <Card
@@ -105,127 +242,6 @@ The SDK automatically provides:
   >
     Seamless React integration with hooks and context providers
   </Card>
-
-</CardGroup>
-
-## What Gets Recorded
-
-The SDK automatically captures:
-
-- **Mouse movements** and clicks
-- **Keyboard input** and form interactions  
-- **Scroll events** and viewport changes
-
-## Session Persistence
-
-Sessions automatically persist for 30 minutes of inactivity:
-
-```javascript
-// Session continues across:
-// - Page refreshes within 30 minutes
-// - Tab switching and reopening
-// - Short periods of inactivity
-
-// New session created after:
-// - 30+ minutes of inactivity
-// - Manual session reset
-// - Browser restart
-```
-
-## React Integration
-
-For React applications, use the dedicated React integration:
-
-```javascript
-import { HumanBehaviorProvider, useHumanBehavior } from 'humanbehavior-js/react';
-
-function App() {
-  return (
-    <HumanBehaviorProvider apiKey="your-api-key">
-      <YourApp />
-    </HumanBehaviorProvider>
-  );
-}
-
-function MyComponent() {
-  const tracker = useHumanBehavior();
-  
-  const handleClick = () => {
-    // Your business logic here
-    console.log('Button clicked!');
-    // Custom events are optional - the SDK automatically tracks clicks
-  };
-  
-  return <button onClick={handleClick}>Submit</button>;
-}
-```
-
-## Data Privacy & Security
-
-### Automatic Redaction
-
-```javascript
-// Redact sensitive fields during recording
-tracker.setRedactedFields([
-  'input[type="password"]',
-  '#email-field',
-  '.sensitive-data'
-]);
-```
-
-### Consent Management
-
-```javascript
-// Only track with user consent
-if (userConsent) {
-  const tracker = HumanBehaviorTracker.init('your-api-key');
-} else {
-  console.log('Session recording disabled - no consent');
-}
-```
-
-
-
-## Browser Compatibility
-
-The SDK supports all modern browsers:
-
-| Browser | Version |
-|---------|---------|
-| Chrome | 60+ |
-| Firefox | 55+ |
-| Safari | 12+ |
-| Edge | 79+ |
-
-<Warning>
-  Internet Explorer is not supported. The SDK uses modern JavaScript features that are not available in IE.
-</Warning>
-
-## Bundle Size
-
-The SDK is optimized for size:
-
-- **Core SDK**: ~45KB (gzipped)
-- **With React integration**: ~50KB (gzipped)
-- **CDN version**: ~60KB (gzipped)
-
-## Getting Started
-
-<CardGroup cols={2}>
-  <Card
-    title="Quickstart Guide"
-    icon="rocket"
-    href="/quickstart"
-  >
-    Get up and running in under 5 minutes
-  </Card>
-  <Card
-    title="Installation"
-    icon="download"
-    href="/installation"
-  >
-    Installation options and setup instructions
-  </Card>
   <Card
     title="API Reference"
     icon="code"
@@ -233,87 +249,4 @@ The SDK is optimized for size:
   >
     Complete API documentation
   </Card>
-  <Card
-    title="React Integration"
-    icon="react"
-    href="/essentials/react-integration"
-  >
-    React hooks and context providers
-  </Card>
 </CardGroup>
-
-## Examples
-
-### Vanilla JavaScript
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
-</head>
-<body>
-  <button id="submit-btn">Submit</button>
-  
-  <script>
-    // Initialize tracker with automatic tracking
-    const tracker = HumanBehaviorTracker.init('your-api-key');
-    
-    // Button clicks are automatically tracked!
-    // No manual event listeners needed
-    
-    // Your business logic here
-    document.getElementById('submit-btn').addEventListener('click', () => {
-      console.log('Processing submission...');
-      // The SDK automatically tracks button clicks
-      // Custom events are optional for additional business tracking
-    });
-  </script>
-</body>
-</html>
-```
-
-### React Application
-
-```javascript
-import { HumanBehaviorProvider, useHumanBehavior } from 'humanbehavior-js/react';
-
-function App() {
-  return (
-    <HumanBehaviorProvider apiKey="your-api-key">
-      <YourApp />
-    </HumanBehaviorProvider>
-  );
-}
-
-function ContactForm() {
-  const tracker = useHumanBehavior();
-  
-  const handleSubmit = (formData) => {
-    // Your form processing logic here
-    console.log('Form submitted!');
-    // The SDK automatically tracks form submissions
-    // Custom events are optional for additional business tracking
-  };
-  
-  return (
-    <form onSubmit={handleSubmit}>
-      <input name="name" placeholder="Name" />
-      <input name="email" placeholder="Email" />
-      <textarea name="message" placeholder="Message" />
-      <button type="submit">Submit</button>
-    </form>
-  );
-}
-```
-
-## Support
-
-- **Documentation**: Comprehensive guides and API reference
-- **Examples**: Code examples for common use cases
-- **Troubleshooting**: Solutions for common issues
-- **Privacy**: Built-in privacy and security features
-
-<Note>
-  Version 0.1.6 includes enhanced session persistence, improved navigation tracking, automatic event tracking, and comprehensive health endpoint monitoring for a more robust user experience.
-</Note>

@@ -3,8 +3,6 @@ title: 'Session Tracking'
 description: 'High-fidelity session recordings with mouse movements, clicks, scrolls, and form interactions'
 ---
 
-
-
 HumanBehavior SDK provides high-fidelity session recordings that capture every user interaction on your website.
 
 ## Automatic Session Recording
@@ -13,172 +11,69 @@ The SDK automatically starts recording when initialized:
 
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-// Initialize and start recording automatically
 const tracker = HumanBehaviorTracker.init('your-api-key');
 ```
-
 <Note>
   No manual `start()` call is required with the `init()` method. The SDK automatically begins recording user interactions.
 </Note>
 
 ## What Gets Recorded
 
-The SDK automatically captures these user interactions:
-
-### Mouse Interactions
-- **Mouse movements** and hover states
-- **Click events** on buttons, links, and other elements
-- **Right-click** and context menu interactions
-- **Drag and drop** operations
-
-### Keyboard Input
-- **Text input** in form fields
-- **Key combinations** and shortcuts
-- **Copy/paste** operations
-- **Form submissions**
-
-
-
-### Console Activity
-- **Console logs** and debug messages
-- **Warnings** and error messages
-- **Performance** and timing information
-
-### Viewport Changes
-- **Scroll events** and scroll position
-- **Window resizing** and orientation changes
-- **Element visibility** and focus changes
+- **Mouse:** Movements, clicks, hovers, drag & drop
+- **Keyboard:** Text input, shortcuts, copy/paste, form submissions
+- **Console:** Logs, warnings, errors (automatically recorded)
+- **Viewport:** Scrolls, resizes, element visibility
 
 ## Session Persistence
 
-Sessions automatically persist across page reloads and navigation:
+Sessions automatically persist across page reloads, navigation, and short inactivity (30-minute window). A new session is created after 30+ minutes of inactivity or browser restart.
 
-### 30-Minute Session Window
+## Session ID
+
+Each session gets a unique ID:
 ```javascript
-// Session continues across:
-// - Page refreshes within 30 minutes
-// - Tab switching and reopening
-// - Short periods of inactivity
-// - SPA navigation
-
-// New session created after:
-// - 30+ minutes of inactivity
-// - Manual session reset
-// - Browser restart
-```
-
-
-
-## Session Management
-
-### Session ID Generation
-```javascript
-// Each session gets a unique ID
 const sessionId = tracker.getSessionId();
-console.log('Current session:', sessionId);
-// Output: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
 ```
 
-### Session Storage
-```javascript
-// Sessions are stored in localStorage
-// Check if session persistence is available
-if (typeof localStorage !== 'undefined') {
-  console.log('Session persistence enabled');
-} else {
-  console.log('Session persistence disabled');
-}
-```
+## Performance
 
-## Manual Session Control
+Events are automatically batched and sent every few seconds to reduce network requests and improve performance.
 
-### Start Recording
-```javascript
-// Start recording (if not using init())
-await tracker.start();
-```
+## Properties & Options
 
-### Stop Recording
-```javascript
-// Stop recording but keep session alive
-await tracker.stop();
-```
+| Property/Option                | Type      | Description                                                                                 |
+|-------------------------------|-----------|---------------------------------------------------------------------------------------------|
+| `apiKey`                      | string    | Your project’s API key (required).                                                          |
+| `redactFields`                | string[]  | CSS selectors for fields to redact.                                                         |
+| `enableAutomaticTracking`     | boolean   | Enable/disable automatic event tracking (default: true).                                    |
+| `automaticTrackingOptions`    | object    | Fine-tune automatic tracking (see below).                                                   |
+| `sessionId`                   | string    | Unique session ID for the current user session.                                             |
+| `getSessionId()`              | function  | Returns the current session ID.                                                             |
 
-### Check Recording Status
-```javascript
-// Check if recording is active
-if (tracker.initializationPromise) {
-  console.log('Tracker is initialized and recording');
-}
-```
+**`automaticTrackingOptions` fields:**
 
+| Option           | Type     | Description                                  |
+|------------------|----------|----------------------------------------------|
+| `trackButtons`   | boolean  | Track button clicks (default: true).          |
+| `trackLinks`     | boolean  | Track link clicks (default: true).            |
+| `trackForms`     | boolean  | Track form submissions (default: true).       |
+| `includeText`    | boolean  | Include button/form text in event properties. |
+| `includeClasses` | boolean  | Include CSS classes in event properties.      |
 
-
-## Console Tracking
-
-### Enable Console Tracking
-```javascript
-// Console tracking is enabled by default
-// You can disable it if needed
-tracker.disableConsoleTracking();
-```
-
-### Custom Console Events
-```javascript
-// Console events are automatically captured:
-console.log('User action completed');
-console.warn('Form validation failed');
-console.error('API request failed');
-```
-
-## Session Data Structure
-
-Each session includes:
+## Example Usage
 
 ```javascript
-{
-  sessionId: "unique-session-id",
-  startTime: "2024-01-15T10:30:00Z",
-  endTime: "2024-01-15T10:45:00Z",
-  events: [
-    {
-      type: "dom",
-      data: { /* DOM interaction data */ },
-      timestamp: 1705312200000
-    },
-    {
-      type: "navigation",
-      data: { 
-        fromUrl: "/home",
-        toUrl: "/products",
-        type: "push"
-      },
-      timestamp: 1705312250000
-    },
-    {
-      type: "console",
-      data: {
-        level: "log",
-        message: "User clicked submit button"
-      },
-      timestamp: 1705312300000
-    }
-  ],
-  userInfo: {
-    endUserId: "user-123",
-    properties: {
-      email: "user@example.com",
-      name: "John Doe"
-    }
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  redactFields: ['input[type="password"]', '.sensitive'],
+  enableAutomaticTracking: true,
+  automaticTrackingOptions: {
+    trackButtons: true,
+    trackLinks: true,
+    trackForms: true,
+    includeText: true,
+    includeClasses: false
   }
-}
-```
-
-## Performance Optimization
-
-### Event Batching
-```javascript
-// Events are automatically batched and sent every 5 seconds
-// This reduces network requests and improves performance
+});
 ```
