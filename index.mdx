@@ -54,6 +54,10 @@ function App() {
 }
 ```
 
+<Note>
+  In Next.js 13+ (App Router), add <code>'use client'</code> to the top of your component file to ensure the provider runs on the client side. The tracker should never be initialized during server-side rendering.
+</Note>
+
 ### HTML Example
 
 For simple HTML pages, use the CDN version:
@@ -72,10 +76,6 @@ For simple HTML pages, use the CDN version:
 </body>
 </html>
 ```
-
-<Note>
-  In Next.js 13+ (App Router), add <code>'use client'</code> to the top of your component file to ensure the provider runs on the client side. The tracker should never be initialized during server-side rendering.
-</Note>
 
 <Note>
   **That's it!** The SDK automatically tracks user interactions, navigation, and console events. You don't need to add any custom event tracking unless you want to track specific business events. See [Custom Events](/essentials/custom-events) for more information.
