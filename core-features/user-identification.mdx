@@ -1,0 +1,122 @@
+---
+title: 'User Identification'
+description: 'Identify and track users across sessions with persistent user IDs and properties'
+---
+
+HumanBehavior SDK automatically identifies and tracks users across sessions using persistent user IDs and properties.
+
+## Automatic User Identification
+
+The SDK handles user identification using cookies. A unique user ID is generated and stored in a cookie on first visit, and persists for 1 year. 
+Initializing the SDK handles user authentication automatically.
+
+## Manual User Identification
+
+### Identifying a user
+
+Optionally, you can identify users manually and even add relevant information for better analytics using the `addUserInfo` function. 
+By using your own user ID, you can ensure that the user is tracked across sessions and can be tied back to your own user database. We 
+recommend using a UUID for this purpose.
+
+```javascript
+// Associate the current session with the user John Doe
+const userResult = await tracker.addUserInfo({
+  userId: 'your-distinct-user-id',
+  userAttributes: {
+    email: formData.email,
+    name: formData.name,
+    plan: 'premium'
+  }
+});
+```
+
+### Logging out a user
+
+When the user is finished with their session, you can log them out using the `logout` function. We highly
+recommend doing this to prevent conflating user data or persisting it across sessions.
+
+```javascript
+// Log out the current user
+tracker.logout();
+```
+
+### Complete Example 
+
+```jsx title="AuthComponents.jsx"
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function LoginForm() {
+    const tracker = useHumanBehavior();
+    
+    const handleLogin = async (formData) => {   
+
+      // ... Your authentication logic here ...
+
+      // Upon successful authentication, add user info to the current session
+      if (loginSuccessful) {
+        const userResult = await tracker.addUserInfo({
+          userId: 'your-distinct-user-id',
+          userAttributes: {
+            email: formData.email,
+            name: formData.name,
+            plan: 'premium'
+          }
+        });
+        console.log('User successfully tracked and authenticated');
+      }
+
+    }
+    return (
+        <form onSubmit={handleLogin}>
+            {/* Your form fields */}
+        </form>
+    );
+}
+
+function LogOutButton() {
+  const tracker = useHumanBehavior();
+
+  const handleLogout = () => {
+
+    // ... Your logout logic here ...
+
+    tracker.logout();
+  }
+
+  return (
+    <button onClick={handleLogout}>Log Out</button>
+  );
+}
+```
+
+
+
+
+
+## Privacy & Segmentation
+
+- User properties are available in your analytics dashboard for segmentation and filtering
+- You can update user info at any time (e.g., after signup, plan change)
+- The SDK supports privacy regulations and pseudonymous IDs 
+
+## Properties & Options
+
+| Property/Option         | Type     | Description                                                        |
+|------------------------|----------|--------------------------------------------------------------------|
+| `userId`               | string   | Unique user ID (auto-generated and stored in a cookie by default).  |
+| `addUserInfo()`        | function | Add or update user properties (see below).                         |
+| `auth()`               | function | Authenticate user using specified fields.                          |
+| `userProperties`       | object   | Any key-value pairs (e.g., `email`, `name`, `plan`, etc.).         |
+| `cookie`               | string   | Stores user ID for 365 days.                                       |
+
+**`addUserInfo(userProperties)` fields:**
+
+| Field         | Type     | Description                                 |
+|-------------- |----------|---------------------------------------------|
+| Any           | any      | You can provide any user property fields.    |
+| Example:      |          |                                             |
+| `email`       | string   | User’s email address.                       |
+| `name`        | string   | User’s name.                                |
+| `userId`      | string   | Your internal user ID.                      |
+| `plan`        | string   | User’s plan or segment.                     | 
+

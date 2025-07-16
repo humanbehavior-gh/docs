@@ -1,0 +1,230 @@
+---
+title: 'Custom Events'
+description: 'Track specific user actions and business events with HumanBehavior SDK'
+---
+
+HumanBehavior SDK automatically tracks common user interactions like button clicks, link clicks, and form submissions. For specific business actions or advanced analytics, you can track custom events to capture exactly what matters to your application.
+
+## Automatic Event Tracking
+
+The SDK automatically captures standard user interactions without any additional code:
+
+- **Button clicks** - All button interactions are tracked
+- **Link clicks** - Navigation and external link clicks
+- **Form submissions** - Form completion events
+- **Page views** - Navigation between pages
+
+These automatic events provide a solid foundation for user behavior analysis.
+
+## Custom Event Tracking
+
+### When to use custom events
+
+Custom events are perfect for tracking business-specific actions that automatic tracking doesn't cover:
+
+- **E-commerce events** - Purchase completion, cart additions, checkout steps
+- **Feature usage** - Tool usage, feature adoption, advanced actions
+- **Business milestones** - Account upgrades, goal completion, achievements
+- **Error tracking** - Custom error states or user-reported issues
+
+### Tracking a custom event
+
+Use the `customEvent` function to track any user action with relevant context:
+
+```javascript
+// Track a purchase completion with order details
+await tracker.customEvent('purchase_completed', {
+  orderId: 'order-123',
+  total: 99.99,
+  currency: 'USD',
+  items: ['item-1', 'item-2']
+});
+```
+
+### Event naming best practices
+
+Choose descriptive, consistent event names that clearly indicate the action:
+
+```javascript
+// Good: Clear action with context
+await tracker.customEvent('video_started', { videoId: 'intro-tutorial' });
+await tracker.customEvent('search_performed', { query: 'user documentation' });
+await tracker.customEvent('feature_enabled', { feature: 'dark_mode' });
+
+// Avoid: Vague or inconsistent naming
+await tracker.customEvent('click', { button: 'video' });
+await tracker.customEvent('search', { q: 'docs' });
+```
+
+### Complete Example 
+
+```jsx title="EcommerceComponents.jsx"
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function ProductPage({ product }) {
+    const tracker = useHumanBehavior();
+    
+    const handleAddToCart = async (product, quantity) => {
+        // Your add to cart logic here
+        const success = await addToCart(product.id, quantity);
+        
+        if (success) {
+            // Track the business event with relevant context
+            await tracker.customEvent('product_added_to_cart', {
+                productId: product.id,
+                productName: product.name,
+                price: product.price,
+                quantity: quantity,
+                category: product.category
+            });
+        }
+    };
+    
+    const handleProductView = async () => {
+        // Track product views for analytics
+        await tracker.customEvent('product_viewed', {
+            productId: product.id,
+            productName: product.name,
+            category: product.category,
+            price: product.price
+        });
+    };
+    
+    // Track view when component mounts
+    useEffect(() => {
+        handleProductView();
+    }, [product.id]);
+    
+    return (
+        <div>
+            <h1>{product.name}</h1>
+            <p>${product.price}</p>
+            <button onClick={() => handleAddToCart(product, 1)}>
+                Add to Cart
+            </button>
+        </div>
+    );
+}
+
+function CheckoutPage() {
+    const tracker = useHumanBehavior();
+    
+    const handlePurchaseComplete = async (orderData) => {
+        // Your order completion logic
+        const order = await processOrder(orderData);
+        
+        if (order.success) {
+            // Track the conversion event
+            await tracker.customEvent('purchase_completed', {
+                orderId: order.id,
+                total: order.total,
+                currency: order.currency,
+                itemCount: order.items.length,
+                paymentMethod: order.paymentMethod
+            });
+        }
+    };
+    
+    const handleCheckoutStep = async (step) => {
+        // Track progression through checkout funnel
+        await tracker.customEvent('checkout_step_completed', {
+            step: step,
+            stepName: getStepName(step)
+        });
+    };
+    
+    return (
+        <div>
+            {/* Your checkout form */}
+            <button onClick={() => handleCheckoutStep(1)}>
+                Continue to Payment
+            </button>
+        </div>
+    );
+}
+```
+
+## Advanced Event Properties
+
+### Complex data structures
+
+Custom events support rich data structures for detailed analytics:
+
+```javascript
+// E-commerce event with nested data
+await tracker.customEvent('order_completed', {
+    orderId: 'order-456',
+    customer: {
+        id: 'user-123',
+        tier: 'premium'
+    },
+    items: [
+        { id: 'item-1', name: 'Product A', price: 29.99 },
+        { id: 'item-2', name: 'Product B', price: 19.99 }
+    ],
+    shipping: {
+        method: 'express',
+        cost: 9.99
+    },
+    total: 59.97
+});
+```
+
+### Performance and feature tracking
+
+```javascript
+// Feature usage analytics
+await tracker.customEvent('feature_used', {
+    feature: 'advanced_search',
+    userId: user.id,
+    sessionDuration: Date.now() - sessionStart,
+    searchFilters: ['category', 'price_range']
+});
+
+// Error tracking
+await tracker.customEvent('error_encountered', {
+    errorType: 'validation_error',
+    formName: 'checkout',
+    fieldName: 'email',
+    errorMessage: 'Invalid email format'
+});
+```
+
+## Analytics & Segmentation
+
+- Custom events appear in your analytics dashboard for conversion tracking
+- Use event properties for advanced segmentation and filtering
+- Combine with user identification for personalized analytics
+- Events are automatically associated with the current session and user
+
+## Properties & Options
+
+| Property/Option         | Type     | Description                                                        |
+|------------------------|----------|--------------------------------------------------------------------|
+| `eventName`            | string   | Descriptive name for the custom event (e.g., 'purchase_completed'). |
+| `properties`           | object   | Event data with any key-value pairs (strings, numbers, booleans, arrays, objects). |
+| `customEvent()`        | function | Track a custom event with name and properties.                     |
+| `automaticTracking`    | boolean  | Button, link, and form events are tracked automatically (enabled by default). |
+
+**`customEvent(eventName, properties)` parameters:**
+
+| Parameter     | Type     | Description                                 |
+|-------------- |----------|---------------------------------------------|
+| `eventName`   | string   | Name of the event (required).               |
+| `properties`  | object   | Event data (optional but recommended).      |
+
+**Common `properties` fields:**
+
+| Field         | Type     | Description                                 |
+|-------------- |----------|---------------------------------------------|
+| `orderId`     | string   | Order, transaction, or reference ID.       |
+| `total`       | number   | Purchase total, price, or value.            |
+| `currency`    | string   | Currency code (e.g., 'USD', 'EUR').        |
+| `category`    | string   | Product category or event type.            |
+| `userId`      | string   | Associated user ID (if different from session). |
+| `feature`     | string   | Feature or tool name.                       |
+| `duration`    | number   | Time spent or duration in milliseconds.     |
+
+<Note>
+  Custom events are powerful for conversion tracking and business analytics. Combine them with user identification for comprehensive user journey analysis.
+</Note> 

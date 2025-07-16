@@ -1,0 +1,72 @@
+---
+title: 'Data Redaction'
+description: 'Protect sensitive data by selectively redacting form fields and content'
+---
+
+HumanBehavior SDK provides data redaction to protect sensitive information during session recording. 
+This helps ensure privacy and compliance while maintaining the value of your analytics. 
+
+## How Redaction Works
+
+Specify which elements should be redacted using CSS selectors:
+
+```javascript
+tracker.setRedactedFields([
+  'input[type="password"]',
+  'input[type="email"]',
+  '.sensitive-data'
+]);
+```
+
+- You can use any valid CSS selector for redaction
+- Redaction is processed in real-time and covers all event types
+
+## Dynamic Redaction
+
+You can update redaction rules at any time (e.g., when new forms appear):
+
+```javascript
+tracker.setRedactedFields([
+  'input[type="password"]',
+  '.payment-form input'
+]);
+```
+
+## Advanced Usage
+
+- Use advanced selectors for precise redaction (e.g., by attribute, form context)
+- Supports compliance for regulated industries (GDPR, payment, healthcare)
+- Test your redaction rules in development to ensure sensitive data is protected
+
+## Properties & Options
+
+| Property/Option         | Type       | Description                                                        |
+|------------------------|------------|--------------------------------------------------------------------|
+| `setRedactedFields()`  | function   | Set CSS selectors for fields to redact.                            |
+| `redact()`             | function   | Start redaction with advanced options.                             |
+| `fields`               | string[]   | Array of CSS selectors to redact.                                  |
+| `excludeSelectors`     | string[]   | CSS selectors to exclude from redaction.                           |
+| `userFields`           | string[]   | Additional fields to redact.                                       |
+
+**`redact(options)` fields:**
+
+| Option           | Type     | Description                                  |
+|------------------|----------|----------------------------------------------|
+| `excludeSelectors`| string[]| CSS selectors to exclude from redaction.      |
+| `userFields`     | string[] | Additional fields to redact.                  |
+
+<Note>
+  Only redact what's necessary for privacy. Overly broad selectors may reduce the value of your session recordings.
+</Note>
+
+## Example Usage
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker = HumanBehaviorTracker.init('your-api-key');
+await tracker.redact({
+  excludeSelectors: ['.public-info'],
+  userFields: ['.custom-sensitive']
+});
+``` 

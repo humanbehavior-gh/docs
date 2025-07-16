@@ -1,18 +1,18 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "HumanBehavior SDK",
-  "title": "HumanBehavior SDK",
+  "name": "Human Behavior Documentation",
+  "title": "Human Behavior Documentation",
   "colors": {
-    "primary": "#6366f1",
-    "light": "#818cf8",
+    "primary": "#00a63e",
+    "light": "#00a63e",
     "dark": "#4f46e5"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Guide",
         "groups": [
           {
             "group": "Get Started",
@@ -23,18 +23,17 @@
           {
             "group": "Core Features",
             "pages": [
-              "essentials/session-tracking",
-              "essentials/user-identification",
-              "essentials/custom-events",
-              "essentials/data-redaction"
+              "core-features/user-identification",
+              "core-features/custom-events",
+              "core-features/data-redaction"
             ]
           },
           {
             "group": "Frameworks",
             "pages": [
-              "essentials/frameworks",
-              "essentials/react-integration",
-              "essentials/nextjs-setup"
+              "frameworks/frameworks",
+              "frameworks/react-integration",
+              "frameworks/nextjs-setup"
             ]
           }
         ]
