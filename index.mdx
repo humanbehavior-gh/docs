@@ -1,6 +1,6 @@
 ---
-title: 'HumanBehavior SDK'
-description: 'Powerful session recording and user behavior analytics for web applications'
+title: "HumanBehavior SDK"
+description: "Powerful session recording and user behavior analytics for web applications"
 ---
 
 A powerful JavaScript SDK for recording user sessions and tracking behavior analytics in web applications. Built on top of [rrweb](https://github.com/rrweb-io/rrweb) for high-fidelity session recordings.
@@ -9,31 +9,61 @@ A powerful JavaScript SDK for recording user sessions and tracking behavior anal
   **Important:** By using the HumanBehavior SDK, you agree to comply with our [Terms of Service](https://organic-panther-09d.notion.site/Human-Behavior-Terms-of-Service-1d785c32eb888021a5fefa9732fddd97) and [Privacy Policy](https://organic-panther-09d.notion.site/Human-Behavior-Privacy-Policy-1d785c32eb8880b98336cd9059fb9d42).
 </Warning>
 
+<Note>
+  If you are using a framework such as React, NextJS, or Vite, we recommend using one of our [Framework Guides](/essentials/frameworks).
+</Note>
+
 ## Quickstart
 
-### 1. Install the SDK
+The fastest way to get started is by adding a simple JS snippet at the top of your website.
+
+### Step 1: Get your Public API Key
+
+This will help identify your website to Human Behavior when users visit it.
+
+<Info>
+  How to find your Public API Key:
+
+  \
+  <b>Flow:</b>
+
+  Project Home → Settings (on sidebar) → Public API Key
+</Info>
+
+<img
+  src="/images/APIKey.png"
+  alt="Where to find your Public API Key"
+  style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
+/>
+
+### Step 2: Install the Tracker
+
+#### Option 1: CDN
+
+Add this to the top of your file.
+
+```html
+<script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+```
+
+#### Option 2: Package Manager
+
+Install using `npm`, `yarn`, or your package manager of choice.
 
 ```bash
 npm install humanbehavior-js
 ```
 
-<Info>
-<strong>How to find your Public API Key:</strong><br/>
-<b>Flow:</b> Project Home → Settings (on sidebar) → Public API Key
-</Info>
+### Step 3: Add the tracker to your project
 
-<img src="/images/APIKey.png" alt="Where to find your Public API Key" style={{ borderRadius: '0.5rem', margin: '1rem 0', maxWidth: '100%' }} />
-
-<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
-
-### 2. Initialize the Tracker
-
-```javascript
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-const tracker = HumanBehaviorTracker.init('your-api-key', {
-  redactFields: ['input[type="password"]']
-});
+```html
+<head>
+	... your other metadata here ...
+	<script>const tracker = HumanBehaviorTracker.init('YOUR_API_KEY_HERE');</script>
+</head>
+<body>
+	... your website ...
+</body>
 ```
 
 ### React/Next.js Example
@@ -55,7 +85,10 @@ function App() {
 ```
 
 <Note>
-  In Next.js 13+ (App Router), add <code>'use client'</code> to the top of your component file to ensure the provider runs on the client side. The tracker should never be initialized during server-side rendering.
+  In Next.js 13\+ (App Router), add <code>
+  'use client'</code>
+
+  to the top of your component file to ensure the provider runs on the client side. The tracker should never be initialized during server-side rendering.
 </Note>
 
 ### HTML Example
@@ -78,7 +111,7 @@ For simple HTML pages, use the CDN version:
 ```
 
 <Note>
-  **That's it!** The SDK automatically tracks user interactions, navigation, and console events. You don't need to add any custom event tracking unless you want to track specific business events. See [Custom Events](/essentials/custom-events) for more information.
+  **That's it\!** The SDK automatically tracks user interactions, navigation, and console events. You don't need to add any custom event tracking unless you want to track specific business events. See [Custom Events](/essentials/custom-events) for more information.
 </Note>
 
 ---
@@ -98,11 +131,11 @@ For simple HTML pages, use the CDN version:
 The SDK supports all modern browsers:
 
 | Browser | Version |
-|---------|---------|
-| Chrome | 60+ |
-| Firefox | 55+ |
-| Safari | 12+ |
-| Edge | 79+ |
+| ------- | ------- |
+| Chrome  | 60\+    |
+| Firefox | 55\+    |
+| Safari  | 12\+    |
+| Edge    | 79\+    |
 
 <Warning>
   Internet Explorer is not supported. The SDK uses modern JavaScript features that are not available in IE.
@@ -136,8 +169,14 @@ The SDK is optimized for size:
 </body>
 </html>
 ```
+
 <Note>
-  <b>Best Practice:</b> Always initialize the tracker in the <code>&lt;head&gt;</code> section, before any user interaction can occur. This ensures all events—including those on page load—are captured.
+  <b>Best Practice:</b>
+
+  Always initialize the tracker in the <code>
+  \<head\></code>
+
+  section, before any user interaction can occur. This ensures all events—including those on page load—are captured.
 </Note>
 
 ---
@@ -207,46 +246,22 @@ Once you've completed the setup:
 ## Learn More
 
 <CardGroup cols={2}>
-  <Card
-    title="Session Recording"
-    icon="video"
-    href="/essentials/session-tracking"
-  >
+  <Card title="Session Recording" icon="video" href="/essentials/session-tracking">
     High-fidelity session recordings with mouse movements, clicks, scrolls, and form interactions
   </Card>
-  <Card
-    title="User Identification"
-    icon="user"
-    href="/essentials/user-identification"
-  >
+  <Card title="User Identification" icon="user" href="/essentials/user-identification">
     Identify and track users across sessions with persistent user IDs and properties
   </Card>
-  <Card
-    title="Custom Events"
-    icon="code"
-    href="/essentials/custom-events"
-  >
+  <Card title="Custom Events" icon="code" href="/essentials/custom-events">
     Track specific user actions and business events with custom properties
   </Card>
-  <Card
-    title="Data Redaction"
-    icon="shield"
-    href="/essentials/data-redaction"
-  >
+  <Card title="Data Redaction" icon="shield" href="/essentials/data-redaction">
     Protect sensitive information by redacting passwords, emails, and other sensitive fields
   </Card>
-  <Card
-    title="React Integration"
-    icon="react"
-    href="/essentials/react-integration"
-  >
+  <Card title="React Integration" icon="react" href="/essentials/react-integration">
     Seamless React integration with hooks and context providers
   </Card>
-  <Card
-    title="API Reference"
-    icon="code"
-    href="/api-reference/tracker"
-  >
+  <Card title="API Reference" icon="code" href="/api-reference/tracker">
     Complete API documentation
   </Card>
 </CardGroup>
