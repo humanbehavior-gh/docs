@@ -1,19 +1,19 @@
 ---
-title: "HumanBehavior SDK"
-description: "Powerful session recording and user behavior analytics for web applications"
+title: "Human Behavior SDK"
+description: "Get started with Human Behavior."
 ---
 
-A powerful JavaScript SDK for recording user sessions and tracking behavior analytics in web applications. Built on top of [rrweb](https://github.com/rrweb-io/rrweb) for high-fidelity session recordings.
+The Human Behavior SDK allows you to record user sessions and track behavior analytics in web applications for use with the Human Behavior platform.
 
 <Warning>
   **Important:** By using the HumanBehavior SDK, you agree to comply with our [Terms of Service](https://organic-panther-09d.notion.site/Human-Behavior-Terms-of-Service-1d785c32eb888021a5fefa9732fddd97) and [Privacy Policy](https://organic-panther-09d.notion.site/Human-Behavior-Privacy-Policy-1d785c32eb8880b98336cd9059fb9d42).
 </Warning>
 
-<Note>
-  If you are using a framework such as React, NextJS, or Vite, we recommend using one of our [Framework Guides](/essentials/frameworks).
-</Note>
-
 ## Quickstart
+
+<Note>
+  If you are using a framework such as React, NextJS, or Vite, we recommend using one of our [Framework Guides](/frameworks/frameworks) instead of the quickstart.
+</Note>
 
 The fastest way to get started is by adding a simple JS snippet at the top of your website.
 
@@ -22,12 +22,7 @@ The fastest way to get started is by adding a simple JS snippet at the top of yo
 This will help identify your website to Human Behavior when users visit it.
 
 <Info>
-  How to find your Public API Key:
-
-  \
-  <b>Flow:</b>
-
-  Project Home → Settings (on sidebar) → Public API Key
+  <b>How to find your Public API Key:</b> Project Home → Settings (on sidebar) → Public API Key
 </Info>
 
 <img
@@ -58,73 +53,42 @@ npm install humanbehavior-js
 
 ```html
 <head>
-	... your other metadata here ...
+	<!-- your other metadata here -->
 	<script>const tracker = HumanBehaviorTracker.init('YOUR_API_KEY_HERE');</script>
 </head>
 <body>
-	... your website ...
+	<!-- your website content here -->
 </body>
 ```
 
-### React/Next.js Example
+### Simple HTML Example
 
-For React or Next.js applications, use the provider for automatic context and hooks. **Important:** The tracker must be initialized on the client side (not during SSR).
-
-```javascript
-// For Next.js 13+ App Router, add 'use client' at the top of your component file:
-// 'use client';
-import { HumanBehaviorProvider } from 'humanbehavior-js/react';
-
-function App() {
-  return (
-    <HumanBehaviorProvider apiKey="your-api-key">
-      <YourApp />
-    </HumanBehaviorProvider>
-  );
-}
-```
-
-<Note>
-  In Next.js 13\+ (App Router), add <code>
-  'use client'</code>
-
-  to the top of your component file to ensure the provider runs on the client side. The tracker should never be initialized during server-side rendering.
-</Note>
-
-### HTML Example
-
-For simple HTML pages, use the CDN version:
+Here is a simple HTML website using the CDN version:
 
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
-  <script>
-    const tracker = HumanBehaviorTracker.init('your-api-key');
-  </script>
-</head>
-<body>
-  <h1>Welcome to My App</h1>
-</body>
+  <head>
+    <title>My Website</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Load the HumanBehavior SDK -->
+    <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+
+    <!-- Initialize the tracker -->
+    <script>const tracker = HumanBehaviorTracker.init('your-api-key');</script>
+
+  </head>
+  <body>
+    <h1>Welcome to My App</h1>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+  </body>
 </html>
 ```
 
 <Note>
   **That's it\!** The SDK automatically tracks user interactions, navigation, and console events. You don't need to add any custom event tracking unless you want to track specific business events. See [Custom Events](/essentials/custom-events) for more information.
 </Note>
-
----
-
-## Key Features
-
-- **Session Recording**: Mouse movements, clicks, scrolls, form inputs
-- **Automatic Event Tracking**: Button clicks, link clicks, form submissions
-- **Navigation Tracking**: SPA route changes, browser navigation
-- **Console Tracking**: Log, warn, error messages
-- **Custom Events**: Track specific user actions
-- **Data Redaction**: Protect sensitive information
-- **Session Continuity**: Persists across page reloads
 
 ## Browser Compatibility
 
@@ -149,84 +113,13 @@ The SDK is optimized for size:
 - **With React integration**: ~50KB (gzipped)
 - **CDN version**: ~60KB (gzipped)
 
-## Examples
-
-### HTML Example (CDN)
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
-  <script>
-    // Initialize tracker as early as possible
-    const tracker = HumanBehaviorTracker.init('your-api-key');
-  </script>
-</head>
-<body>
-  <h1>Welcome to My App</h1>
-  <button id="submit-btn">Submit</button>
-</body>
-</html>
-```
-
 <Note>
   <b>Best Practice:</b>
 
-  Always initialize the tracker in the <code>
-  \<head\></code>
-
-  section, before any user interaction can occur. This ensures all events—including those on page load—are captured.
+  Always initialize the tracker in the <code>\<head\></code> section, before any user interaction can occur. This ensures all events—including those on page load—are captured.
 </Note>
 
 ---
-
-## Complete Examples
-
-### JavaScript Example
-
-Here's a complete working example:
-
-```javascript
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-// Initialize tracker with options
-const tracker = HumanBehaviorTracker.init('your-api-key-here', {
-  redactFields: ['input[type="password"]', '#email'] // optional sensitive fields
-});
-
-// Add user information when available
-async function identifyUser(userData) {
-  try {
-    await tracker.addUserInfo(userData);
-    console.log('User identified successfully');
-  } catch (error) {
-    console.error('Failed to identify user:', error);
-  }
-}
-
-// Example usage
-identifyUser({
-  email: 'user@example.com',
-  name: 'John Doe'
-});
-```
-
-### React Example
-
-For React applications:
-
-```javascript
-import { HumanBehaviorProvider, useHumanBehavior } from 'humanbehavior-js/react';
-
-function App() {
-  return (
-    <HumanBehaviorProvider apiKey="your-api-key-here">
-      <YourApp />
-    </HumanBehaviorProvider>
-  );
-}
-```
 
 ## What Happens Next?
 
@@ -242,26 +135,3 @@ Once you've completed the setup:
 8. **Analytics**: View session recordings and analytics in your HumanBehavior dashboard
 
 ---
-
-## Learn More
-
-<CardGroup cols={2}>
-  <Card title="Session Recording" icon="video" href="/essentials/session-tracking">
-    High-fidelity session recordings with mouse movements, clicks, scrolls, and form interactions
-  </Card>
-  <Card title="User Identification" icon="user" href="/essentials/user-identification">
-    Identify and track users across sessions with persistent user IDs and properties
-  </Card>
-  <Card title="Custom Events" icon="code" href="/essentials/custom-events">
-    Track specific user actions and business events with custom properties
-  </Card>
-  <Card title="Data Redaction" icon="shield" href="/essentials/data-redaction">
-    Protect sensitive information by redacting passwords, emails, and other sensitive fields
-  </Card>
-  <Card title="React Integration" icon="react" href="/essentials/react-integration">
-    Seamless React integration with hooks and context providers
-  </Card>
-  <Card title="API Reference" icon="code" href="/api-reference/tracker">
-    Complete API documentation
-  </Card>
-</CardGroup>
