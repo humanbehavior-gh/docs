@@ -94,29 +94,39 @@ await tracker.addEvent({
 
 ## User Management
 
-### `addUserInfo(userProperties)`
+### `addUserInfo({ userId, userProperties })`
 
-Add user information for identification.
+Identify a user and add their properties. This updates the current user ID and stores user information.
 
 ```typescript
-async addUserInfo(userProperties: Record<string, any>): Promise<void>
+async addUserInfo({ 
+  userId: string, 
+  userProperties: Record<string, any> 
+}): Promise<void>
 ```
 
 **Parameters:**
+- `userId` (string): Unique identifier for the user
 - `userProperties` (object): User properties (email, name, etc.)
 
 **Example:**
 ```javascript
+// When user logs in
 await tracker.addUserInfo({
-  email: 'user@example.com',
-  name: 'John Doe',
-  userId: '12345'
+  userId: 'user123',
+  userProperties: {
+    email: 'user@example.com',
+    name: 'John Doe',
+    plan: 'premium'
+  }
 });
 ```
 
+**Note:** User ID management is mostly automatic. You only need this when explicitly identifying a user (like during login).
+
 ### `auth(authFields)`
 
-Authenticate user using existing user data.
+Check if the current user matches an existing user in your system.
 
 ```typescript
 async auth(authFields: string[]): Promise<void>
@@ -127,8 +137,11 @@ async auth(authFields: string[]): Promise<void>
 
 **Example:**
 ```javascript
-await tracker.auth(['email', 'phoneNumber']);
+// Check if current user matches existing user by email
+await tracker.auth(['email']);
 ```
+
+**Note:** This is typically used when you want to link anonymous sessions to existing users.
 
 
 

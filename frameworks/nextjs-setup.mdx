@@ -188,11 +188,14 @@ export default function LoginForm() {
     
     // Track user info with HumanBehavior
     if (user) {
-      const result = await addUserInfo(user.id, {
-        email: user.email,
-        name: user.name,
-        plan: user.plan,
-        signupDate: user.signupDate
+      const result = await addUserInfo({
+        userId: user.id,
+        userProperties: {
+          email: user.email,
+          name: user.name,
+          plan: user.plan,
+          signupDate: user.signupDate
+        }
       })
       
       if (result.success) {
@@ -325,10 +328,13 @@ export default function UserProfile() {
   const { addUserInfo } = useUserTracking()
 
   const handleUpdateProfile = async (userData: any) => {
-    const result = await addUserInfo(userData.id, {
-      name: userData.name,
-      email: userData.email,
-      plan: userData.plan
+    const result = await addUserInfo({
+      userId: userData.id,
+      userProperties: {
+        name: userData.name,
+        email: userData.email,
+        plan: userData.plan
+      }
     })
     
     if (result.success) {

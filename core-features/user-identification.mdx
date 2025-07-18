@@ -22,7 +22,7 @@ recommend using a UUID for this purpose.
 // Associate the current session with the user John Doe
 const userResult = await tracker.addUserInfo({
   userId: 'your-distinct-user-id',
-  userAttributes: {
+  userProperties: {
     email: formData.email,
     name: formData.name,
     plan: 'premium'
@@ -56,7 +56,7 @@ function LoginForm() {
       if (loginSuccessful) {
         const userResult = await tracker.addUserInfo({
           userId: 'your-distinct-user-id',
-          userAttributes: {
+          userProperties: {
             email: formData.email,
             name: formData.name,
             plan: 'premium'
@@ -104,12 +104,12 @@ function LogOutButton() {
 | Property/Option         | Type     | Description                                                        |
 |------------------------|----------|--------------------------------------------------------------------|
 | `userId`               | string   | Unique user ID (auto-generated and stored in a cookie by default).  |
-| `addUserInfo()`        | function | Add or update user properties (see below).                         |
+| `addUserInfo({ userId, userProperties })` | function | Add or update user properties (see below).                         |
 | `auth()`               | function | Authenticate user using specified fields.                          |
 | `userProperties`       | object   | Any key-value pairs (e.g., `email`, `name`, `plan`, etc.).         |
 | `cookie`               | string   | Stores user ID for 365 days.                                       |
 
-**`addUserInfo(userProperties)` fields:**
+**`addUserInfo({ userId, userProperties })` fields:**
 
 | Field         | Type     | Description                                 |
 |-------------- |----------|---------------------------------------------|

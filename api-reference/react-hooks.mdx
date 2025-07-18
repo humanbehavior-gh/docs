@@ -79,7 +79,7 @@ Returns an object with the following methods:
 ```typescript
 interface HumanBehaviorInterface {
   addEvent: (event: any) => void;
-  addUserInfo: (userProperties: Record<string, any>) => Promise<void>;
+  addUserInfo: ({ userId, userProperties }: { userId: string; userProperties: Record<string, any> }) => Promise<void>;
   start: () => Promise<void>;
   stop: () => Promise<void>;
   setRedactedFields: (fields: string[]) => void;
@@ -140,11 +140,12 @@ tracker.addEvent({
 });
 ```
 
-### `addUserInfo(userProperties)`
+### `addUserInfo({ userId, userProperties })`
 
-Adds or updates user information for the current session.
+Identifies a user and adds their properties. This updates the current user ID and stores user information.
 
 **Parameters:**
+- `userId` (string, required): Unique identifier for the user
 - `userProperties` (object, required): User properties to track
 
 **Returns:** `Promise<void>`
@@ -154,9 +155,12 @@ Adds or updates user information for the current session.
 const tracker = useHumanBehavior();
 
 await tracker.addUserInfo({
-  email: 'user@example.com',
-  name: 'John Doe',
-  userId: '12345'
+  userId: 'user123',
+  userProperties: {
+    email: 'user@example.com',
+    name: 'John Doe',
+    plan: 'premium'
+  }
 });
 ```
 
@@ -275,8 +279,11 @@ const tracker = useHumanBehavior();
 
 // First add user info
 await tracker.addUserInfo({
-  email: 'user@example.com',
-  phone: '+1234567890'
+  userId: 'user123',
+  userProperties: {
+    email: 'user@example.com',
+    phone: '+1234567890'
+  }
 });
 
 // Then authenticate
@@ -441,8 +448,11 @@ function OptimizedComponent() {
   }, [tracker]);
   
   const userInfo = useMemo(() => ({
-    email: 'user@example.com',
-    name: 'John Doe'
+    userId: 'user123',
+    userProperties: {
+      email: 'user@example.com',
+      name: 'John Doe'
+    }
   }), []);
   
   useEffect(() => {
