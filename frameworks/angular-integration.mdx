@@ -1,0 +1,128 @@
+---
+title: 'Angular'
+description: 'Set up HumanBehavior SDK with Angular applications'
+---
+
+# Using HumanBehaviorTracker with Angular
+
+## Quickstart
+
+Human Behavior works seamlessly to record sessions on your Angular app. 
+Angular is a platform for building mobile and desktop web applications.
+
+## Step 1: Installation
+
+```bash
+npm install humanbehavior-js
+# or
+yarn add humanbehavior-js
+```
+
+## Step 2: Basic Setup
+
+### Add the Tracker to Your App
+
+In your `main.ts` file:
+
+```typescript
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { AppModule } from './app/app.module';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+// Initialize the tracker once globally
+const tracker = HumanBehaviorTracker.init('your-api-key-here');
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+  .catch(err => console.error(err));
+```
+
+### With Angular Router
+
+If you're using Angular Router, add navigation tracking in your `app.component.ts`:
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+@Component({
+  selector: 'app-root',
+  template: '<router-outlet></router-outlet>'
+})
+export class AppComponent implements OnInit {
+  private tracker = HumanBehaviorTracker.init('your-api-key-here');
+
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+    // Track route changes
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.tracker.trackPageView(event.urlAfterRedirects);
+    });
+  }
+}
+```
+
+## Step 3: Using the Tracker in Components
+
+### Track Custom Events
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+@Component({
+  selector: 'app-my-component',
+  template: `
+    <div>
+      <h1>My Component</h1>
+      <button (click)="handleButtonClick()">Click Me</button>
+    </div>
+  `
+})
+export class MyComponent implements OnInit {
+  private tracker = HumanBehaviorTracker.init('your-api-key-here');
+
+  ngOnInit() {
+    // Track component view
+    this.tracker.customEvent('component_viewed', {
+      componentName: 'MyComponent'
+    });
+  }
+
+  async handleButtonClick() {
+    await this.tracker.customEvent('button_clicked', {
+      buttonLocation: 'header'
+    });
+  }
+}
+```
+
+## Environment Variables
+
+Store your API key securely:
+
+1. Create a `src/environments/environment.ts` file:
+```typescript
+export const environment = {
+  production: false,
+  humanBehaviorApiKey: 'your-api-key-here'
+};
+```
+
+2. Use in your app:
+```typescript
+import { environment } from '../environments/environment';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker = HumanBehaviorTracker.init(environment.humanBehaviorApiKey);
+```
+
+## Troubleshooting
+
+- Make sure the tracker is initialized before tracking events
+- Check browser console for any error messages
+- Verify your API key is correct 

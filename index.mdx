@@ -31,6 +31,24 @@ This will help identify your website to Human Behavior when users visit it.
   style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
 />
 
+<Note>
+  <b>Security Best Practice:</b> Store your API key in environment variables rather than hardcoding it in your source code. This prevents accidental exposure of your key in version control.
+
+  <Expandable title="example">
+
+  ```bash
+  # .env
+  HUMANBEHAVIOR_API_KEY=your-api-key-here
+  ```
+
+  ```javascript
+  // In your code
+  const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);
+  ```
+
+  </Expandable>
+</Note>
+
 ### Step 2: Install the Tracker
 
 #### Option 1: CDN

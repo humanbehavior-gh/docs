@@ -1,0 +1,144 @@
+---
+title: 'Nuxt.js'
+description: 'Set up HumanBehavior SDK with Nuxt.js applications'
+---
+
+# Using HumanBehaviorTracker with Nuxt.js
+
+## Quickstart
+
+Human Behavior works seamlessly to record sessions on your Nuxt.js app. 
+Nuxt.js is a Vue.js framework for building server-side rendered applications.
+
+## Step 1: Installation
+
+```bash
+npm install humanbehavior-js
+# or
+yarn add humanbehavior-js
+```
+
+## Step 2: Basic Setup
+
+### Add the Tracker to Your App
+
+Create a plugin in `plugins/humanbehavior.client.ts`:
+
+```typescript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+export default defineNuxtPlugin(() => {
+  // Initialize the tracker once globally (client-side only)
+  const tracker = HumanBehaviorTracker.init('your-api-key-here');
+  
+  return {
+    provide: {
+      tracker
+    }
+  };
+});
+```
+
+### With Nuxt Router
+
+Nuxt automatically handles routing. Add navigation tracking in your `app.vue`:
+
+```vue
+<template>
+  <div>
+    <NuxtPage />
+  </div>
+</template>
+
+<script setup>
+import { useRoute } from 'vue-router';
+import { onMounted, watch } from 'vue';
+
+const route = useRoute();
+const { $tracker } = useNuxtApp();
+
+onMounted(() => {
+  // Track initial page load
+  $tracker.trackPageView();
+  
+  // Track route changes
+  watch(() => route.path, (newPath) => {
+    $tracker.trackPageView(newPath);
+  });
+});
+</script>
+```
+
+## Step 3: Using the Tracker in Components
+
+### Track Custom Events
+
+```vue
+<template>
+  <div>
+    <h1>My Component</h1>
+    <button @click="handleButtonClick">Click Me</button>
+  </div>
+</template>
+
+<script setup>
+import { onMounted } from 'vue';
+
+const { $tracker } = useNuxtApp();
+
+onMounted(() => {
+  // Track component view
+  $tracker.customEvent('component_viewed', {
+    componentName: 'MyComponent'
+  });
+});
+
+async function handleButtonClick() {
+  await $tracker.customEvent('button_clicked', {
+    buttonLocation: 'header'
+  });
+}
+</script>
+```
+
+## Environment Variables
+
+Store your API key securely:
+
+1. Create a `.env` file:
+```
+NUXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+2. Use in your plugin:
+```typescript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+export default defineNuxtPlugin(() => {
+  const config = useRuntimeConfig();
+  const tracker = HumanBehaviorTracker.init(config.public.humanBehaviorApiKey);
+  
+  return {
+    provide: {
+      tracker
+    }
+  };
+});
+```
+
+3. Add to `nuxt.config.ts`:
+```typescript
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      humanBehaviorApiKey: process.env.NUXT_PUBLIC_HUMANBEHAVIOR_API_KEY
+    }
+  }
+});
+```
+
+## Troubleshooting
+
+- Make sure the plugin is client-side only (`.client.ts` extension)
+- Check browser console for any error messages
+- Verify your API key is correct 

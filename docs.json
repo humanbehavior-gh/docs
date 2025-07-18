@@ -33,7 +33,12 @@
             "pages": [
               "frameworks/frameworks",
               "frameworks/react-integration",
-              "frameworks/nextjs-setup"
+              "frameworks/nextjs-setup",
+              "frameworks/vue-integration",
+              "frameworks/angular-integration",
+              "frameworks/svelte-integration",
+              "frameworks/nuxt-integration",
+              "frameworks/remix-integration"
             ]
           }
         ]
