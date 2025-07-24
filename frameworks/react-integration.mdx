@@ -40,20 +40,318 @@ Use the `useHumanBehavior` hook in your components when you need access to the t
 ```javascript
 import { useHumanBehavior } from 'humanbehavior-js/react';
 
-function MyComponent() {
-  const tracker = useHumanBehavior();
-  
-  const handleButtonClick = () => {
-    // any tracker commands can be called here
-    tracker.customEvent('form_completed', {
-      formId: 'contact-form',
-    });
-  };
-  
+export default function MyComponent() {
+  const tracker = useHumanBehavior()
+
+  useEffect(() => {
+    // Track a custom event when component loads
+    tracker.customEvent('component_viewed', {
+      componentName: 'MyComponent',
+      timestamp: new Date().toISOString()
+    })
+  }, [tracker])
+
+  const handleButtonClick = async () => {
+    await tracker.customEvent('special_button_clicked', {
+      buttonLocation: 'header',
+      userAction: 'clicked_cta'
+    })
+    
+    // Your other button logic here
+  }
+
   return (
-    <button onClick={handleButtonClick}>
-      Click me
+    <div>
+      <h1>My Component</h1>
+      <button onClick={handleButtonClick}>
+        Click Me
+      </button>
+    </div>
+  )
+}
+```
+
+### Automatic Page View Tracking
+
+Good news! The `HumanBehaviorProvider` automatically tracks page views for you. It handles:
+
+- Initial page loads
+- Route changes (pushState/replaceState)
+- Back/forward navigation (popstate)
+- Hash changes
+
+No additional setup required! Page views are tracked automatically when you use the provider.
+
+If you need to manually track a page view for some reason, you can still do it:
+
+```tsx
+import React from 'react'
+import { useHumanBehavior } from 'humanbehavior-js/react'
+
+export default function CustomPageView() {
+  const tracker = useHumanBehavior()
+
+  const handleCustomPageView = () => {
+    // Track a custom page view
+    tracker.trackPageView('/custom-page')
+  }
+
+  return (
+    <button onClick={handleCustomPageView}>
+      Track Custom Page View
     </button>
+  )
+}
+```
+
+## Advanced Usage
+
+### User Authentication
+
+Use the built-in `useUserTracking` hook to track user information:
+
+<Note>
+  **Placement:** Call `addUserInfo` after successful login or signup, not during component initialization. If you include an `email` field in `userProperties`, the SDK will automatically use it as the user ID.
+</Note>
+
+```tsx
+import React, { useState } from 'react'
+import { useUserTracking } from 'humanbehavior-js/react'
+
+export default function LoginForm() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const { addUserInfo } = useUserTracking()
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Your login logic here
+    const user = await login(email, password)
+    
+    // Track user info with HumanBehavior after successful login
+    if (user) {
+      const result = await addUserInfo({
+        userProperties: {
+          email: user.email,
+          name: user.name,
+          plan: user.plan,
+          signupDate: user.signupDate
+        }
+      })
+      
+      if (result.success) {
+        console.log('User info tracked successfully')
+      } else {
+        console.error('Failed to track user info:', result.error)
+      }
+    }
+  }
+
+  return (
+    <form onSubmit={handleLogin}>
+      <input 
+        type="email" 
+        value={email} 
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+      />
+      <input 
+        type="password" 
+        value={password} 
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+      />
+      <button type="submit">Login</button>
+    </form>
+  )
+}
+```
+
+### Environment Variables
+
+Store your API key securely using environment variables:
+
+1. Create a `.env` file in your project root:
+```
+REACT_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+2. Update your App component to use the environment variable:
+```tsx
+import React from 'react'
+import { HumanBehaviorProvider } from 'humanbehavior-js/react'
+
+function App() {
+  const apiKey = process.env.REACT_APP_HUMANBEHAVIOR_API_KEY
+
+  if (!apiKey) {
+    console.error('HumanBehavior API key not found')
+    return <YourApp />
+  }
+
+  return (
+    <HumanBehaviorProvider apiKey={apiKey}>
+      <YourApp />
+    </HumanBehaviorProvider>
+  )
+}
+```
+
+If you're using TypeScript, add this to your `types/global.d.ts` file:
+
+```typescript
+import { HumanBehaviorTracker } from 'humanbehavior-js'
+
+declare global {
+  interface Window {
+    __humanBehaviorGlobalTracker?: HumanBehaviorTracker
+  }
+}
+```
+
+## Available Built-in Hooks
+
+The HumanBehaviorTracker comes with several built-in hooks:
+
+### 1. `useHumanBehavior`
+Main hook for tracking events and accessing the tracker:
+
+```tsx
+import React from 'react'
+import { useHumanBehavior } from 'humanbehavior-js/react'
+
+export default function MyComponent() {
+  const tracker = useHumanBehavior()
+
+  const handleClick = async () => {
+    await tracker.customEvent('button_clicked', { 
+      location: 'header',
+      timestamp: Date.now()
+    })
+  }
+
+  return (
+    <button onClick={handleClick}>
+      Click Me
+    </button>
+  )
+}
+```
+
+### 2. `useUserTracking`
+Hook for managing user information:
+
+<Note>
+  **Placement:** Call `addUserInfo` after successful login or signup, not during component initialization.
+</Note>
+
+```tsx
+import React from 'react'
+import { useUserTracking } from 'humanbehavior-js/react'
+
+export default function UserProfile() {
+  const { addUserInfo } = useUserTracking()
+
+  const handleUpdateProfile = async (userData: any) => {
+    const result = await addUserInfo({
+      userProperties: {
+        name: userData.name,
+        email: userData.email,
+        plan: userData.plan
+      }
+    })
+    
+    if (result.success) {
+      console.log('User info updated successfully')
+    }
+  }
+
+  return (
+    <button onClick={() => handleUpdateProfile({ /* user data */ })}>
+      Update Profile
+    </button>
+  )
+}
+```
+
+### 3. `useRedaction`
+Hook for managing field redaction:
+
+```tsx
+import React from 'react'
+import { useRedaction } from 'humanbehavior-js/react'
+
+export default function PrivacySettings() {
+  const { setRedactedFields, isRedactionActive, getRedactedFields } = useRedaction()
+
+  const handleEnableRedaction = () => {
+    setRedactedFields([
+      'input[type="password"]',
+      'input[name="ssn"]',
+      '.sensitive-data'
+    ])
+  }
+
+  const handleDisableRedaction = () => {
+    setRedactedFields([])
+  }
+
+  return (
+    <div>
+      <p>Redaction active: {isRedactionActive() ? 'Yes' : 'No'}</p>
+      <p>Redacted fields: {getRedactedFields().join(', ')}</p>
+      <button onClick={handleEnableRedaction}>Enable Redaction</button>
+      <button onClick={handleDisableRedaction}>Disable Redaction</button>
+    </div>
+  )
+}
+```
+
+## React-Specific Features
+
+### Event Queuing
+
+The React integration includes intelligent event queuing. If you try to track events before the tracker is fully initialized, they'll be queued and processed once initialization is complete:
+
+```tsx
+import React, { useEffect } from 'react'
+import { useHumanBehavior } from 'humanbehavior-js/react'
+
+export default function EarlyEventTracking() {
+  const tracker = useHumanBehavior()
+
+  useEffect(() => {
+    // This event will be queued if tracker isn't ready yet
+    tracker.customEvent('early_event', { 
+      timestamp: Date.now() 
+    })
+  }, [tracker])
+
+  return <div>Component with early event tracking</div>
+}
+```
+
+### Server-Side Rendering (SSR) Support
+
+The React integration is SSR-safe and handles server-side rendering gracefully:
+
+```tsx
+import React from 'react'
+import { HumanBehaviorProvider } from 'humanbehavior-js/react'
+
+function App() {
+  const options = {
+    redactFields: ['input[type="password"]']
+  };
+
+  return (
+    <HumanBehaviorProvider 
+      apiKey="your-api-key-here"
+      options={options}
+    >
+      <YourApp />
+    </HumanBehaviorProvider>
   );
 }
 ```
@@ -228,10 +526,6 @@ function TrackedButton({
   Get Started
 </TrackedButton>
 ```
-
-
-
-
 
 ## Form Tracking
 

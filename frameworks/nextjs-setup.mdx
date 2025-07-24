@@ -169,6 +169,10 @@ export default function CustomPageView() {
 
 Use the built-in `useUserTracking` hook to track user information:
 
+<Note>
+  **Placement:** Call `addUserInfo` after successful login or signup, not during component initialization. If you include an `email` field in `userProperties`, the SDK will automatically use it as the user ID.
+</Note>
+
 ```tsx
 'use client'
 
@@ -186,13 +190,15 @@ export default function LoginForm() {
     // Your login logic here
     const user = await login(email, password)
     
-    // Track user info with HumanBehavior
+    // Track user info with HumanBehavior after successful login
     if (user) {
-      const result = await addUserInfo(user.id, {
-        email: user.email,
-        name: user.name,
-        plan: user.plan,
-        signupDate: user.signupDate
+      const result = await addUserInfo({
+        userProperties: {
+          email: user.email,
+          name: user.name,
+          plan: user.plan,
+          signupDate: user.signupDate
+        }
       })
       
       if (result.success) {
@@ -314,6 +320,10 @@ export default function MyComponent() {
 ### 2. `useUserTracking`
 Hook for managing user information:
 
+<Note>
+  **Placement:** Call `addUserInfo` after successful login or signup, not during component initialization.
+</Note>
+
 ```tsx
 'use client'
 
@@ -323,10 +333,12 @@ export default function UserProfile() {
   const { addUserInfo } = useUserTracking()
 
   const handleUpdateProfile = async (userData: any) => {
-    const result = await addUserInfo(userData.id, {
-      name: userData.name,
-      email: userData.email,
-      plan: userData.plan
+    const result = await addUserInfo({
+      userProperties: {
+        name: userData.name,
+        email: userData.email,
+        plan: userData.plan
+      }
     })
     
     if (result.success) {

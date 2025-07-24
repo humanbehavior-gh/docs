@@ -18,11 +18,14 @@ Optionally, you can identify users manually and even add relevant information fo
 By using your own user ID, you can ensure that the user is tracked across sessions and can be tied back to your own user database. We 
 recommend using a UUID for this purpose.
 
+<Note>
+  **Placement:** Call `addUserInfo` after successful login or signup, not during page initialization. If you include an `email` field in `userProperties`, the SDK will automatically use it as the user ID.
+</Note>
+
 ```javascript
 // Associate the current session with the user John Doe
 const userResult = await tracker.addUserInfo({
-  userId: 'your-distinct-user-id',
-  userAttributes: {
+  userProperties: {
     email: formData.email,
     name: formData.name,
     plan: 'premium'
@@ -55,8 +58,7 @@ function LoginForm() {
       // Upon successful authentication, add user info to the current session
       if (loginSuccessful) {
         const userResult = await tracker.addUserInfo({
-          userId: 'your-distinct-user-id',
-          userAttributes: {
+          userProperties: {
             email: formData.email,
             name: formData.name,
             plan: 'premium'
@@ -89,10 +91,6 @@ function LogOutButton() {
 }
 ```
 
-
-
-
-
 ## Privacy & Segmentation
 
 - User properties are available in your analytics dashboard for segmentation and filtering
@@ -105,7 +103,6 @@ function LogOutButton() {
 |------------------------|----------|--------------------------------------------------------------------|
 | `userId`               | string   | Unique user ID (auto-generated and stored in a cookie by default).  |
 | `addUserInfo()`        | function | Add or update user properties (see below).                         |
-| `auth()`               | function | Authenticate user using specified fields.                          |
 | `userProperties`       | object   | Any key-value pairs (e.g., `email`, `name`, `plan`, etc.).         |
 | `cookie`               | string   | Stores user ID for 365 days.                                       |
 
@@ -115,8 +112,8 @@ function LogOutButton() {
 |-------------- |----------|---------------------------------------------|
 | Any           | any      | You can provide any user property fields.    |
 | Example:      |          |                                             |
-| `email`       | string   | User’s email address.                       |
-| `name`        | string   | User’s name.                                |
+| `email`       | string   | User's email address.                       |
+| `name`        | string   | User's name.                                |
 | `userId`      | string   | Your internal user ID.                      |
-| `plan`        | string   | User’s plan or segment.                     | 
+| `plan`        | string   | User's plan or segment.                     | 
 
