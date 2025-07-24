@@ -1,0 +1,120 @@
+---
+title: 'Svelte'
+description: 'Set up HumanBehavior SDK with Svelte applications'
+---
+
+# Using HumanBehaviorTracker with Svelte
+
+## Quickstart
+
+Human Behavior works seamlessly to record sessions on your Svelte app. 
+Svelte is a modern JavaScript framework that compiles to vanilla JavaScript.
+
+## Step 1: Installation
+
+```bash
+npm install humanbehavior-js
+# or
+yarn add humanbehavior-js
+```
+
+## Step 2: Basic Setup
+
+### Add the Tracker to Your App
+
+In your `main.js` or `main.ts` file:
+
+```javascript
+import App from './App.svelte';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+// Initialize the tracker once globally
+const tracker = HumanBehaviorTracker.init('your-api-key-here');
+
+const app = new App({
+  target: document.body
+});
+
+export default app;
+```
+
+### With SvelteKit Router
+
+If you're using SvelteKit, add navigation tracking in your `+layout.svelte`:
+
+```svelte
+<script>
+  import { page } from '$app/stores';
+  import { onMount } from 'svelte';
+  import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+  let tracker;
+
+  onMount(() => {
+    tracker = HumanBehaviorTracker.init('your-api-key-here');
+  });
+
+  // Track route changes
+  $: if (tracker && $page.url.pathname) {
+    tracker.trackPageView($page.url.pathname);
+  }
+</script>
+
+<slot />
+```
+
+## Step 3: Using the Tracker in Components
+
+### Track Custom Events
+
+```svelte
+<script>
+  import { onMount } from 'svelte';
+  import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+  let tracker;
+
+  onMount(() => {
+    tracker = HumanBehaviorTracker.init('your-api-key-here');
+    
+    // Track component view
+    tracker.customEvent('component_viewed', {
+      componentName: 'MyComponent'
+    });
+  });
+
+  async function handleButtonClick() {
+    await tracker.customEvent('button_clicked', {
+      buttonLocation: 'header'
+    });
+  }
+</script>
+
+<div>
+  <h1>My Component</h1>
+  <button on:click={handleButtonClick}>Click Me</button>
+</div>
+```
+
+## Environment Variables
+
+Store your API key securely:
+
+1. Create a `.env` file:
+```
+VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+2. Use in your app:
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const apiKey = import.meta.env.VITE_HUMANBEHAVIOR_API_KEY;
+const tracker = HumanBehaviorTracker.init(apiKey);
+```
+
+## Troubleshooting
+
+- Make sure the tracker is initialized before tracking events
+- Check browser console for any error messages
+- Verify your API key is correct 

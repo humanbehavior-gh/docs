@@ -1,0 +1,130 @@
+---
+title: 'Vue.js'
+description: 'Set up HumanBehavior SDK with Vue.js applications'
+---
+
+# Using HumanBehaviorTracker with Vue.js
+
+## Quickstart
+
+Human Behavior works seamlessly to record sessions on your Vue.js app. 
+Vue.js is a progressive JavaScript framework for building user interfaces.
+
+## Step 1: Installation
+
+```bash
+npm install humanbehavior-js
+# or
+yarn add humanbehavior-js
+```
+
+## Step 2: Basic Setup
+
+### Add the Tracker to Your App
+
+In your main `main.js` or `main.ts` file:
+
+```javascript
+import { createApp } from 'vue'
+import App from './App.vue'
+import { HumanBehaviorTracker } from 'humanbehavior-js'
+
+// Initialize the tracker once globally
+const tracker = HumanBehaviorTracker.init('your-api-key-here')
+
+// Create and mount the app
+const app = createApp(App)
+app.mount('#app')
+```
+
+### With Vue Router
+
+If you're using Vue Router, add navigation tracking:
+
+```javascript
+import { createApp } from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
+import App from './App.vue'
+import { HumanBehaviorTracker } from 'humanbehavior-js'
+
+// Initialize the tracker once globally
+const tracker = HumanBehaviorTracker.init('your-api-key-here')
+
+// Create router
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    // your routes
+  ]
+})
+
+// Track route changes
+router.afterEach((to) => {
+  tracker.trackPageView(to.fullPath)
+})
+
+const app = createApp(App)
+app.use(router)
+app.mount('#app')
+```
+
+## Step 3: Using the Tracker in Components
+
+### Track Custom Events
+
+```vue
+<template>
+  <div>
+    <h1>My Component</h1>
+    <button @click="handleButtonClick">Click Me</button>
+  </div>
+</template>
+
+<script>
+import { HumanBehaviorTracker } from 'humanbehavior-js'
+
+export default {
+  name: 'MyComponent',
+  mounted() {
+    // Get the global tracker instance
+    const tracker = HumanBehaviorTracker.init('your-api-key-here')
+    
+    // Track component view
+    tracker.customEvent('component_viewed', {
+      componentName: 'MyComponent'
+    })
+  },
+  methods: {
+    async handleButtonClick() {
+      const tracker = HumanBehaviorTracker.init('your-api-key-here')
+      await tracker.customEvent('button_clicked', {
+        buttonLocation: 'header'
+      })
+    }
+  }
+}
+</script>
+```
+
+## Environment Variables
+
+Store your API key securely:
+
+1. Create a `.env` file:
+```
+VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+2. Use in your app:
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js'
+
+const apiKey = import.meta.env.VITE_HUMANBEHAVIOR_API_KEY
+const tracker = HumanBehaviorTracker.init(apiKey)
+```
+
+## Troubleshooting
+
+- Make sure the tracker is initialized before tracking events
+- Check browser console for any error messages
+- Verify your API key is correct 
