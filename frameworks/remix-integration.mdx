@@ -20,7 +20,54 @@ yarn add humanbehavior-js
 
 ## Step 2: Basic Setup
 
-### Add the Tracker to Your App
+### Option 1: Using React Provider (Recommended)
+
+For better integration and automatic tracking, use the React provider pattern:
+
+**Step 1**: Create a providers file for client-side code:
+
+Create `app/providers.tsx`:
+```tsx
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <HumanBehaviorProvider apiKey={process.env.HUMANBEHAVIOR_API_KEY!}>
+      {children}
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+**Step 2**: Add the provider to your root layout:
+
+In your `app/root.tsx` file:
+```tsx
+import { Providers } from './providers';
+
+export default function App() {
+  return (
+    <html lang="en">
+      <head>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <Providers>
+          <Outlet />
+        </Providers>
+        <ScrollRestoration />
+        <Scripts />
+        <LiveReload />
+      </body>
+    </html>
+  );
+}
+```
+
+### Option 2: Manual Initialization
+
+If you prefer manual setup, initialize the tracker directly:
 
 In your `app/root.tsx` file:
 
