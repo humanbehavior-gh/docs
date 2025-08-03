@@ -79,14 +79,13 @@ Returns an object with the following methods:
 ```typescript
 interface HumanBehaviorInterface {
   addEvent: (event: any) => void;
-  addUserInfo: (userProperties: Record<string, any>) => Promise<void>;
+  identifyUser: (userId: string, userProperties: Record<string, any>) => Promise<string>;
   start: () => Promise<void>;
   stop: () => Promise<void>;
   setRedactedFields: (fields: string[]) => void;
   isRedactionActive: () => boolean;
   getRedactedFields: () => string[];
   redact: (options?: RedactionOptions) => Promise<void>;
-  auth: (authFields: string[]) => Promise<void>;
   getUserInfo: () => {
     endUserId: string | null;
     sessionId: string;
@@ -140,23 +139,24 @@ tracker.addEvent({
 });
 ```
 
-### `addUserInfo(userProperties)`
+### `identifyUser(userId, userProperties)`
 
-Adds or updates user information for the current session.
+Identifies and tracks users across sessions with persistent user IDs and properties.
 
 **Parameters:**
+- `userId` (string, required): Unique user identifier (should be stable across sessions)
 - `userProperties` (object, required): User properties to track
 
-**Returns:** `Promise<void>`
+**Returns:** `Promise<string>` - The user ID that was set
 
 **Example:**
 ```javascript
 const tracker = useHumanBehavior();
 
-await tracker.addUserInfo({
+const userId = await tracker.identifyUser('user-123', {
   email: 'user@example.com',
   name: 'John Doe',
-  userId: '12345'
+  plan: 'premium'
 });
 ```
 
@@ -260,28 +260,7 @@ await tracker.redact({
 });
 ```
 
-### `auth(authFields)`
 
-Authenticates the current user against your database.
-
-**Parameters:**
-- `authFields` (string[], required): Array of field names to use for authentication
-
-**Returns:** `Promise<void>`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-// First add user info
-await tracker.addUserInfo({
-  email: 'user@example.com',
-  phone: '+1234567890'
-});
-
-// Then authenticate
-await tracker.auth(['email', 'phone']);
-```
 
 
 
@@ -446,7 +425,7 @@ function OptimizedComponent() {
   }), []);
   
   useEffect(() => {
-    tracker.addUserInfo(userInfo);
+          tracker.identifyUser('user-123', userInfo);
   }, [tracker, userInfo]);
   
   return <button onClick={handleClick}>Click me</button>;
@@ -481,7 +460,7 @@ import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 
 const mockTracker = {
   addEvent: jest.fn(),
-  addUserInfo: jest.fn(),
+  identifyUser: jest.fn(),
   customEvent: jest.fn(),
   start: jest.fn(),
   stop: jest.fn(),

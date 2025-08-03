@@ -94,40 +94,116 @@ await tracker.addEvent({
 
 ## User Management
 
-### `addUserInfo(userProperties)`
+### Server-side User Identification
 
-Add user information for identification.
+The server-side `identifyUser` function is used for identifying users during authentication events and server-side user management. This ensures users are properly identified before any client-side tracking begins.
 
 ```typescript
-async addUserInfo(userProperties: Record<string, any>): Promise<void>
+import { identifyUser } from 'humanbehavior-js';
+
+async identifyUser(
+  userId: string,
+  userData: {
+    email: string;
+    name?: string;
+    image?: string;
+    provider?: string;
+    [key: string]: any;
+  },
+  apiKey: string
+): Promise<{ success: boolean; error?: string; actualUserId?: string }>
 ```
 
 **Parameters:**
-- `userProperties` (object): User properties (email, name, etc.)
+- `userId` (string): Stable unique identifier (database user ID recommended)
+- `userData` (object): User properties including email, name, image, provider, etc.
+- `apiKey` (string): Your HumanBehavior API key
 
-**Example:**
+**Returns:** `Promise<{ success: boolean; error?: string; actualUserId?: string }>`
+
+**Example - NextAuth Integration:**
 ```javascript
-await tracker.addUserInfo({
-  email: 'user@example.com',
-  name: 'John Doe',
-  userId: '12345'
+// In your NextAuth configuration
+import { identifyUser } from 'humanbehavior-js';
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  // ... other config
+  events: {
+    async signIn({ user, account, profile, isNewUser }) {
+      if (user.email && process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY) {
+        const result = await identifyUser(
+          user.id!, // Database user ID
+          {
+            email: user.email,
+            name: user.name || undefined,
+            image: user.image || undefined,
+            provider: account?.provider || 'unknown'
+          },
+          process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY
+        );
+        
+        if (result.success) {
+          console.log(`✅ User identified successfully for ${user.email}`);
+        } else {
+          console.error(`❌ Failed to identify user: ${result.error}`);
+        }
+      }
+    }
+  }
 });
 ```
 
-### `auth(authFields)`
+**Example - Firebase Auth:**
+```javascript
+// In your Firebase auth state listener
+import { identifyUser } from 'humanbehavior-js';
 
-Authenticate user using existing user data.
+onAuthStateChanged(auth, async (user) => {
+  if (user && process.env.HUMANBEHAVIOR_API_KEY) {
+    const result = await identifyUser(
+      user.uid, // Firebase UID
+      {
+        email: user.email,
+        name: user.displayName,
+        image: user.photoURL,
+        provider: user.providerData[0]?.providerId
+      },
+      process.env.HUMANBEHAVIOR_API_KEY
+    );
+  }
+});
+```
+
+### Client-side User Identification
+
+For client-side user identification and client-only applications, use the tracker instance method:
 
 ```typescript
-async auth(authFields: string[]): Promise<void>
+async identifyUser(
+  { userId, userProperties }: { 
+    userId?: string, 
+    userProperties: Record<string, any> 
+  }
+): Promise<string>
 ```
 
 **Parameters:**
-- `authFields` (string[]): Array of field names to check for existing users
+- `userId` (string, optional): User identifier
+- `userProperties` (object): User properties
+
+**Returns:** `Promise<string>` - The user ID that was set
 
 **Example:**
 ```javascript
-await tracker.auth(['email', 'phoneNumber']);
+// Client-side usage for client-only applications
+const userId = await tracker.identifyUser({
+  userId: user.id,
+  userProperties: {
+    email: user.email,
+    name: user.name,
+    plan: user.plan
+  }
+});
 ```
 
 

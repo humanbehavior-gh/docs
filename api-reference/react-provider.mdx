@@ -54,28 +54,7 @@ const tracker = HumanBehaviorTracker.init('your-api-key');
 </HumanBehaviorProvider>
 ```
 
-### `options` (object, optional)
 
-Configuration options for the tracker.
-
-**Properties:**
-- `redactFields` (string[], optional): CSS selectors for fields to redact
-
-<Note>
-  The React provider's `options` parameter is defined but not yet implemented. For `redactFields`, you'll need to configure it after initialization using the tracker methods.
-</Note>
-
-**Example:**
-```javascript
-<HumanBehaviorProvider 
-  apiKey="your-api-key-here"
-  options={{
-    redactFields: ['input[type="password"]', '#email']
-  }}
->
-  <App />
-</HumanBehaviorProvider>
-```
 
 ## Usage
 
@@ -225,7 +204,7 @@ const mockTracker = {
   start: jest.fn(),
   stop: jest.fn(),
   customEvent: jest.fn(),
-  addUserInfo: jest.fn(),
+  identifyUser: jest.fn(),
   setRedactedFields: jest.fn()
 };
 

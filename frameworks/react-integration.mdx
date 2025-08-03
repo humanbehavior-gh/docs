@@ -108,12 +108,31 @@ export default function CustomPageView() {
 
 ### User Authentication
 
-Use the built-in `useUserTracking` hook to track user information:
+For the best user tracking experience, identify users server-side in your authentication events:
 
-<Note>
-  **Placement:** Call `addUserInfo` after successful login or signup, not during component initialization.
-</Note>
+**NextAuth.js Example:**
+```javascript
+// In your NextAuth configuration
+import { identifyUser } from 'humanbehavior-js';
 
+export default NextAuth({
+  events: {
+    async signIn({ user, account }) {
+      await identifyUser(
+        user.id, // Database user ID
+        {
+          email: user.email,
+          name: user.name,
+          provider: account?.provider
+        },
+        process.env.HUMANBEHAVIOR_API_KEY
+      );
+    }
+  }
+});
+```
+
+**Client-side identification (if needed):**
 ```tsx
 import React, { useState } from 'react'
 import { useUserTracking } from 'humanbehavior-js/react'
@@ -121,7 +140,7 @@ import { useUserTracking } from 'humanbehavior-js/react'
 export default function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { addUserInfo } = useUserTracking()
+  const { identifyUser } = useUserTracking()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -129,21 +148,23 @@ export default function LoginForm() {
     // Your login logic here
     const user = await login(email, password)
     
-    // Track user info with HumanBehavior after successful login
+    // Identify user with HumanBehavior after successful login
     if (user) {
-      const result = await addUserInfo({
-        userProperties: {
+      const result = await identifyUser(
+        user.id, // Database user ID
+        {
           email: user.email,
           name: user.name,
           plan: user.plan,
           signupDate: user.signupDate
-        }
-      })
+        },
+        process.env.REACT_APP_HUMANBEHAVIOR_API_KEY!
+      )
       
       if (result.success) {
-        console.log('User info tracked successfully')
+        console.log('User identified successfully:', result.actualUserId || user.id)
       } else {
-        console.error('Failed to track user info:', result.error)
+        console.error('Failed to identify user:', result.error)
       }
     }
   }
@@ -243,7 +264,7 @@ export default function MyComponent() {
 Hook for managing user information:
 
 <Note>
-  **Placement:** Call `addUserInfo` after successful login or signup, not during component initialization.
+  **Placement:** Call `identifyUser` after successful login or signup, not during component initialization.
 </Note>
 
 ```tsx
@@ -251,20 +272,16 @@ import React from 'react'
 import { useUserTracking } from 'humanbehavior-js/react'
 
 export default function UserProfile() {
-  const { addUserInfo } = useUserTracking()
+  const { identifyUser } = useUserTracking()
 
   const handleUpdateProfile = async (userData: any) => {
-    const result = await addUserInfo({
-      userProperties: {
-        name: userData.name,
-        email: userData.email,
-        plan: userData.plan
-      }
+    const userId = await identifyUser('user-123', {
+      name: userData.name,
+      email: userData.email,
+      plan: userData.plan
     })
     
-    if (result.success) {
-      console.log('User info updated successfully')
-    }
+    console.log('User identified successfully:', userId)
   }
 
   return (
@@ -372,45 +389,9 @@ function App() {
 }
 ```
 
-### Advanced Provider
 
-```javascript
-import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 
-function App() {
-  return (
-    <HumanBehaviorProvider 
-      apiKey="your-api-key"
-      options={{
-        redactFields: ['input[type="password"]', '#email']
-      }}
-    >
-      <YourApp />
-    </HumanBehaviorProvider>
-  );
-}
-```
 
-### Configuration Options
-
-```javascript
-import { HumanBehaviorProvider } from 'humanbehavior-js/react';
-
-function App() {
-  const options = {
-    redactFields: ['input[type="password"]']
-  };
-
-  return (
-    <HumanBehaviorProvider 
-      apiKey="your-api-key-here"
-      options={options}
-    >
-      <YourApp />
-    </HumanBehaviorProvider>
-  );
-}
-```
 
 ## Hook Usage
 
@@ -717,11 +698,13 @@ function useUserTracking(user) {
   
   useEffect(() => {
     if (user) {
-      tracker.addUserInfo({
+      tracker.identifyUser({
         userId: user.id,
-        email: user.email,
-        name: user.name,
-        plan: user.plan
+        userProperties: {
+          email: user.email,
+          name: user.name,
+          plan: user.plan
+        }
       });
     }
   }, [user, tracker]);
