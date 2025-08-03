@@ -10,25 +10,68 @@ HumanBehavior SDK automatically identifies and tracks users across sessions usin
 The SDK handles user identification using cookies. A unique user ID is generated and stored in a cookie on first visit, and persists for 1 year. 
 Initializing the SDK handles user authentication automatically.
 
-## Manual User Identification
+## User Identification
 
-### Identifying a user
+### Server-side Identification (Recommended)
 
-Optionally, you can identify users manually and even add relevant information for better analytics using the `addUserInfo` function. 
-By using your own user ID, you can ensure that the user is tracked across sessions and can be tied back to your own user database. We 
-recommend using a UUID for this purpose.
+For the best user tracking experience, identify users server-side in your authentication events. This ensures users are identified immediately upon sign-in and maintains session continuity.
+
+**NextAuth.js Example:**
+```javascript
+// In your NextAuth configuration
+import { identifyUser } from 'humanbehavior-js';
+
+export default NextAuth({
+  events: {
+    async signIn({ user, account }) {
+      await identifyUser(
+        user.id, // Database user ID
+        {
+          email: user.email,
+          name: user.name,
+          provider: account?.provider
+        },
+        process.env.HUMANBEHAVIOR_API_KEY
+      );
+    }
+  }
+});
+```
+
+**Firebase Auth Example:**
+```javascript
+// In your Firebase functions
+exports.onUserCreated = functions.auth.user().onCreate((user) => {
+  const { identifyUser } = require('humanbehavior-js');
+  
+  return identifyUser(
+    user.uid, // Firebase user ID
+    {
+      email: user.email,
+      displayName: user.displayName,
+      provider: user.providerData[0]?.providerId
+    },
+    process.env.HUMANBEHAVIOR_API_KEY
+  );
+});
+```
+
+### Client-side Identification
+
+You can also identify users client-side after successful authentication or for client-only applications:
 
 <Note>
-  **Placement:** Call `addUserInfo` after successful login or signup, not during page initialization.
+  **Placement:** Call `identifyUser` after successful login or signup, not during page initialization.
 </Note>
 
 ```javascript
-// Associate the current session with the user John Doe
-const userResult = await tracker.addUserInfo({
+// After successful login/signup, identify the user with their actual ID
+const userId = await tracker.identifyUser({
+  userId: user.id,
   userProperties: {
-    email: formData.email,
-    name: formData.name,
-    plan: 'premium'
+    email: user.email,
+    name: user.name,
+    plan: user.plan
   }
 });
 ```
@@ -55,16 +98,17 @@ function LoginForm() {
 
       // ... Your authentication logic here ...
 
-      // Upon successful authentication, add user info to the current session
+      // Upon successful authentication, identify user in the current session
       if (loginSuccessful) {
-        const userResult = await tracker.addUserInfo({
+        const userId = await tracker.identifyUser({
+          userId: user.id,
           userProperties: {
-            email: formData.email,
-            name: formData.name,
+            email: user.email,
+            name: user.name,
             plan: 'premium'
           }
         });
-        console.log('User successfully tracked and authenticated');
+        console.log('User successfully identified:', userId);
       }
 
     }
@@ -102,11 +146,11 @@ function LogOutButton() {
 | Property/Option         | Type     | Description                                                        |
 |------------------------|----------|--------------------------------------------------------------------|
 | `userId`               | string   | Unique user ID (auto-generated and stored in a cookie by default).  |
-| `addUserInfo()`        | function | Add or update user properties (see below).                         |
+| `identifyUser()`       | function | Identify user with properties (see below).                         |
 | `userProperties`       | object   | Any key-value pairs (e.g., `email`, `name`, `plan`, etc.).         |
 | `cookie`               | string   | Stores user ID for 365 days.                                       |
 
-**`addUserInfo(userProperties)` fields:**
+**`identifyUser(userId, userProperties)` fields:**
 
 | Field         | Type     | Description                                 |
 |-------------- |----------|---------------------------------------------|

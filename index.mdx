@@ -79,6 +79,29 @@ npm install humanbehavior-js
 </body>
 ```
 
+### Step 4: Identify users (Optional)
+
+For the best user tracking experience, identify users server-side in your authentication events:
+
+```javascript
+// In your NextAuth configuration
+events: {
+  async signIn({ user, account }) {
+    const { identifyUser } = require('humanbehavior-js');
+    
+    await identifyUser(
+      user.id, // Database user ID
+      {
+        email: user.email,
+        name: user.name,
+        provider: account?.provider
+      },
+      process.env.HUMANBEHAVIOR_API_KEY
+    );
+  }
+}
+```
+
 ### Simple HTML Example
 
 Here is a simple HTML website using the CDN version:
@@ -123,18 +146,16 @@ The SDK supports all modern browsers:
   Internet Explorer is not supported. The SDK uses modern JavaScript features that are not available in IE.
 </Warning>
 
-## Bundle Size
 
-The SDK is optimized for size:
-
-- **Core SDK**: ~45KB (gzipped)
-- **With React integration**: ~50KB (gzipped)
-- **CDN version**: ~60KB (gzipped)
 
 <Note>
   <b>Best Practice:</b>
 
   Always initialize the tracker in the <code>\<head\></code> section, before any user interaction can occur. This ensures all events—including those on page load—are captured.
+</Note>
+
+<Note>
+  <b>Version:</b> This documentation covers HumanBehavior SDK version 0.3.1
 </Note>
 
 ---
@@ -149,7 +170,7 @@ Once you've completed the setup:
 4. **Navigation Tracking**: SPA navigation and URL changes are automatically tracked
 5. **Console Tracking**: Console logs, warnings, and errors are captured
 6. **Data Processing**: Events are processed and sent to your dashboard
-7. **User Identification**: Users are automatically identified using cookies
+7. **User Identification**: Users are identified server-side during authentication
 8. **Analytics**: View session recordings and analytics in your HumanBehavior dashboard
 
 ---

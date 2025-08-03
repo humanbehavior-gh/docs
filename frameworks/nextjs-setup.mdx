@@ -28,17 +28,10 @@ The HumanBehaviorTracker comes with a built-in React provider that handles all t
 
 ### Provider Options
 
-The `HumanBehaviorProvider` accepts these options:
+The `HumanBehaviorProvider` accepts an API key:
 
 ```tsx
-<HumanBehaviorProvider 
-  apiKey="your-api-key-here"
-  options={{
-    ingestionUrl: 'https://custom-endpoint.com', // Optional: Custom ingestion endpoint
-    logLevel: 'debug', // Optional: 'none' | 'error' | 'warn' | 'info' | 'debug'
-    redactFields: ['input[type="password"]', '.sensitive'] // Optional: Fields to redact
-  }}
->
+<HumanBehaviorProvider apiKey="your-api-key-here">
   {children}
 </HumanBehaviorProvider>
 ```
@@ -170,7 +163,7 @@ export default function CustomPageView() {
 Use the built-in `useUserTracking` hook to track user information:
 
 <Note>
-  **Placement:** Call `addUserInfo` after successful login or signup, not during component initialization.
+  **Placement:** Call `identifyUser` after successful login or signup, not during component initialization.
 </Note>
 
 ```tsx
@@ -182,7 +175,7 @@ import { useUserTracking } from 'humanbehavior-js/react'
 export default function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { addUserInfo } = useUserTracking()
+  const { identifyUser } = useUserTracking()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -190,21 +183,23 @@ export default function LoginForm() {
     // Your login logic here
     const user = await login(email, password)
     
-    // Track user info with HumanBehavior after successful login
+    // Identify user with HumanBehavior after successful login
     if (user) {
-      const result = await addUserInfo({
-        userProperties: {
+      const result = await identifyUser(
+        user.id, // Database user ID
+        {
           email: user.email,
           name: user.name,
           plan: user.plan,
           signupDate: user.signupDate
-        }
-      })
+        },
+        process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!
+      )
       
       if (result.success) {
-        console.log('User info tracked successfully')
+        console.log('User identified successfully:', result.actualUserId || user.id)
       } else {
-        console.error('Failed to track user info:', result.error)
+        console.error('Failed to identify user:', result.error)
       }
     }
   }
@@ -261,12 +256,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <HumanBehaviorProvider 
-          apiKey={apiKey}
-          options={{
-            logLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'error'
-          }}
-        >
+        <HumanBehaviorProvider apiKey={apiKey}>
           {children}
         </HumanBehaviorProvider>
       </body>
@@ -323,7 +313,7 @@ export default function MyComponent() {
 Hook for managing user information:
 
 <Note>
-  **Placement:** Call `addUserInfo` after successful login or signup, not during component initialization.
+  **Placement:** Call `identifyUser` after successful login or signup, not during component initialization.
 </Note>
 
 ```tsx
@@ -332,20 +322,16 @@ Hook for managing user information:
 import { useUserTracking } from 'humanbehavior-js/react'
 
 export default function UserProfile() {
-  const { addUserInfo } = useUserTracking()
+  const { identifyUser } = useUserTracking()
 
   const handleUpdateProfile = async (userData: any) => {
-    const result = await addUserInfo({
-      userProperties: {
-        name: userData.name,
-        email: userData.email,
-        plan: userData.plan
-      }
+    const userId = await identifyUser('user-123', {
+      name: userData.name,
+      email: userData.email,
+      plan: userData.plan
     })
     
-    if (result.success) {
-      console.log('User info updated successfully')
-    }
+    console.log('User identified successfully:', userId)
   }
 
   return (
@@ -410,17 +396,26 @@ export default function PrivacySettings() {
 
 ### Debug Mode
 
-Enable debug mode to see what's happening by setting the `logLevel` in the provider options:
+Enable debug mode to see what's happening by configuring logging after initialization:
 
 ```tsx
-<HumanBehaviorProvider 
-  apiKey="your-api-key-here"
-  options={{
-    logLevel: 'debug' // This will show detailed logs in the console
-  }}
->
-  {children}
-</HumanBehaviorProvider>
+'use client'
+
+import { useEffect } from 'react'
+import { useHumanBehavior } from 'humanbehavior-js/react'
+
+export default function DebugComponent() {
+  const tracker = useHumanBehavior()
+
+  useEffect(() => {
+    if (tracker) {
+      // Configure debug logging
+      tracker.configureLogging({ level: 'debug' })
+    }
+  }, [tracker])
+
+  return null
+}
 ```
 
 ### Check Connection
