@@ -38,11 +38,61 @@ The `HumanBehaviorProvider` accepts an API key:
 
 ### Add the Provider to Your App
 
-In your `app/layout.tsx` (App Router) or `pages/_app.tsx` (Pages Router):
+#### For App Router (Recommended Approach)
 
-#### For App Router (app/layout.tsx):
+**Step 1**: Create a separate providers file to maintain optimal performance:
+
+Create `app/providers.tsx`:
 ```tsx
-'use client' // This line is CRUCIAL - it tells Next.js this is a client component
+'use client' // Only the provider needs to be client-side
+
+import { HumanBehaviorProvider } from 'humanbehavior-js/react'
+
+export function Providers({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <HumanBehaviorProvider apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!}>
+      {children}
+    </HumanBehaviorProvider>
+  )
+}
+```
+
+**Step 2**: Import the providers in your layout (which stays a Server Component):
+
+In `app/layout.tsx`:
+```tsx
+import { Providers } from './providers'
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
+    </html>
+  )
+}
+```
+
+<Note>
+**Why use a separate providers file?** This pattern keeps your app layout as a Server Component while only making the provider client-side. This preserves the performance benefits of Server Components and ensures optimal rendering.
+</Note>
+
+#### Alternative: Direct Integration
+If you prefer a simpler setup (though less optimal), you can add the provider directly to your layout:
+
+```tsx
+'use client' // This makes the entire app client-side
 
 import { HumanBehaviorProvider } from 'humanbehavior-js/react'
 
@@ -235,13 +285,14 @@ Store your API key securely using environment variables:
 NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
-2. Update your layout to use the environment variable:
+2. The providers file already uses the environment variable (as shown above). You can add error handling:
+
 ```tsx
 'use client'
 
 import { HumanBehaviorProvider } from 'humanbehavior-js/react'
 
-export default function RootLayout({
+export function Providers({
   children,
 }: {
   children: React.ReactNode
@@ -250,17 +301,14 @@ export default function RootLayout({
   
   if (!apiKey) {
     console.error('HumanBehavior API key is missing')
+    // Return children without tracking in development
     return <>{children}</>
   }
 
   return (
-    <html lang="en">
-      <body>
-        <HumanBehaviorProvider apiKey={apiKey}>
-          {children}
-        </HumanBehaviorProvider>
-      </body>
-    </html>
+    <HumanBehaviorProvider apiKey={apiKey}>
+      {children}
+    </HumanBehaviorProvider>
   )
 }
 ```

@@ -56,5 +56,9 @@ description: 'Choose your framework below for optimized setup instructions and b
 </CardGroup>
 
 <Note>
+  **Frameworks with Server Components** (like Next.js 13+ App Router): For optimal performance, use a separate providers file marked with `'use client'` instead of adding the directive to your root layout. This preserves Server Component benefits while enabling client-side tracking.
+</Note>
+
+<Note>
   Don't see your framework listed? The standard JavaScript SDK works with any framework. Check our [API Reference](/api-reference/tracker) for complete documentation.
 </Note> 
