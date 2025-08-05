@@ -72,34 +72,11 @@ npm install humanbehavior-js
 ```html
 <head>
 	<!-- your other metadata here -->
-	<script>const tracker = HumanBehaviorTracker.init('YOUR_API_KEY_HERE');</script>
+	<script>const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);</script>
 </head>
 <body>
 	<!-- your website content here -->
 </body>
-```
-
-### Step 4: Identify users (Optional)
-
-For the best user tracking experience, identify users server-side in your authentication events:
-
-```javascript
-// In your NextAuth configuration
-events: {
-  async signIn({ user, account }) {
-    const { identifyUser } = require('humanbehavior-js');
-    
-    await identifyUser(
-      user.id, // Database user ID
-      {
-        email: user.email,
-        name: user.name,
-        provider: account?.provider
-      },
-      process.env.HUMANBEHAVIOR_API_KEY
-    );
-  }
-}
 ```
 
 ### Simple HTML Example
@@ -117,7 +94,7 @@ Here is a simple HTML website using the CDN version:
     <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
 
     <!-- Initialize the tracker -->
-    <script>const tracker = HumanBehaviorTracker.init('your-api-key');</script>
+    <script>const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);</script>
 
   </head>
   <body>
@@ -128,8 +105,34 @@ Here is a simple HTML website using the CDN version:
 ```
 
 <Note>
-  **That's it\!** The SDK automatically tracks user interactions, navigation, and console events. You don't need to add any custom event tracking unless you want to track specific business events. See [Custom Events](/essentials/custom-events) for more information.
+  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
 </Note>
+
+### Identify users (Optional)
+
+For the best user tracking experience, identify users client-side after successful authentication:
+
+```javascript
+// In your NextAuth configuration
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+events: {
+  async signIn({ user, account }) {
+    // Initialize HumanBehavior tracker
+    const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY);
+    
+    // Identify user with current endUserId
+    await tracker.identifyUser({
+      userProperties: {
+        email: user.email,
+        name: user.name,
+        userId: user.id,
+        provider: account?.provider
+      }
+    });
+  }
+}
+```
 
 ## Browser Compatibility
 
@@ -170,7 +173,7 @@ Once you've completed the setup:
 4. **Navigation Tracking**: SPA navigation and URL changes are automatically tracked
 5. **Console Tracking**: Console logs, warnings, and errors are captured
 6. **Data Processing**: Events are processed and sent to your dashboard
-7. **User Identification**: Users are identified server-side during authentication
+7. **User Identification**: Users are identified client-side after successful authentication
 8. **Analytics**: View session recordings and analytics in your HumanBehavior dashboard
 
 ---

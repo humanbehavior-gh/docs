@@ -7,8 +7,7 @@ description: 'Set up HumanBehavior SDK with Nuxt.js applications'
 
 ## Quickstart
 
-Human Behavior works seamlessly to record sessions on your Nuxt.js app. 
-Nuxt.js is a Vue.js framework for building server-side rendered applications.
+Human Behavior works seamlessly to record sessions on your Nuxt.js app.
 
 ## Step 1: Installation
 
@@ -29,7 +28,7 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 export default defineNuxtPlugin(() => {
   // Initialize the tracker once globally (client-side only)
-  const tracker = HumanBehaviorTracker.init('your-api-key-here');
+  const tracker = HumanBehaviorTracker.init(process.env.NUXT_PUBLIC_HUMANBEHAVIOR_API_KEY);
   
   return {
     provide: {
@@ -39,37 +38,11 @@ export default defineNuxtPlugin(() => {
 });
 ```
 
-### With Nuxt Router
+<Note>
+  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
+</Note>
 
-Nuxt automatically handles routing. Add navigation tracking in your `app.vue`:
-
-```vue
-<template>
-  <div>
-    <NuxtPage />
-  </div>
-</template>
-
-<script setup>
-import { useRoute } from 'vue-router';
-import { onMounted, watch } from 'vue';
-
-const route = useRoute();
-const { $tracker } = useNuxtApp();
-
-onMounted(() => {
-  // Track initial page load
-  $tracker.trackPageView();
-  
-  // Track route changes
-  watch(() => route.path, (newPath) => {
-    $tracker.trackPageView(newPath);
-  });
-});
-</script>
-```
-
-## Step 3: Using the Tracker in Components
+## Optional: Advanced Features
 
 ### Track Custom Events
 
@@ -101,44 +74,63 @@ async function handleButtonClick() {
 </script>
 ```
 
+### User Authentication Example
+
+```vue
+<template>
+  <div>
+    <form @submit.prevent="handleLogin">
+      <input v-model="email" type="email" placeholder="Email" />
+      <input v-model="password" type="password" placeholder="Password" />
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const email = ref('');
+const password = ref('');
+const { $tracker } = useNuxtApp();
+
+async function handleLogin() {
+  try {
+    // Your login logic here
+    const user = await login(email.value, password.value);
+    
+    if (user) {
+      // Identify user with current endUserId
+      await $tracker.identifyUser({
+        userProperties: {
+          email: user.email,
+          name: user.name,
+          userId: user.id,
+          plan: user.plan
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Login failed:', error);
+  }
+}
+</script>
+```
+
 ## Environment Variables
 
-Store your API key securely:
-
-1. Create a `.env` file:
-```
+```bash
+# .env
 NUXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
-2. Use in your plugin:
 ```typescript
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-export default defineNuxtPlugin(() => {
-  const config = useRuntimeConfig();
-  const tracker = HumanBehaviorTracker.init(config.public.humanBehaviorApiKey);
-  
-  return {
-    provide: {
-      tracker
-    }
-  };
-});
-```
-
-3. Add to `nuxt.config.ts`:
-```typescript
-export default defineNuxtConfig({
-  runtimeConfig: {
-    public: {
-      humanBehaviorApiKey: process.env.NUXT_PUBLIC_HUMANBEHAVIOR_API_KEY
-    }
-  }
-});
+// In your plugin
+const tracker = HumanBehaviorTracker.init(process.env.NUXT_PUBLIC_HUMANBEHAVIOR_API_KEY);
 ```
 
 ## Troubleshooting
 
-- Make sure the plugin is client-side only (`.client.ts` extension)
 - Check browser console for any error messages
-- Verify your API key is correct 
+- Verify your API key is correct
+- Ensure the tracker is initialized before any user interaction 

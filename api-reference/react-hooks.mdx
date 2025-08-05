@@ -27,6 +27,11 @@ interface HumanBehaviorProviderProps {
   apiKey?: string;
   client?: HumanBehaviorTracker;
   children: ReactNode;
+  options?: {
+    ingestionUrl?: string;
+    logLevel?: 'none' | 'error' | 'warn' | 'info' | 'debug';
+    redactFields?: string[];
+  };
 }
 ```
 
@@ -34,6 +39,7 @@ interface HumanBehaviorProviderProps {
 - `apiKey` (string, optional): Your HumanBehavior API key
 - `client` (HumanBehaviorTracker, optional): Existing tracker instance
 - `children` (ReactNode, required): React components to wrap
+- `options` (object, optional): Configuration options
 
 **Example:**
 ```javascript
@@ -41,7 +47,7 @@ import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 
 function App() {
   return (
-    <HumanBehaviorProvider apiKey="your-api-key-here">
+    <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
       <YourApp />
     </HumanBehaviorProvider>
   );
@@ -52,7 +58,7 @@ function App() {
 
 #### With API Key
 ```javascript
-<HumanBehaviorProvider apiKey="your-api-key-here">
+<HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
   <YourApp />
 </HumanBehaviorProvider>
 ```
@@ -61,9 +67,22 @@ function App() {
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = HumanBehaviorTracker.init('your-api-key');
+const tracker = HumanBehaviorTracker.init(process.env.REACT_APP_HUMANBEHAVIOR_API_KEY);
 
 <HumanBehaviorProvider client={tracker}>
+  <YourApp />
+</HumanBehaviorProvider>
+```
+
+#### With Options
+```javascript
+<HumanBehaviorProvider 
+  apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+  options={{
+    logLevel: 'debug',
+    redactFields: ['input[type="password"]']
+  }}
+>
   <YourApp />
 </HumanBehaviorProvider>
 ```
@@ -74,436 +93,207 @@ Hook that provides access to the HumanBehavior tracker instance.
 
 ### Returns
 
-Returns an object with the following methods:
+Returns the HumanBehaviorTracker instance with all available methods.
 
-```typescript
-interface HumanBehaviorInterface {
-  addEvent: (event: any) => void;
-  identifyUser: (userId: string, userProperties: Record<string, any>) => Promise<string>;
-  start: () => Promise<void>;
-  stop: () => Promise<void>;
-  setRedactedFields: (fields: string[]) => void;
-  isRedactionActive: () => boolean;
-  getRedactedFields: () => string[];
-  redact: (options?: RedactionOptions) => Promise<void>;
-  getUserInfo: () => {
-    endUserId: string | null;
-    sessionId: string;
-    isPreexistingUser: boolean;
-    initialized: boolean;
-  };
-  getSessionId: () => string;
-  getCurrentUrl: () => string;
-}
-```
-
-### Example
-
+**Example:**
 ```javascript
 import { useHumanBehavior } from 'humanbehavior-js/react';
 
 function MyComponent() {
   const tracker = useHumanBehavior();
-  
-  useEffect(() => {
-    tracker.start();
-  }, [tracker]);
-  
-  const handleClick = () => {
-    tracker.customEvent('button_click', { buttonId: 'my-button' });
+
+  const handleClick = async () => {
+    await tracker.customEvent('button_clicked', {
+      buttonLocation: 'header'
+    });
   };
-  
-  return <button onClick={handleClick}>Click me</button>;
+
+  return <button onClick={handleClick}>Click Me</button>;
 }
 ```
 
-## Available Methods
+## useUserTracking
 
-### `addEvent(event)`
+Hook for managing user identification.
 
-Adds a raw event to the session recording.
+### Returns
 
-**Parameters:**
-- `event` (object, required): Raw event object
+Returns an object with user tracking methods:
 
-**Returns:** `void`
+```typescript
+interface UserTrackingInterface {
+  identifyUser: ({ userProperties }: { userProperties: Record<string, any> }) => Promise<{ success: boolean; error?: any }>;
+}
+```
 
 **Example:**
 ```javascript
-const tracker = useHumanBehavior();
+import { useUserTracking } from 'humanbehavior-js/react';
 
-tracker.addEvent({
-  type: 'custom',
-  data: { action: 'test' },
-  timestamp: Date.now()
-});
+function LoginForm() {
+  const { identifyUser } = useUserTracking();
+
+  const handleLogin = async (user) => {
+    const result = await identifyUser({
+      userProperties: {
+        email: user.email,
+        name: user.name,
+        userId: user.id
+      }
+    });
+
+    if (result.success) {
+      console.log('User identified successfully');
+    } else {
+      console.error('Failed to identify user:', result.error);
+    }
+  };
+
+  return <button onClick={() => handleLogin(user)}>Login</button>;
+}
 ```
 
-### `identifyUser(userId, userProperties)`
+## useRedaction
 
-Identifies and tracks users across sessions with persistent user IDs and properties.
+Hook for managing data redaction.
 
-**Parameters:**
-- `userId` (string, required): Unique user identifier (should be stable across sessions)
-- `userProperties` (object, required): User properties to track
+### Returns
 
-**Returns:** `Promise<string>` - The user ID that was set
+Returns an object with redaction methods:
+
+```typescript
+interface RedactionInterface {
+  setRedactedFields: (fields: string[]) => void;
+  isRedactionActive: () => boolean;
+  getRedactedFields: () => string[];
+}
+```
 
 **Example:**
 ```javascript
-const tracker = useHumanBehavior();
+import { useRedaction } from 'humanbehavior-js/react';
 
-const userId = await tracker.identifyUser('user-123', {
-  email: 'user@example.com',
-  name: 'John Doe',
-  plan: 'premium'
-});
-```
+function PrivacySettings() {
+  const { setRedactedFields, isRedactionActive, getRedactedFields } = useRedaction();
 
-### `start()`
+  const handleEnableRedaction = () => {
+    setRedactedFields([
+      'input[type="password"]',
+      'input[name="ssn"]',
+      '.sensitive-data'
+    ]);
+  };
 
-Starts session recording.
+  const handleDisableRedaction = () => {
+    setRedactedFields([]);
+  };
 
-**Returns:** `Promise<void>`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-useEffect(() => {
-  tracker.start();
-}, [tracker]);
-```
-
-### `stop()`
-
-Stops session recording.
-
-**Returns:** `Promise<void>`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-const handleStop = () => {
-  tracker.stop();
-};
-```
-
-
-
-### `setRedactedFields(fields)`
-
-Sets the fields that should be redacted during recording.
-
-**Parameters:**
-- `fields` (string[], required): Array of CSS selectors for fields to redact
-
-**Returns:** `void`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-useEffect(() => {
-  tracker.setRedactedFields([
-    'input[type="password"]',
-    'input[type="email"]'
-  ]);
-}, [tracker]);
-```
-
-### `isRedactionActive()`
-
-Checks if redaction is currently active.
-
-**Returns:** `boolean`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-const isActive = tracker.isRedactionActive();
-console.log('Redaction active:', isActive);
-```
-
-### `getRedactedFields()`
-
-Gets the currently selected fields for redaction.
-
-**Returns:** `string[]`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-const fields = tracker.getRedactedFields();
-console.log('Redacted fields:', fields);
-```
-
-### `redact(options)`
-
-Enable data redaction for sensitive fields.
-
-**Parameters:**
-- `options` (RedactionOptions, optional): Redaction configuration
-
-**Returns:** `Promise<void>`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-await tracker.redact({
-  maskTextInputs: true,
-  maskAllText: false
-});
-```
-
-
-
-
-
-### `getUserInfo()`
-
-Get comprehensive user information.
-
-**Returns:** User information object
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-const userInfo = tracker.getUserInfo();
-console.log('User ID:', userInfo.endUserId);
-console.log('Session ID:', userInfo.sessionId);
-console.log('Is existing user:', userInfo.isPreexistingUser);
-```
-
-### `getSessionId()`
-
-Get the current session ID.
-
-**Returns:** `string`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-const sessionId = tracker.getSessionId();
-console.log('Current session:', sessionId);
-```
-
-### `getCurrentUrl()`
-
-Get the current URL being tracked.
-
-**Returns:** `string`
-
-**Example:**
-```javascript
-const tracker = useHumanBehavior();
-
-const currentUrl = tracker.getCurrentUrl();
-console.log('Current URL:', currentUrl);
-```
-
-
-
-
-
-## Context Usage
-
-### Direct Context Access
-
-You can access the context directly if needed:
-
-```javascript
-import { useContext } from 'react';
-import { HumanBehaviorContext } from 'humanbehavior-js/react';
-
-function MyComponent() {
-  const { humanBehavior, queueEvent } = useContext(HumanBehaviorContext);
-  
-  if (humanBehavior) {
-    // Tracker is initialized
-    humanBehavior.start();
-  } else {
-    // Tracker is not initialized yet, queue the event
-    queueEvent({ type: 'custom', data: { action: 'test' } });
-  }
-  
-  return <div>My Component</div>;
+  return (
+    <div>
+      <p>Redaction active: {isRedactionActive() ? 'Yes' : 'No'}</p>
+      <p>Redacted fields: {getRedactedFields().join(', ')}</p>
+      <button onClick={handleEnableRedaction}>Enable Redaction</button>
+      <button onClick={handleDisableRedaction}>Disable Redaction</button>
+    </div>
+  );
 }
 ```
 
 ## Error Handling
 
-### Provider Errors
+The hooks include built-in error handling and will throw descriptive errors if used incorrectly.
 
+### Common Errors
+
+**useHumanBehavior without Provider:**
 ```javascript
+// ❌ This will throw an error
+function MyComponent() {
+  const tracker = useHumanBehavior(); // Error: useHumanBehavior must be used within a HumanBehaviorProvider
+  return <div>My Component</div>;
+}
+
+// ✅ Wrap with provider
 function App() {
   return (
-    <HumanBehaviorProvider apiKey="invalid-key">
-      <ErrorBoundary>
-        <YourApp />
-      </ErrorBoundary>
+    <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
+      <MyComponent />
     </HumanBehaviorProvider>
   );
 }
 ```
 
-### Hook Errors
-
+**Missing API Key:**
 ```javascript
-function MyComponent() {
-  const tracker = useHumanBehavior();
-  
-  const handleAction = async () => {
-    try {
-      await tracker.customEvent('action', { data: 'value' });
-    } catch (error) {
-      console.error('Failed to track event:', error);
-    }
-  };
-  
-  return <button onClick={handleAction}>Action</button>;
-}
+// ❌ This will show a warning
+<HumanBehaviorProvider>
+  <YourApp />
+</HumanBehaviorProvider>
+
+// ✅ Provide API key
+<HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
+  <YourApp />
+</HumanBehaviorProvider>
 ```
 
-## SSR Compatibility
+## Server-Side Rendering (SSR)
 
-### Server-Side Rendering
-
-The provider automatically handles SSR:
+The React integration is SSR-safe and handles server-side rendering gracefully:
 
 ```javascript
-// Works in both client and server environments
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
 function App() {
   return (
-    <HumanBehaviorProvider apiKey="your-api-key">
+    <HumanBehaviorProvider 
+      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+      options={{
+        redactFields: ['input[type="password"]']
+      }}
+    >
       <YourApp />
     </HumanBehaviorProvider>
   );
 }
 ```
 
-### Hydration
-
-The SDK handles hydration gracefully:
-
-```javascript
-function MyComponent() {
-  const tracker = useHumanBehavior();
-  
-  useEffect(() => {
-    // This runs only on the client after hydration
-    tracker.start();
-  }, [tracker]);
-  
-  return <div>Content</div>;
-}
-```
-
 ## Performance Optimization
 
-### Memoization
+The hooks are optimized for performance and include:
 
-```javascript
-import { useCallback, useMemo } from 'react';
+- **Memoized callbacks** to prevent unnecessary re-renders
+- **Event queuing** for early calls before initialization
+- **Automatic cleanup** on component unmount
+- **SSR compatibility** with proper hydration handling
 
-function OptimizedComponent() {
+## TypeScript Support
+
+Full TypeScript support is included:
+
+```typescript
+import { useHumanBehavior, useUserTracking, useRedaction } from 'humanbehavior-js/react';
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
+function MyComponent() {
   const tracker = useHumanBehavior();
-  
-  const handleClick = useCallback(() => {
-    tracker.customEvent('button_click', { component: 'OptimizedComponent' });
-  }, [tracker]);
-  
-  const userInfo = useMemo(() => ({
-    email: 'user@example.com',
-    name: 'John Doe'
-  }), []);
-  
-  useEffect(() => {
-          tracker.identifyUser('user-123', userInfo);
-  }, [tracker, userInfo]);
-  
-  return <button onClick={handleClick}>Click me</button>;
+  const { identifyUser } = useUserTracking();
+  const { setRedactedFields } = useRedaction();
+
+  const handleUserLogin = async (user: User) => {
+    await identifyUser({
+      userProperties: {
+        email: user.email,
+        name: user.name,
+        userId: user.id
+      }
+    });
+  };
+
+  return <div>My Component</div>;
 }
-```
-
-### Conditional Tracking
-
-```javascript
-function ConditionalTracker({ shouldTrack }) {
-  const tracker = useHumanBehavior();
-  
-  useEffect(() => {
-    if (shouldTrack) {
-      tracker.start();
-    } else {
-      tracker.stop();
-    }
-  }, [shouldTrack, tracker]);
-  
-  return null;
-}
-```
-
-## Testing
-
-### Mock Provider
-
-```javascript
-// test-utils.js
-import { HumanBehaviorProvider } from 'humanbehavior-js/react';
-
-const mockTracker = {
-  addEvent: jest.fn(),
-  identifyUser: jest.fn(),
-  customEvent: jest.fn(),
-  start: jest.fn(),
-  stop: jest.fn(),
-  viewLogs: jest.fn(),
-  setRedactedFields: jest.fn(),
-  isRedactionActive: jest.fn(),
-  getRedactedFields: jest.fn(),
-  auth: jest.fn()
-};
-
-export function TestProvider({ children }) {
-  return (
-    <HumanBehaviorProvider client={mockTracker}>
-      {children}
-    </HumanBehaviorProvider>
-  );
-}
-```
-
-### Component Testing
-
-```javascript
-import { render, screen } from '@testing-library/react';
-import { TestProvider } from './test-utils';
-import MyComponent from './MyComponent';
-
-test('tracks button click', async () => {
-  render(
-    <TestProvider>
-      <MyComponent />
-    </TestProvider>
-  );
-  
-  const button = screen.getByText('Click me');
-  await button.click();
-  
-  expect(mockTracker.customEvent).toHaveBeenCalledWith(
-    'button_click',
-    expect.any(Object)
-  );
-});
-```
-
-<Note>
-  **Version 0.1.6**: Enhanced React integration with improved SSR support, better error handling, full access to all tracker methods through the hook interface, and comprehensive health endpoint monitoring.
-</Note> 
+``` 

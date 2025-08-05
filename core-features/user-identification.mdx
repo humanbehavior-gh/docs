@@ -12,27 +12,30 @@ Initializing the SDK handles user authentication automatically.
 
 ## User Identification
 
-### Server-side Identification (Recommended)
+### Client-side Identification (Recommended)
 
-For the best user tracking experience, identify users server-side in your authentication events. This ensures users are identified immediately upon sign-in and maintains session continuity.
+For the best user tracking experience, identify users client-side after successful authentication. This ensures users are identified with their current session and maintains session continuity.
 
 **NextAuth.js Example:**
 ```javascript
 // In your NextAuth configuration
-import { identifyUser } from 'humanbehavior-js';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 export default NextAuth({
   events: {
     async signIn({ user, account }) {
-      await identifyUser(
-        user.id, // Database user ID
-        {
+      // Initialize HumanBehavior tracker
+      const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY);
+      
+      // Identify user with current endUserId
+      await tracker.identifyUser({
+        userProperties: {
           email: user.email,
           name: user.name,
+          userId: user.id,
           provider: account?.provider
-        },
-        process.env.HUMANBEHAVIOR_API_KEY
-      );
+        }
+      });
     }
   }
 });
@@ -40,20 +43,57 @@ export default NextAuth({
 
 **Firebase Auth Example:**
 ```javascript
-// In your Firebase functions
-exports.onUserCreated = functions.auth.user().onCreate((user) => {
-  const { identifyUser } = require('humanbehavior-js');
-  
-  return identifyUser(
-    user.uid, // Firebase user ID
-    {
-      email: user.email,
-      displayName: user.displayName,
-      provider: user.providerData[0]?.providerId
-    },
-    process.env.HUMANBEHAVIOR_API_KEY
-  );
+// In your Firebase auth state listener
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    // Initialize HumanBehavior tracker
+    const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY);
+    
+    // Identify user with current endUserId
+    await tracker.identifyUser({
+      userProperties: {
+        email: user.email,
+        name: user.displayName,
+        image: user.photoURL,
+        userId: user.uid,
+        provider: user.providerData[0]?.providerId
+      }
+    });
+  }
 });
+```
+
+**Google Auth Example:**
+```javascript
+// In your Google Auth sign-in handler
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const handleGoogleSignIn = async () => {
+  try {
+    // Your Google Auth logic here
+    const user = await signInWithGoogle();
+    
+    if (user) {
+      // Initialize HumanBehavior tracker
+      const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY);
+      
+      // Identify user with current endUserId
+      await tracker.identifyUser({
+        userProperties: {
+          email: user.email,
+          name: user.displayName,
+          image: user.photoURL,
+          userId: user.uid,
+          provider: 'google'
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Google sign-in failed:', error);
+  }
+};
 ```
 
 ### Client-side Identification
@@ -65,9 +105,8 @@ You can also identify users client-side after successful authentication or for c
 </Note>
 
 ```javascript
-// After successful login/signup, identify the user with their actual ID
-const userId = await tracker.identifyUser({
-  userId: user.id,
+// After successful login/signup, identify the user with their current session
+await tracker.identifyUser({
   userProperties: {
     email: user.email,
     name: user.name,
@@ -100,15 +139,14 @@ function LoginForm() {
 
       // Upon successful authentication, identify user in the current session
       if (loginSuccessful) {
-        const userId = await tracker.identifyUser({
-          userId: user.id,
+        await tracker.identifyUser({
           userProperties: {
             email: user.email,
             name: user.name,
             plan: 'premium'
           }
         });
-        console.log('User successfully identified:', userId);
+        console.log('User successfully identified:', endUserId);
       }
 
     }
@@ -145,12 +183,12 @@ function LogOutButton() {
 
 | Property/Option         | Type     | Description                                                        |
 |------------------------|----------|--------------------------------------------------------------------|
-| `userId`               | string   | Unique user ID (auto-generated and stored in a cookie by default).  |
+| `endUserId`            | string   | Unique user ID (auto-generated and stored in a cookie by default).  |
 | `identifyUser()`       | function | Identify user with properties (see below).                         |
 | `userProperties`       | object   | Any key-value pairs (e.g., `email`, `name`, `plan`, etc.).         |
 | `cookie`               | string   | Stores user ID for 365 days.                                       |
 
-**`identifyUser(userId, userProperties)` fields:**
+**`identifyUser({ userProperties })` fields:**
 
 | Field         | Type     | Description                                 |
 |-------------- |----------|---------------------------------------------|
