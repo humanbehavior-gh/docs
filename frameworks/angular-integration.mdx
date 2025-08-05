@@ -7,8 +7,7 @@ description: 'Set up HumanBehavior SDK with Angular applications'
 
 ## Quickstart
 
-Human Behavior works seamlessly to record sessions on your Angular app. 
-Angular is a platform for building mobile and desktop web applications.
+Human Behavior works seamlessly to record sessions on your Angular app.
 
 ## Step 1: Installation
 
@@ -30,43 +29,17 @@ import { AppModule } from './app/app.module';
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 // Initialize the tracker once globally
-const tracker = HumanBehaviorTracker.init('your-api-key-here');
+const tracker = HumanBehaviorTracker.init(process.env.NG_APP_HUMANBEHAVIOR_API_KEY);
 
 platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.error(err));
 ```
 
-### With Angular Router
+<Note>
+  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
+</Note>
 
-If you're using Angular Router, add navigation tracking in your `app.component.ts`:
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-@Component({
-  selector: 'app-root',
-  template: '<router-outlet></router-outlet>'
-})
-export class AppComponent implements OnInit {
-  private tracker = HumanBehaviorTracker.init('your-api-key-here');
-
-  constructor(private router: Router) {}
-
-  ngOnInit() {
-    // Track route changes
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      this.tracker.trackPageView(event.urlAfterRedirects);
-    });
-  }
-}
-```
-
-## Step 3: Using the Tracker in Components
+## Optional: Advanced Features
 
 ### Track Custom Events
 
@@ -84,7 +57,7 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
   `
 })
 export class MyComponent implements OnInit {
-  private tracker = HumanBehaviorTracker.init('your-api-key-here');
+  private tracker = HumanBehaviorTracker.init(process.env.NG_APP_HUMANBEHAVIOR_API_KEY);
 
   ngOnInit() {
     // Track component view
@@ -101,28 +74,64 @@ export class MyComponent implements OnInit {
 }
 ```
 
-## Environment Variables
+### User Authentication Example
 
-Store your API key securely:
-
-1. Create a `src/environments/environment.ts` file:
 ```typescript
-export const environment = {
-  production: false,
-  humanBehaviorApiKey: 'your-api-key-here'
-};
-```
-
-2. Use in your app:
-```typescript
-import { environment } from '../environments/environment';
+import { Component } from '@angular/core';
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = HumanBehaviorTracker.init(environment.humanBehaviorApiKey);
+@Component({
+  selector: 'app-login-form',
+  template: `
+    <form (ngSubmit)="handleLogin()">
+      <input [(ngModel)]="email" type="email" placeholder="Email" name="email" />
+      <input [(ngModel)]="password" type="password" placeholder="Password" name="password" />
+      <button type="submit">Login</button>
+    </form>
+  `
+})
+export class LoginFormComponent {
+  email = '';
+  password = '';
+  private tracker = HumanBehaviorTracker.init(process.env.NG_APP_HUMANBEHAVIOR_API_KEY);
+
+  async handleLogin() {
+    try {
+      // Your login logic here
+      const user = await this.login(this.email, this.password);
+      
+      if (user) {
+        // Identify user with current endUserId
+        await this.tracker.identifyUser({
+          userProperties: {
+            email: user.email,
+            name: user.name,
+            userId: user.id,
+            plan: user.plan
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  }
+}
+```
+
+## Environment Variables
+
+```bash
+# .env
+NG_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+```typescript
+// In your code
+const tracker = HumanBehaviorTracker.init(process.env.NG_APP_HUMANBEHAVIOR_API_KEY);
 ```
 
 ## Troubleshooting
 
-- Make sure the tracker is initialized before tracking events
 - Check browser console for any error messages
-- Verify your API key is correct 
+- Verify your API key is correct
+- Ensure the tracker is initialized before any user interaction 

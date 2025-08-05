@@ -7,8 +7,7 @@ description: 'Set up HumanBehavior SDK with Vue.js applications'
 
 ## Quickstart
 
-Human Behavior works seamlessly to record sessions on your Vue.js app. 
-Vue.js is a progressive JavaScript framework for building user interfaces.
+Human Behavior works seamlessly to record sessions on your Vue.js app.
 
 ## Step 1: Installation
 
@@ -30,45 +29,18 @@ import App from './App.vue'
 import { HumanBehaviorTracker } from 'humanbehavior-js'
 
 // Initialize the tracker once globally
-const tracker = HumanBehaviorTracker.init('your-api-key-here')
+const tracker = HumanBehaviorTracker.init(process.env.VUE_APP_HUMANBEHAVIOR_API_KEY)
 
 // Create and mount the app
 const app = createApp(App)
 app.mount('#app')
 ```
 
-### With Vue Router
+<Note>
+  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
+</Note>
 
-If you're using Vue Router, add navigation tracking:
-
-```javascript
-import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
-import App from './App.vue'
-import { HumanBehaviorTracker } from 'humanbehavior-js'
-
-// Initialize the tracker once globally
-const tracker = HumanBehaviorTracker.init('your-api-key-here')
-
-// Create router
-const router = createRouter({
-  history: createWebHistory(),
-  routes: [
-    // your routes
-  ]
-})
-
-// Track route changes
-router.afterEach((to) => {
-  tracker.trackPageView(to.fullPath)
-})
-
-const app = createApp(App)
-app.use(router)
-app.mount('#app')
-```
-
-## Step 3: Using the Tracker in Components
+## Optional: Advanced Features
 
 ### Track Custom Events
 
@@ -87,7 +59,7 @@ export default {
   name: 'MyComponent',
   mounted() {
     // Get the global tracker instance
-    const tracker = HumanBehaviorTracker.init('your-api-key-here')
+    const tracker = HumanBehaviorTracker.init(process.env.VUE_APP_HUMANBEHAVIOR_API_KEY)
     
     // Track component view
     tracker.customEvent('component_viewed', {
@@ -96,7 +68,7 @@ export default {
   },
   methods: {
     async handleButtonClick() {
-      const tracker = HumanBehaviorTracker.init('your-api-key-here')
+      const tracker = HumanBehaviorTracker.init(process.env.VUE_APP_HUMANBEHAVIOR_API_KEY)
       await tracker.customEvent('button_clicked', {
         buttonLocation: 'header'
       })
@@ -106,25 +78,73 @@ export default {
 </script>
 ```
 
-## Environment Variables
+### User Authentication Example
 
-Store your API key securely:
+```vue
+<template>
+  <div>
+    <form @submit.prevent="handleLogin">
+      <input v-model="email" type="email" placeholder="Email" />
+      <input v-model="password" type="password" placeholder="Password" />
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</template>
 
-1. Create a `.env` file:
-```
-VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
-```
-
-2. Use in your app:
-```javascript
+<script>
 import { HumanBehaviorTracker } from 'humanbehavior-js'
 
-const apiKey = import.meta.env.VITE_HUMANBEHAVIOR_API_KEY
-const tracker = HumanBehaviorTracker.init(apiKey)
+export default {
+  name: 'LoginForm',
+  data() {
+    return {
+      email: '',
+      password: ''
+    }
+  },
+  methods: {
+    async handleLogin() {
+      try {
+        // Your login logic here
+        const user = await this.login(this.email, this.password)
+        
+        if (user) {
+          // Initialize HumanBehavior tracker
+          const tracker = HumanBehaviorTracker.init(process.env.VUE_APP_HUMANBEHAVIOR_API_KEY)
+          
+          // Identify user with current endUserId
+          await tracker.identifyUser({
+            userProperties: {
+              email: user.email,
+              name: user.name,
+              userId: user.id,
+              plan: user.plan
+            }
+          })
+        }
+      } catch (error) {
+        console.error('Login failed:', error)
+      }
+    }
+  }
+}
+</script>
+```
+
+## Environment Variables
+
+```bash
+# .env
+VUE_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+```javascript
+// In your code
+const tracker = HumanBehaviorTracker.init(process.env.VUE_APP_HUMANBEHAVIOR_API_KEY)
 ```
 
 ## Troubleshooting
 
-- Make sure the tracker is initialized before tracking events
 - Check browser console for any error messages
-- Verify your API key is correct 
+- Verify your API key is correct
+- Ensure the tracker is initialized before any user interaction 

@@ -26,7 +26,17 @@ Static method to initialize the tracker with global persistence.
 static init(
   apiKey: string, 
   options?: {
+    ingestionUrl?: string;
+    logLevel?: 'none' | 'error' | 'warn' | 'info' | 'debug';
     redactFields?: string[];
+    enableAutomaticTracking?: boolean;
+    automaticTrackingOptions?: {
+      trackButtons?: boolean;
+      trackLinks?: boolean;
+      trackForms?: boolean;
+      includeText?: boolean;
+      includeClasses?: boolean;
+    };
   }
 ): HumanBehaviorTracker
 ```
@@ -34,14 +44,24 @@ static init(
 **Parameters:**
 - `apiKey` (string): Your HumanBehavior API key
 - `options` (object, optional): Configuration options
+  - `ingestionUrl` (string, optional): Custom ingestion URL
+  - `logLevel` (string, optional): Logging level
   - `redactFields` (string[], optional): CSS selectors for fields to redact
+  - `enableAutomaticTracking` (boolean, optional): Enable automatic tracking (default: true)
+  - `automaticTrackingOptions` (object, optional): Automatic tracking configuration
 
 **Returns:** `HumanBehaviorTracker` instance
 
 **Example:**
 ```javascript
-const tracker = HumanBehaviorTracker.init('your-api-key', {
-  redactFields: ['input[type="password"]', '#email']
+const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY, {
+  redactFields: ['input[type="password"]', '#email'],
+  logLevel: 'debug',
+  automaticTrackingOptions: {
+    trackButtons: true,
+    trackLinks: true,
+    trackForms: true
+  }
 });
 ```
 
@@ -73,16 +93,36 @@ async stop(): Promise<void>
 await tracker.stop();
 ```
 
+### `customEvent(eventName, properties?)`
+
+Track a custom event with optional properties.
+
+```typescript
+async customEvent(eventName: string, properties?: Record<string, any>): Promise<void>
+```
+
+**Parameters:**
+- `eventName` (string): Name of the custom event
+- `properties` (object, optional): Additional event properties
+
+**Example:**
+```javascript
+await tracker.customEvent('button_clicked', {
+  buttonLocation: 'header',
+  userId: 'user123'
+});
+```
+
 ### `addEvent(event)`
 
-Add a custom event to the recording queue.
+Add a raw event to the recording queue.
 
 ```typescript
 async addEvent(event: any): Promise<void>
 ```
 
 **Parameters:**
-- `event` (any): Event object to record
+- `event` (any): Raw event object to record
 
 **Example:**
 ```javascript
@@ -94,148 +134,105 @@ await tracker.addEvent({
 
 ## User Management
 
-### Server-side User Identification
+### `identifyUser({ userProperties })`
 
-The server-side `identifyUser` function is used for identifying users during authentication events and server-side user management. This ensures users are properly identified before any client-side tracking begins.
-
-```typescript
-import { identifyUser } from 'humanbehavior-js';
-
-async identifyUser(
-  userId: string,
-  userData: {
-    email: string;
-    name?: string;
-    image?: string;
-    provider?: string;
-    [key: string]: any;
-  },
-  apiKey: string
-): Promise<{ success: boolean; error?: string; actualUserId?: string }>
-```
-
-**Parameters:**
-- `userId` (string): Stable unique identifier (database user ID recommended)
-- `userData` (object): User properties including email, name, image, provider, etc.
-- `apiKey` (string): Your HumanBehavior API key
-
-**Returns:** `Promise<{ success: boolean; error?: string; actualUserId?: string }>`
-
-**Example - NextAuth Integration:**
-```javascript
-// In your NextAuth configuration
-import { identifyUser } from 'humanbehavior-js';
-
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  // ... other config
-  events: {
-    async signIn({ user, account, profile, isNewUser }) {
-      if (user.email && process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY) {
-        const result = await identifyUser(
-          user.id!, // Database user ID
-          {
-            email: user.email,
-            name: user.name || undefined,
-            image: user.image || undefined,
-            provider: account?.provider || 'unknown'
-          },
-          process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY
-        );
-        
-        if (result.success) {
-          console.log(`✅ User identified successfully for ${user.email}`);
-        } else {
-          console.error(`❌ Failed to identify user: ${result.error}`);
-        }
-      }
-    }
-  }
-});
-```
-
-**Example - Firebase Auth:**
-```javascript
-// In your Firebase auth state listener
-import { identifyUser } from 'humanbehavior-js';
-
-onAuthStateChanged(auth, async (user) => {
-  if (user && process.env.HUMANBEHAVIOR_API_KEY) {
-    const result = await identifyUser(
-      user.uid, // Firebase UID
-      {
-        email: user.email,
-        name: user.displayName,
-        image: user.photoURL,
-        provider: user.providerData[0]?.providerId
-      },
-      process.env.HUMANBEHAVIOR_API_KEY
-    );
-  }
-});
-```
-
-### Client-side User Identification
-
-For client-side user identification and client-only applications, use the tracker instance method:
+Identify a user with their properties. This method maintains the current `endUserId` and merges user properties.
 
 ```typescript
 async identifyUser(
-  { userId, userProperties }: { 
-    userId?: string, 
+  { userProperties }: { 
     userProperties: Record<string, any> 
   }
 ): Promise<string>
 ```
 
 **Parameters:**
-- `userId` (string, optional): User identifier
-- `userProperties` (object): User properties
+- `userProperties` (object): User properties including email, name, image, provider, etc.
 
-**Returns:** `Promise<string>` - The user ID that was set
+**Returns:** `Promise<string>` - The current endUserId
 
 **Example:**
 ```javascript
-// Client-side usage for client-only applications
-const userId = await tracker.identifyUser({
-  userId: user.id,
+await tracker.identifyUser({
   userProperties: {
     email: user.email,
     name: user.name,
-    plan: user.plan
+    userId: user.id,
+    provider: account?.provider
   }
 });
 ```
 
+### `getUserAttributes()`
 
-
-
-
-
-
-## Data Redaction
-
-### `redact(options?)`
-
-Enable data redaction for sensitive fields.
+Get current user attributes.
 
 ```typescript
-async redact(options?: RedactionOptions): Promise<void>
+getUserAttributes(): Record<string, any>
 ```
 
-**Parameters:**
-- `options` (RedactionOptions, optional): Redaction configuration
+**Returns:** Object containing current user properties
 
 **Example:**
 ```javascript
-await tracker.redact({
-  maskTextInputs: true,
-  maskAllText: false
-});
+const userAttributes = tracker.getUserAttributes();
+console.log(userAttributes); // { email: 'user@example.com', name: 'John Doe' }
 ```
+
+### `logout()`
+
+Clear user identification and reset to anonymous state.
+
+```typescript
+logout(): void
+```
+
+**Example:**
+```javascript
+tracker.logout();
+```
+
+## Navigation Tracking
+
+### `trackPageView(url?)`
+
+Track a page view event.
+
+```typescript
+async trackPageView(url?: string): Promise<void>
+```
+
+**Parameters:**
+- `url` (string, optional): URL to track (defaults to current URL)
+
+**Example:**
+```javascript
+await tracker.trackPageView('/dashboard');
+```
+
+### `trackNavigationEvent(type, fromUrl, toUrl)`
+
+Track a navigation event.
+
+```typescript
+async trackNavigationEvent(type: string, fromUrl: string, toUrl: string): Promise<void>
+```
+
+**Parameters:**
+- `type` (string): Navigation type (e.g., 'push', 'pop', 'replace')
+- `fromUrl` (string): Previous URL
+- `toUrl` (string): New URL
+
+**Example:**
+```javascript
+await tracker.trackNavigationEvent('push', '/home', '/dashboard');
+```
+
+## Redaction Management
 
 ### `setRedactedFields(fields)`
 
-Set specific fields to be redacted.
+Set fields to be redacted from recordings.
 
 ```typescript
 setRedactedFields(fields: string[]): void
@@ -248,7 +245,7 @@ setRedactedFields(fields: string[]): void
 ```javascript
 tracker.setRedactedFields([
   'input[type="password"]',
-  '#email-field',
+  '#email',
   '.sensitive-data'
 ]);
 ```
@@ -261,32 +258,75 @@ Check if redaction is currently active.
 isRedactionActive(): boolean
 ```
 
-**Returns:** `boolean`
+**Returns:** `boolean` - Whether redaction is active
 
 **Example:**
 ```javascript
-if (tracker.isRedactionActive()) {
-  console.log('Redaction is enabled');
-}
+const isActive = tracker.isRedactionActive();
 ```
 
 ### `getRedactedFields()`
 
-Get the currently selected fields for redaction.
+Get current redacted fields.
 
 ```typescript
 getRedactedFields(): string[]
 ```
 
-**Returns:** `string[]`
+**Returns:** `string[]` - Array of current redacted field selectors
 
 **Example:**
 ```javascript
 const fields = tracker.getRedactedFields();
-console.log('Redacted fields:', fields);
 ```
 
-## User Information
+### `redact(options?)`
+
+Apply redaction to current session.
+
+```typescript
+async redact(options?: RedactionOptions): Promise<void>
+```
+
+**Parameters:**
+- `options` (object, optional): Redaction options
+
+**Example:**
+```javascript
+await tracker.redact();
+```
+
+## Session Information
+
+### `getSessionId()`
+
+Get the current session ID.
+
+```typescript
+getSessionId(): string
+```
+
+**Returns:** `string` - Current session ID
+
+**Example:**
+```javascript
+const sessionId = tracker.getSessionId();
+```
+
+### `getCurrentUrl()`
+
+Get the current URL.
+
+```typescript
+getCurrentUrl(): string
+```
+
+**Returns:** `string` - Current URL
+
+**Example:**
+```javascript
+const currentUrl = tracker.getCurrentUrl();
+```
 
 ### `getUserInfo()`
 
@@ -301,38 +341,135 @@ getUserInfo(): {
 }
 ```
 
-**Returns:** User information object
+**Returns:** Object containing user information
 
 **Example:**
 ```javascript
 const userInfo = tracker.getUserInfo();
-console.log('User ID:', userInfo.endUserId);
-console.log('Session ID:', userInfo.sessionId);
-console.log('Is existing user:', userInfo.isPreexistingUser);
+console.log(userInfo.endUserId); // Current endUserId
+console.log(userInfo.sessionId); // Current sessionId
 ```
 
-### `getSessionId()`
+### `isPreexistingUser()`
 
-Get the current session ID.
+Check if the current user is preexisting.
 
 ```typescript
-getSessionId(): string
+isPreexistingUser(): boolean
 ```
 
-**Returns:** `string`
+**Returns:** `boolean` - Whether user is preexisting
 
 **Example:**
 ```javascript
-const sessionId = tracker.getSessionId();
-console.log('Current session:', sessionId);
+const isPreexisting = tracker.isPreexistingUser();
 ```
 
-### `getCurrentUrl()`
+## Connection Management
 
-Get the current URL being tracked.
+### `testConnection()`
+
+Test connection to the HumanBehavior server.
 
 ```typescript
-getCurrentUrl(): string
+async testConnection(): Promise<{ success: boolean; error?: string }>
 ```
 
-**Returns:** `string`
+**Returns:** Object with connection status
+
+**Example:**
+```javascript
+const result = await tracker.testConnection();
+if (result.success) {
+  console.log('Connection successful');
+} else {
+  console.log('Connection failed:', result.error);
+}
+```
+
+### `getConnectionStatus()`
+
+Get detailed connection status and recommendations.
+
+```typescript
+getConnectionStatus(): {
+  blocked: boolean;
+  recommendations: string[];
+}
+```
+
+**Returns:** Object with connection status and recommendations
+
+**Example:**
+```javascript
+const status = tracker.getConnectionStatus();
+if (status.blocked) {
+  console.log('Connection blocked. Recommendations:', status.recommendations);
+}
+```
+
+## Logging and Debugging
+
+### `viewLogs()`
+
+View stored logs (if available).
+
+```typescript
+viewLogs(): void
+```
+
+**Example:**
+```javascript
+tracker.viewLogs();
+```
+
+### `configureLogging(config)`
+
+Configure logging options.
+
+```typescript
+static configureLogging(config: {
+  level?: 'none' | 'error' | 'warn' | 'info' | 'debug';
+  enableConsole?: boolean;
+  enableStorage?: boolean;
+}): void
+```
+
+**Parameters:**
+- `config` (object): Logging configuration
+  - `level` (string, optional): Log level
+  - `enableConsole` (boolean, optional): Enable console logging
+  - `enableStorage` (boolean, optional): Enable storage logging
+
+**Example:**
+```javascript
+HumanBehaviorTracker.configureLogging({
+  level: 'debug',
+  enableConsole: true,
+  enableStorage: false
+});
+```
+
+## Snapshot Information
+
+### `getSnapshotFrequencyInfo()`
+
+Get information about snapshot frequency and timing.
+
+```typescript
+getSnapshotFrequencyInfo(): {
+  sessionDuration: number;
+  currentInterval: number;
+  currentThreshold: number;
+  phase: string;
+}
+```
+
+**Returns:** Object with snapshot frequency information
+
+**Example:**
+```javascript
+const info = tracker.getSnapshotFrequencyInfo();
+console.log('Session duration:', info.sessionDuration);
+console.log('Current phase:', info.phase);
+```

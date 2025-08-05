@@ -1,5 +1,5 @@
 ---
-title: 'Next.JS'
+title: 'Next.js'
 description: 'Set up HumanBehavior SDK with Next.js applications'
 ---
 
@@ -7,10 +7,7 @@ description: 'Set up HumanBehavior SDK with Next.js applications'
 
 ## Quickstart
 
-Human Behavior works seamlessly to record sessions on your Next.js app. 
-Next.js is a React framework that can run code on both the server (Node.js) and in the browser. 
-Human Behavior must be used in <b>Client Components</b> only!
-
+Human Behavior works seamlessly to record sessions on your Next.js app.
 
 ## Step 1: Installation
 
@@ -22,25 +19,11 @@ yarn add humanbehavior-js
 
 ## Step 2: Basic Setup
 
-### Use the Built-in React Provider
+### Add the Tracker to Your App
 
-The HumanBehaviorTracker comes with a built-in React provider that handles all the complexity for you! No need to create your own.
+Use the React provider for the best integration and automatic tracking:
 
-### Provider Options
-
-The `HumanBehaviorProvider` accepts an API key:
-
-```tsx
-<HumanBehaviorProvider apiKey="your-api-key-here">
-  {children}
-</HumanBehaviorProvider>
-```
-
-### Add the Provider to Your App
-
-#### For App Router (Recommended Approach)
-
-**Step 1**: Create a separate providers file to maintain optimal performance:
+**Step 1**: Create a separate providers file for client-side code:
 
 Create `app/providers.tsx`:
 ```tsx
@@ -85,412 +68,88 @@ export default function RootLayout({
 ```
 
 <Note>
-**Why use a separate providers file?** This pattern keeps your app layout as a Server Component while only making the provider client-side. This preserves the performance benefits of Server Components and ensures optimal rendering.
+  **Why use a separate providers file?** This pattern keeps your app layout as a Server Component while only making the provider client-side. This preserves the performance benefits of Server Components and ensures optimal rendering.
 </Note>
 
-#### Alternative: Direct Integration
-If you prefer a simpler setup (though less optimal), you can add the provider directly to your layout:
+<Note>
+  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
+</Note>
 
-```tsx
-'use client' // This makes the entire app client-side
+## Alternative: Manual Initialization
 
-import { HumanBehaviorProvider } from 'humanbehavior-js/react'
+If you prefer manual setup, you can initialize the tracker directly:
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <html lang="en">
-      <body>
-        <HumanBehaviorProvider apiKey="your-api-key-here">
-          {children}
-        </HumanBehaviorProvider>
-      </body>
-    </html>
-  )
-}
-```
-
-#### For Pages Router (pages/_app.tsx):
 ```tsx
 'use client' // This line is CRUCIAL - it tells Next.js this is a client component
 
-import type { AppProps } from 'next/app'
-import { HumanBehaviorProvider } from 'humanbehavior-js/react'
+import { useEffect } from 'react';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-export default function App({ Component, pageProps }: AppProps) {
-  return (
-    <HumanBehaviorProvider apiKey="your-api-key-here">
-      <Component {...pageProps} />
-    </HumanBehaviorProvider>
-  )
+function MyApp({ Component, pageProps }) {
+  useEffect(() => {
+    // Initialize the tracker once globally
+    const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY);
+  }, []);
+
+  return <Component {...pageProps} />;
 }
+
+export default MyApp;
 ```
 
-## Step 3: Using the Tracker in Your Components
+## Optional: Advanced Features
 
 ### Track Custom Events
 
-Use the built-in `useHumanBehavior` hook to track custom events:
-
 ```tsx
 'use client'
 
-import { useEffect } from 'react'
-import { useHumanBehavior } from 'humanbehavior-js/react'
+import { useUserTracking } from 'humanbehavior-js/react';
 
-export default function MyComponent() {
-  const tracker = useHumanBehavior()
-
-  useEffect(() => {
-    // Track a custom event when component loads
-    tracker.customEvent('component_viewed', {
-      componentName: 'MyComponent',
-      timestamp: new Date().toISOString()
-    })
-  }, [tracker])
+function MyComponent() {
+  const { identifyUser } = useUserTracking();
 
   const handleButtonClick = async () => {
-    await tracker.customEvent('special_button_clicked', {
-      buttonLocation: 'header',
-      userAction: 'clicked_cta'
-    })
-    
-    // Your other button logic here
-  }
+    // Track custom event
+    await tracker.customEvent('button_clicked', {
+      buttonLocation: 'header'
+    });
+  };
+
+  const handleLogin = async (user) => {
+    // Identify user after successful authentication
+    await identifyUser({
+      userProperties: {
+        email: user.email,
+        name: user.name,
+        userId: user.id
+      }
+    });
+  };
 
   return (
     <div>
-      <h1>My Component</h1>
-      <button onClick={handleButtonClick}>
-        Click Me
-      </button>
+      <button onClick={handleButtonClick}>Click Me</button>
     </div>
-  )
+  );
 }
 ```
 
-### Automatic Page View Tracking
+## Environment Variables
 
-Good news! The `HumanBehaviorProvider` automatically tracks page views for you. It handles:
-
-- Initial page loads
-- Route changes (pushState/replaceState)
-- Back/forward navigation (popstate)
-- Hash changes
-
-No additional setup required! Page views are tracked automatically when you use the provider.
-
-If you need to manually track a page view for some reason, you can still do it:
-
-```tsx
-'use client'
-
-import { useHumanBehavior } from 'humanbehavior-js/react'
-
-export default function CustomPageView() {
-  const tracker = useHumanBehavior()
-
-  const handleCustomPageView = () => {
-    // Track a custom page view
-    tracker.trackPageView('/custom-page')
-  }
-
-  return (
-    <button onClick={handleCustomPageView}>
-      Track Custom Page View
-    </button>
-  )
-}
-```
-
-## Step 4: Advanced Usage
-
-<Expandable title="User Authentication">
-
-Use the built-in `useUserTracking` hook to track user information:
-
-<Note>
-  **Placement:** Call `identifyUser` after successful login or signup, not during component initialization.
-</Note>
-
-```tsx
-'use client'
-
-import { useState } from 'react'
-import { useUserTracking } from 'humanbehavior-js/react'
-
-export default function LoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const { identifyUser } = useUserTracking()
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // Your login logic here
-    const user = await login(email, password)
-    
-    // Identify user with HumanBehavior after successful login
-    if (user) {
-      const result = await identifyUser(
-        user.id, // Database user ID
-        {
-          email: user.email,
-          name: user.name,
-          plan: user.plan,
-          signupDate: user.signupDate
-        },
-        process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!
-      )
-      
-      if (result.success) {
-        console.log('User identified successfully:', result.actualUserId || user.id)
-      } else {
-        console.error('Failed to identify user:', result.error)
-      }
-    }
-  }
-
-  return (
-    <form onSubmit={handleLogin}>
-      <input 
-        type="email" 
-        value={email} 
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-      />
-      <input 
-        type="password" 
-        value={password} 
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-      />
-      <button type="submit">Login</button>
-    </form>
-  )
-}
-```
-
-</Expandable>
-
-### Environment Variables
-
-Store your API key securely using environment variables:
-
-1. Create a `.env.local` file in your project root:
-```
+```bash
+# .env.local
 NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
-2. The providers file already uses the environment variable (as shown above). You can add error handling:
-
 ```tsx
-'use client'
-
-import { HumanBehaviorProvider } from 'humanbehavior-js/react'
-
-export function Providers({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const apiKey = process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY
-  
-  if (!apiKey) {
-    console.error('HumanBehavior API key is missing')
-    // Return children without tracking in development
-    return <>{children}</>
-  }
-
-  return (
-    <HumanBehaviorProvider apiKey={apiKey}>
-      {children}
-    </HumanBehaviorProvider>
-  )
-}
-```
-
-## Step 5: TypeScript Support
-
-If you're using TypeScript, add this to your `types/global.d.ts` file:
-
-```typescript
-import { HumanBehaviorTracker } from 'humanbehavior-js'
-
-declare global {
-  interface Window {
-    __humanBehaviorGlobalTracker?: HumanBehaviorTracker
-  }
-}
-```
-
-## Available Built-in Hooks
-
-The HumanBehaviorTracker comes with several built-in hooks:
-
-### 1. `useHumanBehavior`
-Main hook for tracking events and accessing the tracker:
-
-```tsx
-'use client'
-
-import { useHumanBehavior } from 'humanbehavior-js/react'
-
-export default function MyComponent() {
-  const tracker = useHumanBehavior()
-
-  const handleClick = async () => {
-    await tracker.customEvent('button_clicked', { 
-      location: 'header',
-      timestamp: Date.now()
-    })
-  }
-
-  return (
-    <button onClick={handleClick}>
-      Click Me
-    </button>
-  )
-}
-```
-
-### 2. `useUserTracking`
-Hook for managing user information:
-
-<Note>
-  **Placement:** Call `identifyUser` after successful login or signup, not during component initialization.
-</Note>
-
-```tsx
-'use client'
-
-import { useUserTracking } from 'humanbehavior-js/react'
-
-export default function UserProfile() {
-  const { identifyUser } = useUserTracking()
-
-  const handleUpdateProfile = async (userData: any) => {
-    const userId = await identifyUser('user-123', {
-      name: userData.name,
-      email: userData.email,
-      plan: userData.plan
-    })
-    
-    console.log('User identified successfully:', userId)
-  }
-
-  return (
-    <button onClick={() => handleUpdateProfile({ /* user data */ })}>
-      Update Profile
-    </button>
-  )
-}
-```
-
-### 3. `useRedaction`
-Hook for managing field redaction:
-
-```tsx
-'use client'
-
-import { useRedaction } from 'humanbehavior-js/react'
-
-export default function PrivacySettings() {
-  const { setRedactedFields, isRedactionActive, getRedactedFields } = useRedaction()
-
-  const handleEnableRedaction = () => {
-    setRedactedFields([
-      'input[type="password"]',
-      'input[name="ssn"]',
-      '.sensitive-data'
-    ])
-  }
-
-  const handleDisableRedaction = () => {
-    setRedactedFields([])
-  }
-
-  return (
-    <div>
-      <p>Redaction active: {isRedactionActive() ? 'Yes' : 'No'}</p>
-      <p>Redacted fields: {getRedactedFields().join(', ')}</p>
-      <button onClick={handleEnableRedaction}>Enable Redaction</button>
-      <button onClick={handleDisableRedaction}>Disable Redaction</button>
-    </div>
-  )
-}
+// In your code
+const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY);
 ```
 
 ## Troubleshooting
 
-### Common Issues
-
-1. **"window is not defined" error**
-   - Make sure you're using `'use client'` at the top of your file
-   - Check that you're not calling tracker methods during server-side rendering
-
-2. **Tracker not working**
-   - Make sure you've added the `'use client'` directive
-   - Check the browser console for any error messages
-   - Verify your API key is correct
-
-3. **Events not being tracked**
-   - Make sure the tracker is initialized before trying to track events
-   - Check that you're using the correct tracker instance
-   - Verify that you're in a client component
-
-### Debug Mode
-
-Enable debug mode to see what's happening by configuring logging after initialization:
-
-```tsx
-'use client'
-
-import { useEffect } from 'react'
-import { useHumanBehavior } from 'humanbehavior-js/react'
-
-export default function DebugComponent() {
-  const tracker = useHumanBehavior()
-
-  useEffect(() => {
-    if (tracker) {
-      // Configure debug logging
-      tracker.configureLogging({ level: 'debug' })
-    }
-  }, [tracker])
-
-  return null
-}
-```
-
-### Check Connection
-
-Test if the tracker can connect to the server:
-
-```tsx
-'use client'
-
-import { useEffect } from 'react'
-import { useHumanBehavior } from 'humanbehavior-js/react'
-
-export default function ConnectionTest() {
-  const tracker = useHumanBehavior()
-
-  useEffect(() => {
-    if (tracker) {
-      tracker.testConnection().then((result) => {
-        if (result.success) {
-          console.log('✅ HumanBehavior connection successful')
-        } else {
-          console.error('❌ HumanBehavior connection failed:', result.error)
-        }
-      })
-    }
-  }, [tracker])
-
-  return null
-}
-```
+- Make sure you're using `'use client'` at the top of your file
+- Check browser console for any error messages
+- Verify your API key is correct
+- Ensure the tracker is initialized before any user interaction

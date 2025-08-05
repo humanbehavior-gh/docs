@@ -7,8 +7,7 @@ description: 'Set up HumanBehavior SDK with Remix applications'
 
 ## Quickstart
 
-Human Behavior works seamlessly to record sessions on your Remix app. 
-Remix is a full-stack React framework for building web applications.
+Human Behavior works seamlessly to record sessions on your Remix app.
 
 ## Step 1: Installation
 
@@ -20,30 +19,12 @@ yarn add humanbehavior-js
 
 ## Step 2: Basic Setup
 
-### Option 1: Using React Provider (Recommended)
+### Add the Tracker to Your App
 
-For better integration and automatic tracking, use the React provider pattern:
+Use the React provider for the best integration and automatic tracking:
 
-**Step 1**: Create a providers file for client-side code:
-
-Create `app/providers.tsx`:
 ```tsx
 import { HumanBehaviorProvider } from 'humanbehavior-js/react';
-
-export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <HumanBehaviorProvider apiKey={process.env.HUMANBEHAVIOR_API_KEY!}>
-      {children}
-    </HumanBehaviorProvider>
-  );
-}
-```
-
-**Step 2**: Add the provider to your root layout:
-
-In your `app/root.tsx` file:
-```tsx
-import { Providers } from './providers';
 
 export default function App() {
   return (
@@ -53,9 +34,9 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <Providers>
+        <HumanBehaviorProvider apiKey={process.env.HUMANBEHAVIOR_API_KEY}>
           <Outlet />
-        </Providers>
+        </HumanBehaviorProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
@@ -65,20 +46,22 @@ export default function App() {
 }
 ```
 
-### Option 2: Manual Initialization
+<Note>
+  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
+</Note>
 
-If you prefer manual setup, initialize the tracker directly:
+## Alternative: Manual Initialization
 
-In your `app/root.tsx` file:
+If you prefer manual setup, you can initialize the tracker directly:
 
 ```tsx
-import { HumanBehaviorTracker } from 'humanbehavior-js';
 import { useEffect } from 'react';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 export default function App() {
   useEffect(() => {
     // Initialize the tracker once globally (client-side only)
-    const tracker = HumanBehaviorTracker.init('your-api-key-here');
+    const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);
   }, []);
 
   return (
@@ -98,74 +81,36 @@ export default function App() {
 }
 ```
 
-### With Remix Router
-
-Remix automatically handles routing. Add navigation tracking in your `app/root.tsx`:
-
-```tsx
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-import { useEffect, useLocation } from 'react';
-
-export default function App() {
-  const location = useLocation();
-  let tracker: any;
-
-  useEffect(() => {
-    tracker = HumanBehaviorTracker.init('your-api-key-here');
-  }, []);
-
-  useEffect(() => {
-    if (tracker) {
-      // Track route changes
-      tracker.trackPageView(location.pathname);
-    }
-  }, [location, tracker]);
-
-  return (
-    <html lang="en">
-      <head>
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        <Outlet />
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
-      </body>
-    </html>
-  );
-}
-```
-
-## Step 3: Using the Tracker in Components
+## Optional: Advanced Features
 
 ### Track Custom Events
 
 ```tsx
-import { useEffect } from 'react';
-import { HumanBehaviorTracker } from 'humanbehavior-js';
+import { useUserTracking } from 'humanbehavior-js/react';
 
 export default function MyComponent() {
-  useEffect(() => {
-    const tracker = HumanBehaviorTracker.init('your-api-key-here');
-    
-    // Track component view
-    tracker.customEvent('component_viewed', {
-      componentName: 'MyComponent'
-    });
-  }, []);
+  const { identifyUser } = useUserTracking();
 
   const handleButtonClick = async () => {
-    const tracker = HumanBehaviorTracker.init('your-api-key-here');
+    // Track custom event
     await tracker.customEvent('button_clicked', {
       buttonLocation: 'header'
     });
   };
 
+  const handleLogin = async (user) => {
+    // Identify user after successful authentication
+    await identifyUser({
+      userProperties: {
+        email: user.email,
+        name: user.name,
+        userId: user.id
+      }
+    });
+  };
+
   return (
     <div>
-      <h1>My Component</h1>
       <button onClick={handleButtonClick}>Click Me</button>
     </div>
   );
@@ -174,23 +119,18 @@ export default function MyComponent() {
 
 ## Environment Variables
 
-Store your API key securely:
-
-1. Create a `.env` file:
-```
+```bash
+# .env
 HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
-2. Use in your app:
 ```tsx
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-const apiKey = process.env.HUMANBEHAVIOR_API_KEY;
-const tracker = HumanBehaviorTracker.init(apiKey);
+// In your code
+const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);
 ```
 
 ## Troubleshooting
 
-- Make sure the tracker is initialized on the client side only
 - Check browser console for any error messages
-- Verify your API key is correct 
+- Verify your API key is correct
+- Ensure the tracker is initialized before any user interaction 

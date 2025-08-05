@@ -7,8 +7,7 @@ description: 'Set up HumanBehavior SDK with Svelte applications'
 
 ## Quickstart
 
-Human Behavior works seamlessly to record sessions on your Svelte app. 
-Svelte is a modern JavaScript framework that compiles to vanilla JavaScript.
+Human Behavior works seamlessly to record sessions on your Svelte app.
 
 ## Step 1: Installation
 
@@ -29,7 +28,7 @@ import App from './App.svelte';
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 // Initialize the tracker once globally
-const tracker = HumanBehaviorTracker.init('your-api-key-here');
+const tracker = HumanBehaviorTracker.init(process.env.VITE_HUMANBEHAVIOR_API_KEY);
 
 const app = new App({
   target: document.body
@@ -38,32 +37,11 @@ const app = new App({
 export default app;
 ```
 
-### With SvelteKit Router
+<Note>
+  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
+</Note>
 
-If you're using SvelteKit, add navigation tracking in your `+layout.svelte`:
-
-```svelte
-<script>
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
-  import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-  let tracker;
-
-  onMount(() => {
-    tracker = HumanBehaviorTracker.init('your-api-key-here');
-  });
-
-  // Track route changes
-  $: if (tracker && $page.url.pathname) {
-    tracker.trackPageView($page.url.pathname);
-  }
-</script>
-
-<slot />
-```
-
-## Step 3: Using the Tracker in Components
+## Optional: Advanced Features
 
 ### Track Custom Events
 
@@ -96,25 +74,63 @@ If you're using SvelteKit, add navigation tracking in your `+layout.svelte`:
 </div>
 ```
 
+### User Authentication Example
+
+```svelte
+<script>
+  import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+  let email = '';
+  let password = '';
+
+  async function handleLogin() {
+    try {
+      // Your login logic here
+      const user = await login(email, password);
+      
+      if (user) {
+        // Initialize HumanBehavior tracker
+        const tracker = HumanBehaviorTracker.init('your-api-key-here');
+        
+        // Identify user with current endUserId
+        await tracker.identifyUser({
+          userProperties: {
+            email: user.email,
+            name: user.name,
+            userId: user.id,
+            plan: user.plan
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  }
+</script>
+
+<div>
+  <form on:submit|preventDefault={handleLogin}>
+    <input bind:value={email} type="email" placeholder="Email" />
+    <input bind:value={password} type="password" placeholder="Password" />
+    <button type="submit">Login</button>
+  </form>
+</div>
+```
+
 ## Environment Variables
 
-Store your API key securely:
-
-1. Create a `.env` file:
-```
+```bash
+# .env
 VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
-2. Use in your app:
 ```javascript
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-const apiKey = import.meta.env.VITE_HUMANBEHAVIOR_API_KEY;
-const tracker = HumanBehaviorTracker.init(apiKey);
+// In your code
+const tracker = HumanBehaviorTracker.init(import.meta.env.VITE_HUMANBEHAVIOR_API_KEY);
 ```
 
 ## Troubleshooting
 
-- Make sure the tracker is initialized before tracking events
 - Check browser console for any error messages
-- Verify your API key is correct 
+- Verify your API key is correct
+- Ensure the tracker is initialized before any user interaction 
