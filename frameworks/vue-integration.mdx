@@ -9,6 +9,46 @@ description: 'Set up HumanBehavior SDK with Vue.js applications'
 
 Human Behavior works seamlessly to record sessions on your Vue.js app.
 
+### Option 1: Auto-Installation Wizard (Recommended)
+
+The easiest way to get started is using our auto-installation wizard:
+
+```bash
+npx humanbehavior-js YOUR_API_KEY
+```
+
+This will automatically:
+- 🔍 Detect your Vue.js project
+- 📦 Install the humanbehavior-js package
+- ✏️ Add HumanBehaviorPlugin to your main.js/ts
+- 🔧 Create environment files with your API key
+- 🚀 Make your app ready to track user behavior
+
+**Version Compatibility**: The wizard works with most Vue versions and automatically detects:
+- TypeScript support (`typescript` or `@vue/cli-service`)
+- Router usage (`vue-router`)
+- Bundlers: Vite, Webpack, esbuild, rollup
+- Package managers: npm, yarn, pnpm
+
+### Option 2: Manual Setup
+
+If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
+
+### Get your API Key
+
+<Info>
+  <strong>How to find your Public API Key:</strong><br/>
+  <b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
+</Info>
+
+<img
+  src="/images/APIKeyUpdated.png"
+  alt="Where to find your Public API Key"
+  style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
+/>
+
+<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+
 ## Step 1: Installation
 
 ```bash
@@ -26,13 +66,16 @@ In your main `main.js` or `main.ts` file:
 ```javascript
 import { createApp } from 'vue'
 import App from './App.vue'
-import { HumanBehaviorTracker } from 'humanbehavior-js'
-
-// Initialize the tracker once globally
-const tracker = HumanBehaviorTracker.init(process.env.VUE_APP_HUMANBEHAVIOR_API_KEY)
+import { HumanBehaviorPlugin } from 'humanbehavior-js/vue'
 
 // Create and mount the app
 const app = createApp(App)
+
+// Use the HumanBehavior plugin
+app.use(HumanBehaviorPlugin, {
+  apiKey: import.meta.env.VITE_HUMANBEHAVIOR_API_KEY
+})
+
 app.mount('#app')
 ```
 
@@ -53,13 +96,11 @@ app.mount('#app')
 </template>
 
 <script>
-import { HumanBehaviorTracker } from 'humanbehavior-js'
-
 export default {
   name: 'MyComponent',
   mounted() {
-    // Get the global tracker instance
-    const tracker = HumanBehaviorTracker.init(process.env.VUE_APP_HUMANBEHAVIOR_API_KEY)
+    // Get the global tracker instance via plugin
+    const tracker = this.$humanBehavior
     
     // Track component view
     tracker.customEvent('component_viewed', {
@@ -68,7 +109,8 @@ export default {
   },
   methods: {
     async handleButtonClick() {
-      const tracker = HumanBehaviorTracker.init(process.env.VUE_APP_HUMANBEHAVIOR_API_KEY)
+      // Access tracker via plugin
+      const tracker = this.$humanBehavior
       await tracker.customEvent('button_clicked', {
         buttonLocation: 'header'
       })
@@ -92,8 +134,6 @@ export default {
 </template>
 
 <script>
-import { HumanBehaviorTracker } from 'humanbehavior-js'
-
 export default {
   name: 'LoginForm',
   data() {
@@ -109,8 +149,8 @@ export default {
         const user = await this.login(this.email, this.password)
         
         if (user) {
-          // Initialize HumanBehavior tracker
-          const tracker = HumanBehaviorTracker.init(process.env.VUE_APP_HUMANBEHAVIOR_API_KEY)
+          // Access tracker via plugin
+          const tracker = this.$humanBehavior
           
           // Identify user with current endUserId
           await tracker.identifyUser({
@@ -135,12 +175,14 @@ export default {
 
 ```bash
 # .env
-VUE_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
+VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
 ```javascript
 // In your code
-const tracker = HumanBehaviorTracker.init(process.env.VUE_APP_HUMANBEHAVIOR_API_KEY)
+app.use(HumanBehaviorPlugin, {
+  apiKey: import.meta.env.VITE_HUMANBEHAVIOR_API_KEY
+})
 ```
 
 ## Troubleshooting

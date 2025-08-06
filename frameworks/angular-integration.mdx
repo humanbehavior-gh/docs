@@ -9,6 +9,46 @@ description: 'Set up HumanBehavior SDK with Angular applications'
 
 Human Behavior works seamlessly to record sessions on your Angular app.
 
+### Option 1: Auto-Installation Wizard (Recommended)
+
+The easiest way to get started is using our auto-installation wizard:
+
+```bash
+npx humanbehavior-js YOUR_API_KEY
+```
+
+This will automatically:
+- 🔍 Detect your Angular project (standalone or NgModule)
+- 📦 Install the humanbehavior-js package
+- ✏️ Add HumanBehaviorModule or initializeHumanBehavior
+- 🔧 Create environment files with your API key
+- 🚀 Make your app ready to track user behavior
+
+**Version Compatibility**: The wizard automatically detects your Angular version and setup:
+- **Modern Angular** (17+ with standalone components): Detects `src/app/app.ts` and no `app.module.ts`
+- **Legacy Angular** (pre-17 with NgModule): Detects `src/app/app.module.ts`
+- TypeScript support (always enabled for Angular)
+- Package managers: npm, yarn, pnpm
+
+### Option 2: Manual Setup
+
+If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
+
+### Get your API Key
+
+<Info>
+  <strong>How to find your Public API Key:</strong><br/>
+  <b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
+</Info>
+
+<img
+  src="/images/APIKeyUpdated.png"
+  alt="Where to find your Public API Key"
+  style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
+/>
+
+<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+
 ## Step 1: Installation
 
 ```bash
@@ -21,18 +61,50 @@ yarn add humanbehavior-js
 
 ### Add the Tracker to Your App
 
+**For Angular 17+ (Standalone Components):**
+
 In your `main.ts` file:
 
 ```typescript
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { AppModule } from './app/app.module';
-import { HumanBehaviorTracker } from 'humanbehavior-js';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+import { initializeHumanBehavior } from 'humanbehavior-js/angular';
 
 // Initialize the tracker once globally
-const tracker = HumanBehaviorTracker.init(process.env.NG_APP_HUMANBEHAVIOR_API_KEY);
+if (typeof window !== 'undefined') {
+  initializeHumanBehavior(process.env.HUMANBEHAVIOR_API_KEY || '');
+}
 
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.error(err));
+bootstrapApplication(AppComponent, {
+  providers: [
+    // Your other providers
+  ]
+}).catch(err => console.error(err));
+```
+
+**For Legacy Angular (NgModule):**
+
+In your `app.module.ts` file:
+
+```typescript
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+import { HumanBehaviorModule } from 'humanbehavior-js/angular';
+import { environment } from '../environments/environment';
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [
+    BrowserModule,
+    HumanBehaviorModule.forRoot({
+      apiKey: environment.humanBehaviorApiKey
+    })
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
 ```
 
 <Note>
@@ -43,8 +115,44 @@ platformBrowserDynamic().bootstrapModule(AppModule)
 
 ### Track Custom Events
 
+**For Angular 17+ (Standalone Components):**
+
 ```typescript
 import { Component, OnInit } from '@angular/core';
+import { initializeHumanBehavior } from 'humanbehavior-js/angular';
+
+@Component({
+  selector: 'app-my-component',
+  template: `
+    <div>
+      <h1>My Component</h1>
+      <button (click)="handleButtonClick()">Click Me</button>
+    </div>
+  `,
+  standalone: true
+})
+export class MyComponent implements OnInit {
+  private tracker = initializeHumanBehavior(process.env.HUMANBEHAVIOR_API_KEY || '');
+
+  ngOnInit() {
+    // Track component view
+    this.tracker.customEvent('component_viewed', {
+      componentName: 'MyComponent'
+    });
+  }
+
+  async handleButtonClick() {
+    await this.tracker.customEvent('button_clicked', {
+      buttonLocation: 'header'
+    });
+  }
+}
+```
+
+**For Legacy Angular (NgModule):**
+
+```typescript
+import { Component, OnInit, Inject } from '@angular/core';
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 @Component({
@@ -57,7 +165,7 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
   `
 })
 export class MyComponent implements OnInit {
-  private tracker = HumanBehaviorTracker.init(process.env.NG_APP_HUMANBEHAVIOR_API_KEY);
+  constructor(@Inject(HumanBehaviorTracker) private tracker: HumanBehaviorTracker) {}
 
   ngOnInit() {
     // Track component view
@@ -76,8 +184,56 @@ export class MyComponent implements OnInit {
 
 ### User Authentication Example
 
+**For Angular 17+ (Standalone Components):**
+
 ```typescript
 import { Component } from '@angular/core';
+import { initializeHumanBehavior } from 'humanbehavior-js/angular';
+
+@Component({
+  selector: 'app-login-form',
+  template: `
+    <form (ngSubmit)="handleLogin()">
+      <input [(ngModel)]="email" type="email" placeholder="Email" name="email" />
+      <input [(ngModel)]="password" type="password" placeholder="Password" name="password" />
+      <button type="submit">Login</button>
+    </form>
+  `,
+  standalone: true,
+  imports: [FormsModule]
+})
+export class LoginFormComponent {
+  email = '';
+  password = '';
+  private tracker = initializeHumanBehavior(process.env.HUMANBEHAVIOR_API_KEY || '');
+
+  async handleLogin() {
+    try {
+      // Your login logic here
+      const user = await this.login(this.email, this.password);
+      
+      if (user) {
+        // Identify user with current endUserId
+        await this.tracker.identifyUser({
+          userProperties: {
+            email: user.email,
+            name: user.name,
+            userId: user.id,
+            plan: user.plan
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  }
+}
+```
+
+**For Legacy Angular (NgModule):**
+
+```typescript
+import { Component, Inject } from '@angular/core';
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 @Component({
@@ -93,7 +249,8 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
 export class LoginFormComponent {
   email = '';
   password = '';
-  private tracker = HumanBehaviorTracker.init(process.env.NG_APP_HUMANBEHAVIOR_API_KEY);
+
+  constructor(@Inject(HumanBehaviorTracker) private tracker: HumanBehaviorTracker) {}
 
   async handleLogin() {
     try {
@@ -122,12 +279,23 @@ export class LoginFormComponent {
 
 ```bash
 # .env
-NG_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
+HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
+**For Angular 17+ (Standalone Components):**
 ```typescript
 // In your code
-const tracker = HumanBehaviorTracker.init(process.env.NG_APP_HUMANBEHAVIOR_API_KEY);
+const tracker = initializeHumanBehavior(process.env.HUMANBEHAVIOR_API_KEY || '');
+```
+
+**For Legacy Angular (NgModule):**
+```typescript
+// In your code
+// Add to src/environments/environment.ts
+export const environment = {
+  production: false,
+  humanBehaviorApiKey: process.env.HUMANBEHAVIOR_API_KEY || ''
+};
 ```
 
 ## Troubleshooting
