@@ -9,6 +9,45 @@ description: 'Set up HumanBehavior SDK with Remix applications'
 
 Human Behavior works seamlessly to record sessions on your Remix app.
 
+### Option 1: Auto-Installation Wizard (Recommended)
+
+The easiest way to get started is using our auto-installation wizard:
+
+```bash
+npx humanbehavior-js YOUR_API_KEY
+```
+
+This will automatically:
+- 🔍 Detect your Remix project
+- 📦 Install the humanbehavior-js package
+- ✏️ Add createHumanBehaviorLoader to your root.tsx
+- 🔧 Create environment files with your API key
+- 🚀 Make your app ready to track user behavior
+
+**Version Compatibility**: The wizard works with most Remix versions and automatically detects:
+- TypeScript support (`typescript` or `@types/react`)
+- Modern Remix patterns
+- Package managers: npm, yarn, pnpm
+
+### Option 2: Manual Setup
+
+If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
+
+### Get your API Key
+
+<Info>
+  <strong>How to find your Public API Key:</strong><br/>
+  <b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
+</Info>
+
+<img
+  src="/images/APIKeyUpdated.png"
+  alt="Where to find your Public API Key"
+  style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
+/>
+
+<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+
 ## Step 1: Installation
 
 ```bash
@@ -21,12 +60,25 @@ yarn add humanbehavior-js
 
 ### Add the Tracker to Your App
 
-Use the React provider for the best integration and automatic tracking:
+Use the Remix-specific setup for the best integration and automatic tracking:
+
+**Step 1**: Create a loader in your `app/root.tsx`:
 
 ```tsx
-import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useLoaderData,
+} from "@remix-run/react";
+import { HumanBehaviorProvider, createHumanBehaviorLoader } from 'humanbehavior-js/remix';
+import type { LoaderFunctionArgs } from "@remix-run/node";
 
-export default function App() {
+export const loader = createHumanBehaviorLoader();
+
+export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -34,14 +86,21 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <HumanBehaviorProvider apiKey={process.env.HUMANBEHAVIOR_API_KEY}>
-          <Outlet />
-        </HumanBehaviorProvider>
+        {children}
         <ScrollRestoration />
         <Scripts />
-        <LiveReload />
       </body>
     </html>
+  );
+}
+
+export default function App() {
+  const data = useLoaderData<typeof loader>();
+  
+  return (
+    <HumanBehaviorProvider apiKey={data.ENV.HUMANBEHAVIOR_API_KEY}>
+      <Outlet />
+    </HumanBehaviorProvider>
   );
 }
 ```
@@ -74,7 +133,6 @@ export default function App() {
         <Outlet />
         <ScrollRestoration />
         <Scripts />
-        <LiveReload />
       </body>
     </html>
   );
@@ -86,10 +144,10 @@ export default function App() {
 ### Track Custom Events
 
 ```tsx
-import { useUserTracking } from 'humanbehavior-js/react';
+import { useHumanBehavior } from 'humanbehavior-js/react';
 
 export default function MyComponent() {
-  const { identifyUser } = useUserTracking();
+  const tracker = useHumanBehavior();
 
   const handleButtonClick = async () => {
     // Track custom event
@@ -100,7 +158,7 @@ export default function MyComponent() {
 
   const handleLogin = async (user) => {
     // Identify user after successful authentication
-    await identifyUser({
+    await tracker.identifyUser({
       userProperties: {
         email: user.email,
         name: user.name,

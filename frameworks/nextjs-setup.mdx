@@ -9,6 +9,46 @@ description: 'Set up HumanBehavior SDK with Next.js applications'
 
 Human Behavior works seamlessly to record sessions on your Next.js app.
 
+### Option 1: Auto-Installation Wizard (Recommended)
+
+The easiest way to get started is using our auto-installation wizard:
+
+```bash
+npx humanbehavior-js YOUR_API_KEY
+```
+
+This will automatically:
+- 🔍 Detect your Next.js project (App Router or Pages Router)
+- 📦 Install the humanbehavior-js package
+- ✏️ Create providers.tsx and update your layout
+- 🔧 Create environment files with your API key
+- 🚀 Make your app ready to track user behavior
+
+**Version Compatibility**: The wizard automatically detects your Next.js version and setup:
+- **App Router** (Next.js 13+): Detects `src/app/layout.tsx`
+- **Pages Router** (Next.js 12 and earlier): Detects `src/pages/_app.tsx`
+- TypeScript support
+- Package managers: npm, yarn, pnpm
+
+### Option 2: Manual Setup
+
+If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
+
+### Get your API Key
+
+<Info>
+  <strong>How to find your Public API Key:</strong><br/>
+  <b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
+</Info>
+
+<img
+  src="/images/APIKeyUpdated.png"
+  alt="Where to find your Public API Key"
+  style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
+/>
+
+<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+
 ## Step 1: Installation
 
 ```bash
@@ -104,10 +144,10 @@ export default MyApp;
 ```tsx
 'use client'
 
-import { useUserTracking } from 'humanbehavior-js/react';
+import { useHumanBehavior } from 'humanbehavior-js/react';
 
 function MyComponent() {
-  const { identifyUser } = useUserTracking();
+  const tracker = useHumanBehavior();
 
   const handleButtonClick = async () => {
     // Track custom event
@@ -118,7 +158,7 @@ function MyComponent() {
 
   const handleLogin = async (user) => {
     // Identify user after successful authentication
-    await identifyUser({
+    await tracker.identifyUser({
       userProperties: {
         email: user.email,
         name: user.name,

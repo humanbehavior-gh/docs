@@ -9,6 +9,47 @@ description: 'Set up HumanBehavior SDK with Svelte applications'
 
 Human Behavior works seamlessly to record sessions on your Svelte app.
 
+### Option 1: Auto-Installation Wizard (Recommended)
+
+The easiest way to get started is using our auto-installation wizard:
+
+```bash
+npx humanbehavior-js YOUR_API_KEY
+```
+
+This will automatically:
+- 🔍 Detect your Svelte project (SvelteKit or regular Svelte)
+- 📦 Install the humanbehavior-js package
+- ✏️ Add humanBehaviorStore to your main file
+- 🔧 Create environment files with your API key
+- 🚀 Make your app ready to track user behavior
+
+**Version Compatibility**: The wizard automatically detects your Svelte setup:
+- **SvelteKit**: Detects `svelte.config.js`
+- **Regular Svelte**: Standalone Svelte projects
+- TypeScript support (`typescript` or `svelte-check`)
+- Router usage (`svelte-routing` or `@sveltejs/kit`)
+- Package managers: npm, yarn, pnpm
+
+### Option 2: Manual Setup
+
+If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
+
+### Get your API Key
+
+<Info>
+  <strong>How to find your Public API Key:</strong><br/>
+  <b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
+</Info>
+
+<img
+  src="/images/APIKeyUpdated.png"
+  alt="Where to find your Public API Key"
+  style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
+/>
+
+<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+
 ## Step 1: Installation
 
 ```bash
@@ -25,10 +66,10 @@ In your `main.js` or `main.ts` file:
 
 ```javascript
 import App from './App.svelte';
-import { HumanBehaviorTracker } from 'humanbehavior-js';
+import { humanBehaviorStore } from 'humanbehavior-js/svelte';
 
 // Initialize the tracker once globally
-const tracker = HumanBehaviorTracker.init(process.env.VITE_HUMANBEHAVIOR_API_KEY);
+const tracker = humanBehaviorStore.init(import.meta.env.VITE_HUMANBEHAVIOR_API_KEY);
 
 const app = new App({
   target: document.body
@@ -48,12 +89,12 @@ export default app;
 ```svelte
 <script>
   import { onMount } from 'svelte';
-  import { HumanBehaviorTracker } from 'humanbehavior-js';
+  import { humanBehaviorStore } from 'humanbehavior-js/svelte';
 
   let tracker;
 
   onMount(() => {
-    tracker = HumanBehaviorTracker.init('your-api-key-here');
+    tracker = humanBehaviorStore.init(import.meta.env.VITE_HUMANBEHAVIOR_API_KEY);
     
     // Track component view
     tracker.customEvent('component_viewed', {
@@ -78,7 +119,7 @@ export default app;
 
 ```svelte
 <script>
-  import { HumanBehaviorTracker } from 'humanbehavior-js';
+  import { humanBehaviorStore } from 'humanbehavior-js/svelte';
 
   let email = '';
   let password = '';
@@ -90,7 +131,7 @@ export default app;
       
       if (user) {
         // Initialize HumanBehavior tracker
-        const tracker = HumanBehaviorTracker.init('your-api-key-here');
+        const tracker = humanBehaviorStore.init(import.meta.env.VITE_HUMANBEHAVIOR_API_KEY);
         
         // Identify user with current endUserId
         await tracker.identifyUser({
@@ -126,7 +167,7 @@ VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
 
 ```javascript
 // In your code
-const tracker = HumanBehaviorTracker.init(import.meta.env.VITE_HUMANBEHAVIOR_API_KEY);
+const tracker = humanBehaviorStore.init(import.meta.env.VITE_HUMANBEHAVIOR_API_KEY);
 ```
 
 ## Troubleshooting

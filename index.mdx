@@ -11,25 +11,58 @@ The Human Behavior SDK allows you to record user sessions and track behavior ana
 
 ## Quickstart
 
+### Option 1: Auto-Installation Wizard (Recommended)
+
+The easiest way to get started is using our auto-installation wizard:
+
+```bash
+npx humanbehavior-js YOUR_API_KEY
+```
+
+This will automatically:
+- 🔍 Detect your project's framework
+- 📦 Install the humanbehavior-js package
+- ✏️ Modify your codebase to integrate the SDK
+- 🔧 Create environment files with your API key
+- 🚀 Make your app ready to track user behavior
+
+**Version Compatibility**: The wizard works with most versions of each framework and automatically detects:
+- **Next.js**: App Router (13+) vs Pages Router (12 and earlier)
+- **Angular**: Standalone components (17+) vs NgModule (pre-17)
+- **Svelte**: SvelteKit vs regular Svelte
+- **Bundlers**: Vite, Webpack, esbuild, rollup
+- **Package Managers**: npm, yarn, pnpm
+
 <Note>
-  If you are using a framework such as React, NextJS, or Vite, we recommend using one of our [Framework Guides](/frameworks/frameworks) instead of the quickstart.
+  The wizard supports React, Next.js, Vue, Angular, Svelte, Nuxt, Remix, and vanilla JS/TS projects.
+</Note>
+
+### Get your API Key
+
+<Info>
+  <strong>How to find your Public API Key:</strong><br/>
+  <b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
+</Info>
+
+<img
+  src="/images/APIKeyUpdated.png"
+  alt="Where to find your Public API Key"
+  style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
+/>
+
+<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+
+### Option 2: Manual Setup
+
+If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
+
+<Note>
+  If you are using a framework such as React, NextJS, or Vite, we recommend using one of our [Framework Guides](/frameworks/frameworks) instead of the manual quickstart.
 </Note>
 
 The fastest way to get started is by adding a simple JS snippet at the top of your website.
 
-### Step 1: Get your Public API Key
 
-This will help identify your website to Human Behavior when users visit it.
-
-<Info>
-  <b>How to find your Public API Key:</b> Project Home → Settings (on sidebar) → Public API Key
-</Info>
-
-<img
-  src="/images/APIKey.png"
-  alt="Where to find your Public API Key"
-  style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
-/>
 
 <Note>
   <b>Security Best Practice:</b> Store your API key in environment variables rather than hardcoding it in your source code. This prevents accidental exposure of your key in version control.
@@ -42,14 +75,14 @@ This will help identify your website to Human Behavior when users visit it.
   ```
 
   ```javascript
-  // In your code
-  const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);
-  ```
+// In your code
+const tracker = HumanBehaviorTracker.init('your-api-key-here');
+```
 
   </Expandable>
 </Note>
 
-### Step 2: Install the Tracker
+### Step 1: Install the Tracker
 
 #### Option 1: CDN
 
@@ -67,7 +100,7 @@ Install using `npm`, `yarn`, or your package manager of choice.
 npm install humanbehavior-js
 ```
 
-### Step 3: Add the tracker to your project
+### Step 2: Add the tracker to your project
 
 ```html
 <head>
@@ -94,7 +127,7 @@ Here is a simple HTML website using the CDN version:
     <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
 
     <!-- Initialize the tracker -->
-    <script>const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);</script>
+    <script>const tracker = HumanBehaviorTracker.init('your-api-key-here');</script>
 
   </head>
   <body>
@@ -158,7 +191,7 @@ The SDK supports all modern browsers:
 </Note>
 
 <Note>
-  <b>Version:</b> This documentation covers HumanBehavior SDK version 0.3.3
+  <b>Version:</b> This documentation covers HumanBehavior SDK version 0.4.5
 </Note>
 
 ---
@@ -169,7 +202,7 @@ Once you've completed the setup:
 
 1. **Automatic Session Recording**: The SDK automatically captures user interactions using rrweb
 2. **Automatic Event Tracking**: Button clicks, link clicks, and form submissions are tracked automatically
-3. **Session Persistence**: Sessions persist across page reloads for 30 minutes
+3. **Session Persistence**: Sessions persist across page reloads for 15 minutes
 4. **Navigation Tracking**: SPA navigation and URL changes are automatically tracked
 5. **Console Tracking**: Console logs, warnings, and errors are captured
 6. **Data Processing**: Events are processed and sent to your dashboard
