@@ -9,33 +9,7 @@ description: 'Set up HumanBehavior SDK with React applications'
 
 Human Behavior works seamlessly to record sessions on your React app.
 
-### Option 1: Auto-Installation Wizard (Recommended)
-
-The easiest way to get started is using our auto-installation wizard:
-
-```bash
-npx humanbehavior-js YOUR_API_KEY
-```
-
-This will automatically:
-- 🔍 Detect your React project
-- 📦 Install the humanbehavior-js package
-- ✏️ Add HumanBehaviorProvider to your App component
-- 🔧 Create environment files with your API key
-- 🚀 Make your app ready to track user behavior
-
-**Version Compatibility**: The wizard works with most React versions and automatically detects:
-- TypeScript support (`typescript` or `@types/react`)
-- Router usage (`react-router-dom` or `react-router`)
-- Bundlers: Vite, Webpack, esbuild, rollup
-- Package managers: npm, yarn, pnpm
-
-### Option 2: Manual Setup
-
-If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
-
-### Get your API Key
-
+<Expandable title="How to get your API Key">
 <Info>
   <strong>How to find your Public API Key:</strong><br/>
   <b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
@@ -48,6 +22,61 @@ If you prefer manual setup or the wizard doesn't work for your project, follow t
 />
 
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+</Expandable>
+
+### Option 1: Installation Wizard (Recommended)
+
+The easiest way to get started is using our installation wizard:
+
+```bash
+npx humanbehavior-js YOUR_API_KEY
+```
+
+You'll see several installation options:
+
+```bash
+🤖 Choose installation mode:
+1. Manual AI-Enhanced (recommended) - Choose your framework and use AI for optimization
+2. Traditional - Standard framework detection and installation
+3. Browser - Browser-based AI detection and code generation
+
+Select mode (1-3, default: 1):
+```
+
+Select **Option 1: Manual AI-Enhanced** and then choose **React** from the framework list:
+
+```bash
+🎯 Choose your framework:
+1. Vanilla JS (HTML)
+2. React <
+3. Next.js
+4. Vue
+5. Nuxt
+6. Angular
+7. Svelte
+8. Remix
+9. Node.js
+10. Other (Auto-detect)
+
+Select framework (1-10):
+```
+
+The AI wizard will then:
+1. Analyze your React codebase for optimal integration
+2. Detect your React configuration and dependencies
+3. Install the humanbehavior-js package
+4. Add HumanBehaviorProvider to your App component
+5. Configure environment variables
+6. Provide React-specific optimizations and recommendations
+
+<Tip>
+  **Why choose Manual AI-Enhanced Installation?**
+  The manual AI-enhanced installation option is perfect for developers who want to understand each step of the integration process. You'll get the same end result as auto-installation, but with detailed explanations, AI-powered optimizations, and the ability to customize along the way.
+</Tip>
+
+### Option 2: Manual Setup
+
+If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
 
 ## Step 1: Installation
 
