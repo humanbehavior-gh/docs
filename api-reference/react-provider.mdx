@@ -13,10 +13,10 @@ The `HumanBehaviorProvider` is a React context provider that makes the HumanBeha
 
 <Info>
 <strong>How to find your Public API Key:</strong><br/>
-<b>Flow:</b> Project Home → Settings (on sidebar) → Public API Key
+<b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
 </Info>
 
-<img src="/images/APIKey.png" alt="Where to find your Public API Key" style={{ borderRadius: '0.5rem', margin: '1rem 0', maxWidth: '100%' }} />
+<img src="/images/APIKeyUpdated.png" alt="Where to find your Public API Key" style={{ borderRadius: '0.5rem', margin: '1rem 0', maxWidth: '100%' }} />
 
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
 
@@ -34,7 +34,7 @@ Your HumanBehavior API key. Required if no `client` is provided.
 
 **Example:**
 ```javascript
-<HumanBehaviorProvider apiKey="your-api-key-here">
+<HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
   <App />
 </HumanBehaviorProvider>
 ```
@@ -47,7 +47,7 @@ An existing tracker instance to use instead of creating a new one.
 ```javascript
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
-const tracker = HumanBehaviorTracker.init('your-api-key');
+const tracker = HumanBehaviorTracker.init(process.env.REACT_APP_HUMANBEHAVIOR_API_KEY);
 
 <HumanBehaviorProvider client={tracker}>
   <App />
@@ -65,7 +65,7 @@ import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 
 function App() {
   return (
-    <HumanBehaviorProvider apiKey="your-api-key-here">
+    <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
       <YourApp />
     </HumanBehaviorProvider>
   );
@@ -80,7 +80,7 @@ import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 function App() {
   return (
     <HumanBehaviorProvider 
-      apiKey="your-api-key-here"
+      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
     >
       <YourApp />
     </HumanBehaviorProvider>
@@ -95,7 +95,7 @@ import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 // Create custom tracker
-const tracker = HumanBehaviorTracker.init('your-api-key');
+const tracker = HumanBehaviorTracker.init(process.env.REACT_APP_HUMANBEHAVIOR_API_KEY);
 
 function App() {
   return (
@@ -155,7 +155,7 @@ The provider is fully compatible with SSR:
 // Works in both client and server environments
 function App() {
   return (
-    <HumanBehaviorProvider apiKey="your-api-key">
+    <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
       <YourApp />
     </HumanBehaviorProvider>
   );
@@ -170,7 +170,7 @@ The provider automatically initializes the tracker when mounted:
 
 ```javascript
 // Tracker is initialized automatically
-<HumanBehaviorProvider apiKey="your-api-key">
+<HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
   <App />
 </HumanBehaviorProvider>
 ```
@@ -185,7 +185,7 @@ function ConditionalProvider({ show }) {
   if (!show) return null;
   
   return (
-    <HumanBehaviorProvider apiKey="your-api-key">
+    <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
       <App />
     </HumanBehaviorProvider>
   );
@@ -245,7 +245,7 @@ Use only one provider at the root of your app:
 // Good: Single provider at root
 function App() {
   return (
-    <HumanBehaviorProvider apiKey="your-api-key">
+    <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
       <Header />
       <Main />
       <Footer />
@@ -256,9 +256,9 @@ function App() {
 // Avoid: Multiple providers
 function App() {
   return (
-    <HumanBehaviorProvider apiKey="your-api-key">
+    <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
       <Header />
-      <HumanBehaviorProvider apiKey="your-api-key"> {/* Don't do this */}
+      <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}> {/* Don't do this */}
         <Main />
       </HumanBehaviorProvider>
       <Footer />
@@ -276,7 +276,7 @@ Configure the provider with your API key:
 function App() {
   return (
     <HumanBehaviorProvider 
-      apiKey="your-api-key-here"
+      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
     >
       <YourApp />
     </HumanBehaviorProvider>
@@ -294,7 +294,7 @@ import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 function App() {
   return (
     <ErrorBoundary>
-      <HumanBehaviorProvider apiKey="your-api-key">
+      <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
         <YourApp />
       </HumanBehaviorProvider>
     </ErrorBoundary>
@@ -325,7 +325,7 @@ import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 function DebugProvider({ children }) {
   return (
     <HumanBehaviorProvider 
-      apiKey="your-api-key-here"
+      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
     >
       <DebugComponent />
       {children}

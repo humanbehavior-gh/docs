@@ -9,33 +9,7 @@ description: 'Set up HumanBehavior SDK with Vue.js applications'
 
 Human Behavior works seamlessly to record sessions on your Vue.js app.
 
-### Option 1: Auto-Installation Wizard (Recommended)
-
-The easiest way to get started is using our auto-installation wizard:
-
-```bash
-npx humanbehavior-js YOUR_API_KEY
-```
-
-This will automatically:
-- 🔍 Detect your Vue.js project
-- 📦 Install the humanbehavior-js package
-- ✏️ Add HumanBehaviorPlugin to your main.js/ts
-- 🔧 Create environment files with your API key
-- 🚀 Make your app ready to track user behavior
-
-**Version Compatibility**: The wizard works with most Vue versions and automatically detects:
-- TypeScript support (`typescript` or `@vue/cli-service`)
-- Router usage (`vue-router`)
-- Bundlers: Vite, Webpack, esbuild, rollup
-- Package managers: npm, yarn, pnpm
-
-### Option 2: Manual Setup
-
-If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
-
-### Get your API Key
-
+<Expandable title="How to get your API Key">
 <Info>
   <strong>How to find your Public API Key:</strong><br/>
   <b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
@@ -48,6 +22,62 @@ If you prefer manual setup or the wizard doesn't work for your project, follow t
 />
 
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+</Expandable>
+
+### Option 1: Installation Wizard (Recommended)
+
+The easiest way to get started is using our installation wizard:
+
+```bash
+npx humanbehavior-js YOUR_API_KEY
+```
+
+You'll see several installation options:
+
+```bash
+🤖 Choose installation mode:
+1. Manual AI-Enhanced (recommended) - Choose your framework and use AI for optimization
+2. Traditional - Standard framework detection and installation
+3. Browser - Browser-based AI detection and code generation
+
+Select mode (1-3, default: 1):
+```
+
+Select **Option 1: Manual AI-Enhanced** and then choose **Vue** from the framework list:
+
+```bash
+🎯 Choose your framework:
+1. Vanilla JS (HTML)
+2. React
+3. Next.js
+4. Vue <
+5. Nuxt
+6. Angular
+7. Svelte
+8. Remix
+9. Node.js
+10. Other (Auto-detect)
+
+Select framework (1-10):
+```
+
+The AI wizard will then:
+1. Analyze your Vue.js codebase for optimal integration
+2. Detect your Vue configuration and dependencies
+3. Install the humanbehavior-js package
+4. Add HumanBehaviorPlugin to your main.js/ts
+5. Configure environment variables
+6. Provide Vue.js-specific optimizations and recommendations
+
+**Version Compatibility**: The wizard works with most Vue versions and automatically detects:
+- TypeScript support (`typescript` or `@vue/cli-service`)
+- Router usage (`vue-router`)
+- Bundlers: Vite, Webpack, esbuild, rollup
+- Package managers: npm, yarn, pnpm
+
+### Option 2: Manual Setup
+
+If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
 
 ## Step 1: Installation
 
