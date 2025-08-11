@@ -38,7 +38,9 @@
               "frameworks/angular-integration",
               "frameworks/svelte-integration",
               "frameworks/nuxt-integration",
-              "frameworks/remix-integration"
+              "frameworks/remix-integration",
+              "frameworks/astro-integration",
+              "frameworks/gatsby-integration"
             ]
           }
         ]

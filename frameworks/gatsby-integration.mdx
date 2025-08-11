@@ -1,0 +1,258 @@
+---
+title: 'Gatsby'
+description: 'Integrate HumanBehavior SDK with Gatsby for session recording and analytics.'
+---
+
+<Expandable title="How to get your API Key">
+<Info>
+  <strong>How to find your Public API Key:</strong><br/>
+  <b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
+</Info>
+
+<img
+  src="/images/APIKeyUpdated.png"
+  alt="Where to find your Public API Key"
+  style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
+/>
+
+<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+</Expandable>
+
+### Option 1: Installation Wizard (Recommended)
+
+The easiest way to get started is using our installation wizard:
+
+```bash
+npx humanbehavior-js YOUR_API_KEY
+```
+
+The wizard will:
+1. Ask for your API key (if not provided as an argument)
+2. Let you select **Gatsby** from the framework options
+3. Automatically install and configure the SDK for your Gatsby project:
+   - Install the `humanbehavior-js` package
+   - Create gatsby-browser.js configuration
+   - Configure environment variables
+   - Set up proper Gatsby integration
+
+**Version Compatibility**: The wizard works with most Gatsby versions and automatically detects:
+- **Gatsby 5.x**: Modern Gatsby with improved performance
+- **Gatsby 4.x**: Stable Gatsby with full feature support
+- **Bundlers**: Webpack (default), Vite
+- **Package Managers**: npm, yarn, pnpm
+
+### Option 2: Manual Setup
+
+If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
+
+## Step 1: Installation
+
+```bash
+npm install humanbehavior-js
+# or
+yarn add humanbehavior-js
+```
+
+## Step 2: Basic Setup
+
+### Add the Tracker to Your App
+
+Create or update your `gatsby-browser.js` file in the root of your project:
+
+```javascript
+import "./src/styles/global.css"
+
+// Initialize HumanBehavior SDK
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+export const onClientEntry = () => {
+  const apiKey = process.env.GATSBY_HUMANBEHAVIOR_API_KEY;
+  if (apiKey) {
+    try {
+      const tracker = HumanBehaviorTracker.init(apiKey);
+      console.log('HumanBehavior SDK initialized for Gatsby');
+    } catch (error) {
+      console.error('HumanBehavior: Failed to initialize tracker:', error);
+    }
+  } else {
+    console.error('HumanBehavior: No API key found');
+  }
+};
+```
+
+<Note>
+  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
+</Note>
+
+## Step 3: Environment Variables
+
+Create a `.env` file in your project root:
+
+```bash
+# .env
+GATSBY_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+<Note>
+  **Security Best Practice:** The `GATSBY_` prefix is required for Gatsby to expose the environment variable to the client-side code.
+</Note>
+
+## Optional: Advanced Features
+
+### Track Custom Events
+
+You can track custom events from any React component:
+
+```jsx
+import React from 'react';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+function MyComponent() {
+  const handleButtonClick = () => {
+    const apiKey = process.env.GATSBY_HUMANBEHAVIOR_API_KEY;
+    const tracker = HumanBehaviorTracker.init(apiKey);
+    
+    tracker.customEvent('button_clicked', {
+      button: 'cta-button',
+      page: window.location.pathname
+    });
+  };
+
+  return (
+    <div>
+      <button onClick={handleButtonClick}>Click Me</button>
+    </div>
+  );
+}
+
+export default MyComponent;
+```
+
+### User Identification
+
+Identify users after authentication:
+
+```jsx
+import React, { useEffect } from 'react';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+function AuthComponent({ user }) {
+  useEffect(() => {
+    if (user) {
+      const apiKey = process.env.GATSBY_HUMANBEHAVIOR_API_KEY;
+      const tracker = HumanBehaviorTracker.init(apiKey);
+      
+      tracker.identifyUser({
+        userProperties: {
+          email: user.email,
+          name: user.name,
+          userId: user.id
+        }
+      });
+    }
+  }, [user]);
+
+  return (
+    <div>
+      {/* Your authentication UI */}
+    </div>
+  );
+}
+
+export default AuthComponent;
+```
+
+### Data Redaction
+
+Configure data redaction for sensitive information in your `gatsby-browser.js`:
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+export const onClientEntry = () => {
+  const apiKey = process.env.GATSBY_HUMANBEHAVIOR_API_KEY;
+  if (apiKey) {
+    const tracker = HumanBehaviorTracker.init(apiKey, {
+      redactText: ['password', 'credit-card', 'ssn'],
+      redactInputs: ['password', 'credit-card-number'],
+      redactAttributes: ['data-sensitive']
+    });
+    console.log('HumanBehavior SDK initialized for Gatsby');
+  }
+};
+```
+
+## Gatsby-Specific Considerations
+
+### Client-Side Only Execution
+
+The HumanBehavior SDK runs on the client side using Gatsby's `onClientEntry` API, which ensures it only loads after the browser environment is ready.
+
+### Environment Variables
+
+Gatsby requires environment variables to be prefixed with `GATSBY_` to be available in client-side code.
+
+### Performance
+
+The HumanBehavior SDK is lightweight and won't impact your Gatsby site's performance. It only loads the tracking code when needed.
+
+### SSR Compatibility
+
+The SDK is fully compatible with Gatsby's SSR (Server-Side Rendering) and SSG (Static Site Generation) modes.
+
+### Build Process
+
+The SDK works seamlessly with Gatsby's build process and doesn't interfere with static generation or deployment.
+
+## Alternative: Using gatsby-ssr.js
+
+If you prefer to initialize the tracker in the SSR phase, you can also use `gatsby-ssr.js`:
+
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+export const onRenderBody = ({ setHeadComponents }) => {
+  const apiKey = process.env.GATSBY_HUMANBEHAVIOR_API_KEY;
+  
+  if (apiKey) {
+    // Add any SSR-specific initialization here
+    // Note: The actual tracker initialization should still happen in gatsby-browser.js
+  }
+};
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**"API key not found"**
+- Ensure your environment variable is prefixed with `GATSBY_`
+- Check that the `.env` file is in your project root
+- Restart your development server after adding environment variables
+
+**"Tracker not initializing"**
+- Verify the API key is correct
+- Check browser console for error messages
+- Ensure `gatsby-browser.js` is in your project root
+
+**"Events not being tracked"**
+- Check your network tab for API calls to HumanBehavior
+- Verify the API key has the correct permissions
+- Check browser console for any error messages
+
+**"Build errors"**
+- Ensure the SDK is only imported in client-side files
+- Check that environment variables are properly configured
+- Verify Gatsby version compatibility
+
+## Next Steps
+
+Once you've completed the setup:
+
+1. **Test the integration** by visiting your site and checking the browser console
+2. **Verify events** are being sent to your HumanBehavior dashboard
+3. **Customize tracking** by adding custom events where needed
+4. **Monitor performance** to ensure the SDK isn't impacting your site
+5. **Deploy** your Gatsby site with the tracking enabled
+
+For more advanced features, check out our [API Reference](/api-reference/tracker) and [Custom Events](/core-features/custom-events) documentation.

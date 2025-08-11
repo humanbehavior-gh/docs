@@ -32,46 +32,18 @@ The easiest way to get started is using our installation wizard:
 npx humanbehavior-js YOUR_API_KEY
 ```
 
-You'll see several installation options:
-
-```bash
-🤖 Choose installation mode:
-1. Manual AI-Enhanced (recommended) - Choose your framework and use AI for optimization
-2. Traditional - Standard framework detection and installation
-3. Browser - Browser-based AI detection and code generation
-
-Select mode (1-3, default: 1):
-```
-
-Select **Option 1: Manual AI-Enhanced** and then choose **React** from the framework list:
-
-```bash
-🎯 Choose your framework:
-1. Vanilla JS (HTML)
-2. React <
-3. Next.js
-4. Vue
-5. Nuxt
-6. Angular
-7. Svelte
-8. Remix
-9. Node.js
-10. Other (Auto-detect)
-
-Select framework (1-10):
-```
-
-The AI wizard will then:
-1. Analyze your React codebase for optimal integration
-2. Detect your React configuration and dependencies
-3. Install the humanbehavior-js package
-4. Add HumanBehaviorProvider to your App component
-5. Configure environment variables
-6. Provide React-specific optimizations and recommendations
+The wizard will:
+1. Ask for your API key (if not provided as an argument)
+2. Let you select **React** from the framework options
+3. Automatically install and configure the SDK for your React project:
+   - Install the `humanbehavior-js` package
+   - Add HumanBehaviorProvider to your App component
+   - Configure environment variables
+   - Set up proper React integration
 
 <Tip>
-  **Why choose Manual AI-Enhanced Installation?**
-  The manual AI-enhanced installation option is perfect for developers who want to understand each step of the integration process. You'll get the same end result as auto-installation, but with detailed explanations, AI-powered optimizations, and the ability to customize along the way.
+  **Why choose the Auto-Installation Wizard?**
+  The auto-installation wizard is perfect for developers who want to get started quickly. It automatically detects your React setup and provides the optimal integration configuration with detailed explanations of each step.
 </Tip>
 
 ### Option 2: Manual Setup

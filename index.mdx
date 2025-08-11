@@ -34,39 +34,25 @@ The easiest way to get started is using our auto-installation wizard:
 npx humanbehavior-js YOUR_API_KEY
 ```
 
-When you run this command, you'll see several installation options:
+When you run this command, the wizard will:
 
-```bash
-🤖 Choose installation mode:
-1. Manual AI-Enhanced (recommended) - Choose your framework and use AI for optimization
-2. Traditional - Standard framework detection and installation
-3. Browser - Browser-based AI detection and code generation
-
-Select mode (1-3, default: 1):
-```
-
-Select **Option 1: Manual AI-Enhanced** to:
-1. Choose your framework from the list:
-   ```bash
-   🎯 Choose your framework:
-   1. Vanilla JS (HTML)
-   2. React
-   3. Next.js
-   4. Vue
-   5. Nuxt
-   6. Angular
-   7. Svelte
-   8. Remix
-   9. Node.js
-   10. Other (Auto-detect)
-   ```
-2. Let the AI analyze your codebase for optimal integration
-3. Get framework-specific optimizations and recommendations
-4. Have the wizard automatically:
-   - Install dependencies
-   - Create necessary files
-   - Add SDK initialization code
+1. **Ask for your API key** (if not provided as an argument)
+2. **Let you select your framework** from the supported options:
+   - React
+   - Next.js
+   - Vue
+   - Angular
+   - Svelte
+   - Nuxt.js
+   - Remix
+   - Astro
+   - Gatsby
+   - Vanilla JS/TS
+3. **Automatically install and configure** the SDK for your project:
+   - Install the `humanbehavior-js` package
+   - Add framework-specific integration code
    - Configure environment variables
+   - Set up proper initialization
 
 **Version Compatibility**: The wizard works with most versions of each framework and automatically detects:
 - **Next.js**: App Router (13+) vs Pages Router (12 and earlier)
@@ -76,7 +62,7 @@ Select **Option 1: Manual AI-Enhanced** to:
 - **Package Managers**: npm, yarn, pnpm
 
 <Note>
-  The wizard supports React, Next.js, Vue, Angular, Svelte, Nuxt, Remix, and vanilla JS/TS projects.
+  The wizard supports React, Next.js, Vue, Angular, Svelte, Nuxt, Remix, Astro, Gatsby, and vanilla JS/TS projects.
 </Note>
 
 <Tip>
