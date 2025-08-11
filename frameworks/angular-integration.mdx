@@ -75,17 +75,18 @@ In your `main.ts` file:
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { initializeHumanBehavior } from 'humanbehavior-js/angular';
-
-// Initialize the tracker once globally
-if (typeof window !== 'undefined') {
-  initializeHumanBehavior(process.env.HUMANBEHAVIOR_API_KEY || '');
-}
+import { environment } from './environments/environment';
 
 bootstrapApplication(AppComponent, {
   providers: [
     // Your other providers
   ]
 }).catch(err => console.error(err));
+
+// Initialize HumanBehavior SDK (client-side only)
+if (typeof window !== 'undefined') {
+  const tracker = initializeHumanBehavior(environment.humanBehaviorApiKey);
+}
 ```
 
 **For Legacy Angular (NgModule):**
@@ -126,6 +127,7 @@ export class AppModule { }
 ```typescript
 import { Component, OnInit } from '@angular/core';
 import { initializeHumanBehavior } from 'humanbehavior-js/angular';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-my-component',
@@ -138,7 +140,7 @@ import { initializeHumanBehavior } from 'humanbehavior-js/angular';
   standalone: true
 })
 export class MyComponent implements OnInit {
-  private tracker = initializeHumanBehavior(process.env.HUMANBEHAVIOR_API_KEY || '');
+  private tracker = initializeHumanBehavior(environment.humanBehaviorApiKey);
 
   ngOnInit() {
     // Track component view
@@ -195,6 +197,7 @@ export class MyComponent implements OnInit {
 ```typescript
 import { Component } from '@angular/core';
 import { initializeHumanBehavior } from 'humanbehavior-js/angular';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-login-form',
@@ -211,7 +214,7 @@ import { initializeHumanBehavior } from 'humanbehavior-js/angular';
 export class LoginFormComponent {
   email = '';
   password = '';
-  private tracker = initializeHumanBehavior(process.env.HUMANBEHAVIOR_API_KEY || '');
+  private tracker = initializeHumanBehavior(environment.humanBehaviorApiKey);
 
   async handleLogin() {
     try {
@@ -283,25 +286,62 @@ export class LoginFormComponent {
 
 ## Environment Variables
 
-```bash
-# .env
-HUMANBEHAVIOR_API_KEY=your-api-key-here
+Angular uses its own environment system with `environment.ts` files. The wizard will automatically create these files for you.
+
+### Manual Setup (if needed):
+
+**For Angular 17+ (Standalone Components):**
+
+Create `src/environments/environment.ts`:
+```typescript
+export const environment = {
+  production: false,
+  humanBehaviorApiKey: 'your-api-key-here'
+};
 ```
+
+Create `src/environments/environment.prod.ts`:
+```typescript
+export const environment = {
+  production: true,
+  humanBehaviorApiKey: 'your-api-key-here'
+};
+```
+
+**For Legacy Angular (NgModule):**
+
+Create `src/environments/environment.ts`:
+```typescript
+export const environment = {
+  production: false,
+  humanBehaviorApiKey: 'your-api-key-here'
+};
+```
+
+Create `src/environments/environment.prod.ts`:
+```typescript
+export const environment = {
+  production: true,
+  humanBehaviorApiKey: 'your-api-key-here'
+};
+```
+
+<Note>
+  **Angular Environment System:** Angular CLI automatically replaces `environment.ts` with `environment.prod.ts` during production builds. This is the standard Angular way to handle environment variables.
+</Note>
 
 **For Angular 17+ (Standalone Components):**
 ```typescript
 // In your code
-const tracker = initializeHumanBehavior(process.env.HUMANBEHAVIOR_API_KEY || '');
+import { environment } from './environments/environment';
+const tracker = initializeHumanBehavior(environment.humanBehaviorApiKey);
 ```
 
 **For Legacy Angular (NgModule):**
 ```typescript
 // In your code
-// Add to src/environments/environment.ts
-export const environment = {
-  production: false,
-  humanBehaviorApiKey: process.env.HUMANBEHAVIOR_API_KEY || ''
-};
+import { environment } from '../environments/environment';
+const tracker = initializeHumanBehavior(environment.humanBehaviorApiKey);
 ```
 
 ## Troubleshooting
