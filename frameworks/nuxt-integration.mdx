@@ -32,43 +32,15 @@ The easiest way to get started is using our installation wizard:
 npx humanbehavior-js YOUR_API_KEY
 ```
 
-You'll see several installation options:
-
-```bash
-🤖 Choose installation mode:
-1. Manual AI-Enhanced (recommended) - Choose your framework and use AI for optimization
-2. Traditional - Standard framework detection and installation
-3. Browser - Browser-based AI detection and code generation
-
-Select mode (1-3, default: 1):
-```
-
-Select **Option 1: Manual AI-Enhanced** and then choose **Nuxt** from the framework list:
-
-```bash
-🎯 Choose your framework:
-1. Vanilla JS (HTML)
-2. React
-3. Next.js
-4. Vue
-5. Nuxt <
-6. Angular
-7. Svelte
-8. Remix
-9. Node.js
-10. Other (Auto-detect)
-
-Select framework (1-10):
-```
-
-The AI wizard will then:
-1. Analyze your Nuxt.js codebase for optimal integration
-2. Detect your Nuxt configuration and dependencies
-3. Install the humanbehavior-js package
-4. Create plugins/humanbehavior.client.ts
-5. Update nuxt.config.ts with runtime config
-6. Configure environment variables
-7. Provide Nuxt.js-specific optimizations and recommendations
+The wizard will:
+1. Ask for your API key (if not provided as an argument)
+2. Let you select **Nuxt.js** from the framework options
+3. Automatically install and configure the SDK for your Nuxt project:
+   - Install the `humanbehavior-js` package
+   - Create plugins/humanbehavior.client.ts
+   - Update nuxt.config.ts with runtime config
+   - Configure environment variables
+   - Set up proper Nuxt integration
 
 **Version Compatibility**: The wizard works with most Nuxt versions and automatically detects:
 - TypeScript support

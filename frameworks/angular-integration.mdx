@@ -32,42 +32,14 @@ The easiest way to get started is using our installation wizard:
 npx humanbehavior-js YOUR_API_KEY
 ```
 
-You'll see several installation options:
-
-```bash
-🤖 Choose installation mode:
-1. Manual AI-Enhanced (recommended) - Choose your framework and use AI for optimization
-2. Traditional - Standard framework detection and installation
-3. Browser - Browser-based AI detection and code generation
-
-Select mode (1-3, default: 1):
-```
-
-Select **Option 1: Manual AI-Enhanced** and then choose **Angular** from the framework list:
-
-```bash
-🎯 Choose your framework:
-1. Vanilla JS (HTML)
-2. React
-3. Next.js
-4. Vue
-5. Nuxt
-6. Angular <
-7. Svelte
-8. Remix
-9. Node.js
-10. Other (Auto-detect)
-
-Select framework (1-10):
-```
-
-The AI wizard will then:
-1. Analyze your Angular codebase for optimal integration
-2. Detect your Angular version and configuration (standalone vs NgModule)
-3. Install the humanbehavior-js package
-4. Add HumanBehaviorModule or initializeHumanBehavior
-5. Configure environment variables
-6. Provide Angular-specific optimizations and recommendations
+The wizard will:
+1. Ask for your API key (if not provided as an argument)
+2. Let you select **Angular** from the framework options
+3. Automatically install and configure the SDK for your Angular project:
+   - Install the `humanbehavior-js` package
+   - Add HumanBehaviorModule or initializeHumanBehavior
+   - Configure environment variables
+   - Set up proper Angular integration
 
 **Version Compatibility**: The wizard automatically detects your Angular version and setup:
 - **Modern Angular** (17+ with standalone components): Detects `src/app/app.ts` and no `app.module.ts`

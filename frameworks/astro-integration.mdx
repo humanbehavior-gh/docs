@@ -1,0 +1,266 @@
+---
+title: 'Astro'
+description: 'Integrate HumanBehavior SDK with Astro for session recording and analytics.'
+---
+
+<Expandable title="How to get your API Key">
+<Info>
+  <strong>How to find your Public API Key:</strong><br/>
+  <b>Flow:</b> Project Home → Integrations → Human Behavior SDK → Kebab Menu → Configuration → Public API Key
+</Info>
+
+<img
+  src="/images/APIKeyUpdated.png"
+  alt="Where to find your Public API Key"
+  style={{ borderRadius:"0.5rem",margin:"1rem 0",maxWidth:"100%" }}
+/>
+
+<p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
+</Expandable>
+
+### Option 1: Installation Wizard (Recommended)
+
+The easiest way to get started is using our installation wizard:
+
+```bash
+npx humanbehavior-js YOUR_API_KEY
+```
+
+The wizard will:
+1. Ask for your API key (if not provided as an argument)
+2. Let you select **Astro** from the framework options
+3. Automatically install and configure the SDK for your Astro project:
+   - Install the `humanbehavior-js` package
+   - Create a HumanBehavior component
+   - Add the component to your layout
+   - Configure environment variables
+   - Set up proper Astro integration
+
+**Version Compatibility**: The wizard works with most Astro versions and automatically detects:
+- **Astro 4.0+**: Modern Astro with improved performance
+- **Astro 3.x**: Stable Astro with full feature support
+- **Bundlers**: Vite (default), Webpack
+- **Package Managers**: npm, yarn, pnpm
+
+### Option 2: Manual Setup
+
+If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
+
+## Step 1: Installation
+
+```bash
+npm install humanbehavior-js
+# or
+yarn add humanbehavior-js
+```
+
+## Step 2: Basic Setup
+
+### Create a HumanBehavior Component
+
+Create a new component file `src/components/HumanBehavior.astro`:
+
+```astro
+---
+// This component will only run on the client side
+---
+
+<script>
+  import { HumanBehaviorTracker } from 'humanbehavior-js';
+  
+  // Get API key from environment variable
+  const apiKey = import.meta.env.PUBLIC_HUMANBEHAVIOR_API_KEY;
+  
+  if (apiKey) {
+    try {
+      const tracker = HumanBehaviorTracker.init(apiKey);
+      console.log('HumanBehavior: Tracker initialized successfully');
+    } catch (error) {
+      console.error('HumanBehavior: Failed to initialize tracker:', error);
+    }
+  } else {
+    console.error('HumanBehavior: No API key found');
+  }
+</script>
+```
+
+### Add the Component to Your Layout
+
+In your main layout file (usually `src/layouts/Layout.astro`):
+
+```astro
+---
+export interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+
+import HumanBehavior from '../components/HumanBehavior.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Astro description">
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+    <HumanBehavior />
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>
+```
+
+<Note>
+  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
+</Note>
+
+## Step 3: Environment Variables
+
+Create a `.env` file in your project root:
+
+```bash
+# .env
+PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+<Note>
+  **Security Best Practice:** The `PUBLIC_` prefix is required for Astro to expose the environment variable to the client-side code.
+</Note>
+
+## Optional: Advanced Features
+
+### Track Custom Events
+
+You can track custom events from any Astro component:
+
+```astro
+---
+// Your component logic here
+---
+
+<div>
+  <button id="cta-button">Click Me</button>
+</div>
+
+<script>
+  import { HumanBehaviorTracker } from 'humanbehavior-js';
+  
+  const apiKey = import.meta.env.PUBLIC_HUMANBEHAVIOR_API_KEY;
+  const tracker = HumanBehaviorTracker.init(apiKey);
+  
+  document.getElementById('cta-button')?.addEventListener('click', () => {
+    tracker.customEvent('button_clicked', {
+      button: 'cta-button',
+      page: window.location.pathname
+    });
+  });
+</script>
+```
+
+### User Identification
+
+Identify users after authentication:
+
+```astro
+---
+// In your authentication component
+---
+
+<script>
+  import { HumanBehaviorTracker } from 'humanbehavior-js';
+  
+  const apiKey = import.meta.env.PUBLIC_HUMANBEHAVIOR_API_KEY;
+  const tracker = HumanBehaviorTracker.init(apiKey);
+  
+  // After successful login
+  function onLoginSuccess(user) {
+    tracker.identifyUser({
+      userProperties: {
+        email: user.email,
+        name: user.name,
+        userId: user.id
+      }
+    });
+  }
+</script>
+```
+
+### Data Redaction
+
+Configure data redaction for sensitive information:
+
+```astro
+---
+// In your HumanBehavior component
+---
+
+<script>
+  import { HumanBehaviorTracker } from 'humanbehavior-js';
+  
+  const apiKey = import.meta.env.PUBLIC_HUMANBEHAVIOR_API_KEY;
+  
+  const tracker = HumanBehaviorTracker.init(apiKey, {
+    redactText: ['password', 'credit-card', 'ssn'],
+    redactInputs: ['password', 'credit-card-number'],
+    redactAttributes: ['data-sensitive']
+  });
+</script>
+```
+
+## Astro-Specific Considerations
+
+### Client-Side Only Execution
+
+Astro components run on the server by default. The HumanBehavior SDK must run on the client side, which is why we use the `<script>` tag in the component.
+
+### Environment Variables
+
+Astro requires environment variables to be prefixed with `PUBLIC_` to be available in client-side code.
+
+### Performance
+
+The HumanBehavior component is lightweight and won't impact your Astro site's performance. It only loads the tracking code when needed.
+
+### SSR Compatibility
+
+The SDK is fully compatible with Astro's SSR (Server-Side Rendering) and SSG (Static Site Generation) modes.
+
+## Troubleshooting
+
+### Common Issues
+
+**"API key not found"**
+- Ensure your environment variable is prefixed with `PUBLIC_`
+- Check that the `.env` file is in your project root
+- Restart your development server after adding environment variables
+
+**"Tracker not initializing"**
+- Verify the API key is correct
+- Check browser console for error messages
+- Ensure the HumanBehavior component is included in your layout
+
+**"Events not being tracked"**
+- Check your network tab for API calls to HumanBehavior
+- Verify the API key has the correct permissions
+- Check browser console for any error messages
+
+## Next Steps
+
+Once you've completed the setup:
+
+1. **Test the integration** by visiting your site and checking the browser console
+2. **Verify events** are being sent to your HumanBehavior dashboard
+3. **Customize tracking** by adding custom events where needed
+4. **Monitor performance** to ensure the SDK isn't impacting your site
+
+For more advanced features, check out our [API Reference](/api-reference/tracker) and [Custom Events](/core-features/custom-events) documentation.
