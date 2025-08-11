@@ -5,189 +5,416 @@ description: 'Track specific user actions and business events with HumanBehavior
 
 HumanBehavior SDK automatically tracks common user interactions like button clicks, link clicks, and form submissions. For specific business actions or advanced analytics, you can track custom events to capture exactly what matters to your application.
 
-## Automatic Event Tracking
+## Quick Start
 
-The SDK automatically captures standard user interactions without any additional code:
+### Step 1: Get the Tracker Instance
 
-- **Button clicks** - All button interactions are tracked
-- **Link clicks** - Navigation and external link clicks
-- **Form submissions** - Form completion events
-- **Page views** - Navigation between pages
+**Important:** Even if you initialize the tracker globally (like in a React provider), you still need to get the tracker instance in each component where you want to track events.
 
-These automatic events provide a solid foundation for user behavior analysis.
+**React/Next.js:**
+```jsx
+import { useHumanBehavior } from 'humanbehavior-js/react';
 
-## Custom Event Tracking
+function MyComponent() {
+  const tracker = useHumanBehavior(); // ← Always get the instance
+  // Your component code...
+}
+```
 
-### When to use custom events
+**Vue:**
+```vue
+<script>
+export default {
+  mounted() {
+    const tracker = this.$humanBehavior; // ← Always get the instance
+    // Your component code...
+  }
+}
+</script>
+```
+
+**Vanilla JavaScript:**
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key');
+```
+
+### Step 2: Track Your First Event
+
+```javascript
+// Simple event tracking
+await tracker.customEvent('button_clicked', {
+  buttonName: 'signup_button',
+  page: 'homepage'
+});
+```
+
+That's it! Your custom event is now being tracked. 🎉
+
+## Understanding Tracker Instances
+
+### Global vs Component-Level Access
+
+When you set up HumanBehavior in your app (like with a React provider), you're creating a **global tracker instance**. However, to use it in your components, you still need to **get the tracker instance** in each component:
+
+```jsx
+// ✅ Correct: Get tracker instance in each component
+function ProductPage() {
+  const tracker = useHumanBehavior(); // ← Get the instance
+  
+  const handleAddToCart = async () => {
+    await tracker.customEvent('product_added_to_cart', { productId: '123' });
+  };
+  
+  return <button onClick={handleAddToCart}>Add to Cart</button>;
+}
+
+function CheckoutPage() {
+  const tracker = useHumanBehavior(); // ← Get the instance again
+  
+  const handlePurchase = async () => {
+    await tracker.customEvent('purchase_completed', { total: 99.99 });
+  };
+  
+  return <button onClick={handlePurchase}>Complete Purchase</button>;
+}
+```
+
+```jsx
+// ❌ Incorrect: Don't try to access tracker globally
+function ProductPage() {
+  // This won't work - tracker is not available here
+  const handleAddToCart = async () => {
+    await tracker.customEvent('product_added_to_cart', { productId: '123' });
+  };
+  
+  return <button onClick={handleAddToCart}>Add to Cart</button>;
+}
+```
+
+### Why This Matters
+
+- **Provider setup** creates the global tracker instance
+- **Component access** requires getting the instance via hooks/properties
+- **Each component** needs its own reference to the tracker
+- **Same session** - all components share the same underlying session
+
+### Vanilla JavaScript vs Framework Usage
+
+**Vanilla JavaScript (Singleton Pattern):**
+```javascript
+// ✅ Initialize once - creates a global singleton
+const tracker = HumanBehaviorTracker.init('your-api-key');
+
+// ✅ Access the same instance anywhere in your code
+function handleButtonClick() {
+  tracker.customEvent('button_clicked', { button: 'cta' });
+}
+
+function handleFormSubmit() {
+  tracker.customEvent('form_submitted', { form: 'contact' });
+}
+```
+
+**Framework Usage (Provider Pattern):**
+```jsx
+// ✅ Provider creates the instance
+<HumanBehaviorProvider apiKey="your-api-key">
+  <App />
+</HumanBehaviorProvider>
+
+// ✅ Each component gets its own reference
+function ComponentA() {
+  const tracker = useHumanBehavior(); // Gets the instance
+  // Use tracker...
+}
+
+function ComponentB() {
+  const tracker = useHumanBehavior(); // Gets the same instance
+  // Use tracker...
+}
+```
+
+**Key Difference:** In vanilla JS, you can call `HumanBehaviorTracker.init()` multiple times and get the same instance. In frameworks, you use hooks/properties to access the instance created by the provider.
+
+## When to Use Custom Events
 
 Custom events are perfect for tracking business-specific actions that automatic tracking doesn't cover:
 
 - **E-commerce events** - Purchase completion, cart additions, checkout steps
-- **Feature usage** - Tool usage, feature adoption, advanced actions
+- **Feature usage** - Tool usage, feature adoption, advanced actions  
 - **Business milestones** - Account upgrades, goal completion, achievements
 - **Error tracking** - Custom error states or user-reported issues
 
-### Tracking a custom event
+## Framework-Specific Examples
 
-Use the `customEvent` function to track any user action with relevant context:
+### React/Next.js Example
 
-```javascript
-// Track a purchase completion with order details
-await tracker.customEvent('purchase_completed', {
-  orderId: 'order-123',
-  total: 99.99,
-  currency: 'USD',
-  items: ['item-1', 'item-2']
-});
+```jsx title="ContactForm.jsx"
+import { useHumanBehavior } from 'humanbehavior-js/react';
+import { useState } from 'react';
+
+function ContactForm() {
+  const tracker = useHumanBehavior();
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      // Your form submission logic
+      await submitForm(formData);
+      
+      // Track successful form submission
+      await tracker.customEvent('contact_form_submitted', {
+        formType: 'contact',
+        hasName: !!formData.name,
+        hasEmail: !!formData.email,
+        messageLength: formData.message.length
+      });
+      
+      alert('Message sent successfully!');
+    } catch (error) {
+      // Track form error
+      await tracker.customEvent('contact_form_error', {
+        errorType: error.message,
+        formType: 'contact'
+      });
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Your form fields */}
+      <button type="submit">Send Message</button>
+    </form>
+  );
+}
 ```
 
-### Event naming best practices
+### Vue Example
+
+```vue title="ProductCard.vue"
+<template>
+  <div class="product-card">
+    <h3>{{ product.name }}</h3>
+    <p>${{ product.price }}</p>
+    <button @click="handleAddToCart">Add to Cart</button>
+  </div>
+</template>
+
+<script>
+export default {
+  props: ['product'],
+  methods: {
+    async handleAddToCart() {
+      try {
+        // Your add to cart logic
+        await this.addToCart(this.product.id);
+        
+        // Track the event
+        await this.$humanBehavior.customEvent('product_added_to_cart', {
+          productId: this.product.id,
+          productName: this.product.name,
+          price: this.product.price,
+          category: this.product.category
+        });
+        
+        this.$toast.success('Added to cart!');
+      } catch (error) {
+        await this.$humanBehavior.customEvent('add_to_cart_error', {
+          productId: this.product.id,
+          error: error.message
+        });
+      }
+    }
+  }
+}
+</script>
+```
+
+### Vanilla JavaScript Example
+
+```html title="index.html"
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+</head>
+<body>
+  <button id="cta-button">Get Started</button>
+  
+  <script>
+    const tracker = HumanBehaviorTracker.init('your-api-key');
+    
+    document.getElementById('cta-button').addEventListener('click', async () => {
+      // Track the button click
+      await tracker.customEvent('cta_button_clicked', {
+        buttonText: 'Get Started',
+        page: 'landing_page',
+        section: 'hero'
+      });
+      
+      // Your button logic here
+      window.location.href = '/signup';
+    });
+  </script>
+</body>
+</html>
+```
+
+## Event Naming Best Practices
 
 Choose descriptive, consistent event names that clearly indicate the action:
 
 ```javascript
-// Good: Clear action with context
+// ✅ Good: Clear action with context
 await tracker.customEvent('video_started', { videoId: 'intro-tutorial' });
 await tracker.customEvent('search_performed', { query: 'user documentation' });
 await tracker.customEvent('feature_enabled', { feature: 'dark_mode' });
 
-// Avoid: Vague or inconsistent naming
+// ❌ Avoid: Vague or inconsistent naming
 await tracker.customEvent('click', { button: 'video' });
 await tracker.customEvent('search', { q: 'docs' });
 ```
 
-### Complete Example 
+## Common Event Patterns
 
-```jsx title="EcommerceComponents.jsx"
-import { useHumanBehavior } from 'humanbehavior-js/react';
-
-function ProductPage({ product }) {
-    const tracker = useHumanBehavior();
-    
-    const handleAddToCart = async (product, quantity) => {
-        // Your add to cart logic here
-        const success = await addToCart(product.id, quantity);
-        
-        if (success) {
-            // Track the business event with relevant context
-            await tracker.customEvent('product_added_to_cart', {
-                productId: product.id,
-                productName: product.name,
-                price: product.price,
-                quantity: quantity,
-                category: product.category
-            });
-        }
-    };
-    
-    const handleProductView = async () => {
-        // Track product views for analytics
-        await tracker.customEvent('product_viewed', {
-            productId: product.id,
-            productName: product.name,
-            category: product.category,
-            price: product.price
-        });
-    };
-    
-    // Track view when component mounts
-    useEffect(() => {
-        handleProductView();
-    }, [product.id]);
-    
-    return (
-        <div>
-            <h1>{product.name}</h1>
-            <p>${product.price}</p>
-            <button onClick={() => handleAddToCart(product, 1)}>
-                Add to Cart
-            </button>
-        </div>
-    );
-}
-
-function CheckoutPage() {
-    const tracker = useHumanBehavior();
-    
-    const handlePurchaseComplete = async (orderData) => {
-        // Your order completion logic
-        const order = await processOrder(orderData);
-        
-        if (order.success) {
-            // Track the conversion event
-            await tracker.customEvent('purchase_completed', {
-                orderId: order.id,
-                total: order.total,
-                currency: order.currency,
-                itemCount: order.items.length,
-                paymentMethod: order.paymentMethod
-            });
-        }
-    };
-    
-    const handleCheckoutStep = async (step) => {
-        // Track progression through checkout funnel
-        await tracker.customEvent('checkout_step_completed', {
-            step: step,
-            stepName: getStepName(step)
-        });
-    };
-    
-    return (
-        <div>
-            {/* Your checkout form */}
-            <button onClick={() => handleCheckoutStep(1)}>
-                Continue to Payment
-            </button>
-        </div>
-    );
-}
-```
-
-## Advanced Event Properties
-
-### Complex data structures
-
-Custom events support rich data structures for detailed analytics:
+### E-commerce Events
 
 ```javascript
-// E-commerce event with nested data
-await tracker.customEvent('order_completed', {
-    orderId: 'order-456',
-    customer: {
-        id: 'user-123',
-        tier: 'premium'
-    },
-    items: [
-        { id: 'item-1', name: 'Product A', price: 29.99 },
-        { id: 'item-2', name: 'Product B', price: 19.99 }
-    ],
-    shipping: {
-        method: 'express',
-        cost: 9.99
-    },
-    total: 59.97
+// Product interactions
+await tracker.customEvent('product_viewed', {
+  productId: '123',
+  productName: 'Blue T-Shirt',
+  category: 'clothing',
+  price: 29.99
+});
+
+await tracker.customEvent('product_added_to_cart', {
+  productId: '123',
+  quantity: 2,
+  totalValue: 59.98
+});
+
+// Checkout process
+await tracker.customEvent('checkout_started', {
+  cartValue: 99.99,
+  itemCount: 3
+});
+
+await tracker.customEvent('purchase_completed', {
+  orderId: 'order-456',
+  total: 99.99,
+  currency: 'USD',
+  paymentMethod: 'credit_card'
 });
 ```
 
-### Performance and feature tracking
+### User Engagement Events
 
 ```javascript
-// Feature usage analytics
+// Feature usage
 await tracker.customEvent('feature_used', {
-    feature: 'advanced_search',
-    userId: user.id,
-    sessionDuration: Date.now() - sessionStart,
-    searchFilters: ['category', 'price_range']
+  feature: 'advanced_search',
+  searchFilters: ['category', 'price_range']
 });
 
-// Error tracking
-await tracker.customEvent('error_encountered', {
-    errorType: 'validation_error',
-    formName: 'checkout',
-    fieldName: 'email',
-    errorMessage: 'Invalid email format'
+// Content interactions
+await tracker.customEvent('article_read', {
+  articleId: 'getting-started',
+  readTime: 180, // seconds
+  completionRate: 0.85
 });
+
+// User milestones
+await tracker.customEvent('account_upgraded', {
+  fromPlan: 'free',
+  toPlan: 'premium',
+  reason: 'team_collaboration'
+});
+```
+
+### Error Tracking
+
+```javascript
+// Form validation errors
+await tracker.customEvent('form_validation_error', {
+  formName: 'signup',
+  fieldName: 'email',
+  errorType: 'invalid_format'
+});
+
+// API errors
+await tracker.customEvent('api_error', {
+  endpoint: '/api/products',
+  errorCode: 500,
+  userAction: 'product_search'
+});
+```
+
+## Advanced Properties
+
+### Complex Data Structures
+
+```javascript
+// Nested objects
+await tracker.customEvent('order_completed', {
+  orderId: 'order-789',
+  customer: {
+    id: 'user-123',
+    tier: 'premium',
+    location: 'US'
+  },
+  items: [
+    { id: 'item-1', name: 'Product A', price: 29.99 },
+    { id: 'item-2', name: 'Product B', price: 19.99 }
+  ],
+  shipping: {
+    method: 'express',
+    cost: 9.99
+  },
+  total: 59.97
+});
+```
+
+### Performance Tracking
+
+```javascript
+// Feature performance
+await tracker.customEvent('feature_performance', {
+  feature: 'image_upload',
+  loadTime: 1500, // milliseconds
+  fileSize: 2048000, // bytes
+  success: true
+});
+```
+
+## Error Handling
+
+Always wrap custom events in try-catch blocks to prevent errors from breaking your app:
+
+```javascript
+const handleButtonClick = async () => {
+  try {
+    // Your business logic
+    await processAction();
+    
+    // Track success
+    await tracker.customEvent('action_completed', {
+      action: 'button_click',
+      success: true
+    });
+  } catch (error) {
+    // Track error
+    await tracker.customEvent('action_failed', {
+      action: 'button_click',
+      error: error.message
+    });
+    
+    // Handle error gracefully
+    console.error('Action failed:', error);
+  }
+};
 ```
 
 ## Analytics & Segmentation
