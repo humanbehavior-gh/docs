@@ -280,6 +280,38 @@ getRedactedFields(): string[]
 const fields = tracker.getRedactedFields();
 ```
 
+### `unredactFields(fields)`
+
+Remove specific fields from redaction.
+
+```typescript
+unredactFields(fields: string[]): void
+```
+
+**Parameters:**
+- `fields` (string[]): Array of CSS selectors for fields to unredact
+
+**Example:**
+```javascript
+tracker.unredactFields([
+  '#public-comment',
+  '.non-sensitive-input'
+]);
+```
+
+### `clearRedactedFields()`
+
+Clear all redacted fields (disable redaction completely).
+
+```typescript
+clearRedactedFields(): void
+```
+
+**Example:**
+```javascript
+tracker.clearRedactedFields();
+```
+
 ### `redact(options?)`
 
 Apply redaction to current session.

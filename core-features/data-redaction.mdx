@@ -1,229 +1,142 @@
 ---
 title: 'Data Redaction'
-description: 'Protect sensitive data by selectively redacting form fields and content during session recording'
+description: 'Automatic data redaction with optional field unredaction'
 ---
 
-HumanBehavior SDK provides comprehensive data redaction capabilities to protect sensitive information during session recording. This ensures privacy compliance while maintaining the value of your analytics by selectively masking sensitive data in real-time.
+HumanBehavior SDK automatically redacts sensitive data using rrweb's built-in masking. **All input fields are redacted by default**, ensuring privacy compliance while maintaining the value of your analytics.
 
-## Automatic Redaction Setup
+## Automatic Redaction
 
-The SDK can be configured to automatically redact sensitive fields during initialization. Simply specify CSS selectors for fields that should be redacted:
+The SDK automatically redacts sensitive data without any configuration:
 
-```javascript
-const tracker = HumanBehaviorTracker.init('your-api-key', {
-  redactFields: [
-    'input[type="password"]',
-    'input[type="email"]',
-    '.sensitive-data',
-    '#credit-card-number'
-  ]
-});
-```
+- ✅ **All Input Fields**: Automatically masked (`maskAllInputs: true`)
+- ✅ **Password Fields**: Always masked (`maskInputOptions: { password: true }`)
+- ✅ **Real-time Protection**: Data is masked before being recorded
+- ✅ **No Configuration Required**: Works out of the box
 
-## Manual Redaction Configuration
+## Unredacting Specific Fields
 
-### Setting fields to redact
-
-You can configure redaction at any time using the `setRedactedFields` function. This allows you to dynamically update redaction rules as your application state changes:
+You can selectively unredact fields that you want to track (except passwords, which remain protected):
 
 ```javascript
-// Redact password fields and email inputs
-tracker.setRedactedFields([
-  'input[type="password"]',
-  'input[type="email"]',
-  '.payment-form input',
-  '#ssn-field'
+// Unredact specific fields for tracking
+tracker.setUnredactedFields([
+  '#public-comment',
+  '.feedback-input',
+  'input[name="username"]'
 ]);
 ```
 
-### Advanced redaction options
+### Accessing the Tracker Instance
 
-For more control over redaction behavior, use the `redact` function with advanced options:
-
+**React/Next.js:**
 ```javascript
-await tracker.redact({
-  redactedText: '[SENSITIVE]', // Custom redaction text
-  excludeSelectors: ['.public-info'], // Fields to exclude from redaction
-  userFields: ['.custom-sensitive'] // Additional fields to redact
-});
-```
+import { useHumanBehavior } from '@humanbehavior/react';
 
-### Complete Example
-
-```jsx title="SecureForm.jsx"
-import { useHumanBehavior } from 'humanbehavior-js/react';
-
-function LoginForm() {
-    const tracker = useHumanBehavior();
-    
-    useEffect(() => {
-        // Configure redaction for login form
-        tracker.setRedactedFields([
-            'input[type="password"]',
-            'input[type="email"]',
-            '.login-form input'
-        ]);
-    }, []);
-    
-    const handleLogin = async (formData) => {
-        // Your authentication logic here
-        
-        if (loginSuccessful) {
-            // Update redaction for authenticated user
-            tracker.setRedactedFields([
-                'input[type="password"]',
-                '.payment-info input',
-                '#credit-card',
-                '.personal-data'
-            ]);
-        }
-    };
-    
-    return (
-        <form className="login-form">
-            <input type="email" placeholder="Email" />
-            <input type="password" placeholder="Password" />
-            <button type="submit">Login</button>
-        </form>
-    );
-}
-
-function PaymentForm() {
-    const tracker = useHumanBehavior();
-    
-    useEffect(() => {
-        // Ensure payment fields are redacted
-        tracker.setRedactedFields([
-            'input[type="password"]',
-            '#card-number',
-            '#cvv',
-            '.payment-form input'
-        ]);
-    }, []);
-    
-    const handlePayment = async (paymentData) => {
-        // Payment processing logic
-        
-        // Track payment event (sensitive data already redacted)
-        await tracker.customEvent('payment_attempted', {
-            amount: paymentData.amount,
-            currency: paymentData.currency
-        });
-    };
-    
-    return (
-        <form className="payment-form">
-            <input id="card-number" placeholder="Card Number" />
-            <input id="cvv" placeholder="CVV" />
-            <input type="password" placeholder="Card Password" />
-            <button type="submit">Pay</button>
-        </form>
-    );
+function MyComponent() {
+  const tracker = useHumanBehavior();
+  
+  const handleUnredact = () => {
+    tracker.setUnredactedFields(['#comment-field']);
+  };
 }
 ```
 
-## Redaction Capabilities
+**Angular:**
+```javascript
+import { HumanBehaviorService } from '@humanbehavior/angular';
 
-### What gets redacted
+constructor(private humanBehavior: HumanBehaviorService) {}
 
-The SDK redacts sensitive data across all event types:
+unredactFields() {
+  this.humanBehavior.setUnredactedFields(['#comment-field']);
+}
+```
 
-- **Input Events**: Text input, password fields, form submissions
-- **DOM Mutations**: Text changes, attribute updates, content modifications
-- **Mouse Interactions**: Text selection, clipboard operations
-- **Full Snapshots**: Initial page state and subsequent snapshots
+**Vue:**
+```javascript
+import { useHumanBehavior } from '@humanbehavior/vue';
 
-### CSS Selector Support
+const tracker = useHumanBehavior();
+tracker.setUnredactedFields(['#comment-field']);
+```
 
-Redaction supports all valid CSS selectors for precise targeting:
+**Vanilla JavaScript:**
+```javascript
+// The tracker instance is available globally after initialization
+window.HumanBehaviorTracker.setUnredactedFields(['#comment-field']);
+```
+
+## Common Use Cases
+
+### Public Forms
+```javascript
+// Unredact public feedback fields
+tracker.setUnredactedFields([
+  '#feedback-form textarea',
+  '.public-comment',
+  'input[name="topic"]'
+]);
+```
+
+### User Experience Research
+```javascript
+// Unredact fields for UX research (but keep passwords protected)
+tracker.setUnredactedFields([
+  '.search-input',
+  '#product-feedback',
+  'input[name="category"]'
+]);
+```
+
+### Debugging Mode
+```javascript
+// Temporarily unredact fields for debugging
+tracker.setUnredactedFields([
+  '#debug-input',
+  '.test-field'
+]);
+
+// Re-enable redaction later
+tracker.redactFields([
+  '#debug-input',
+  '.test-field'
+]);
+```
+
+### Cross-Page/Component Usage
+
+**Important**: When using redaction methods across different pages or components, you need to access the tracker instance again:
 
 ```javascript
-// Element types
-'input[type="password"]'
-'textarea[name="secret"]'
+// ✅ Correct - Get fresh tracker instance
+const tracker = useHumanBehavior(); // React
+// or
+const tracker = window.HumanBehaviorTracker; // Vanilla JS
 
-// IDs and classes
-'#credit-card'
-'.sensitive-data'
+tracker.setUnredactedFields(['#new-field']);
 
-// Attribute selectors
-'[data-sensitive="true"]'
-'input[autocomplete="off"]'
-
-// Complex selectors
-'.payment-form input:not(.public)'
-'form[action*="payment"] input'
+// ❌ Incorrect - Don't reuse old references
+// const oldTracker = someOldReference; // This might be stale
 ```
+
+## API Reference
+
+| Method | Description |
+|--------|-------------|
+| `setUnredactedFields(fields)` | Unredact specific fields |
+| `clearUnredactedFields()` | Redact all fields (everything becomes redacted) |
+| `redactFields(fields)` | Redact specific fields |
+| `hasUnredactedFields()` | Check if any fields are unredacted |
+| `getUnredactedFields()` | Get currently unredacted fields |
 
 ## Privacy & Compliance
 
-- **Real-time Processing**: Data is redacted before being sent to servers
-- **Comprehensive Coverage**: All event types and data sources are protected
-- **Flexible Configuration**: Adapt redaction rules to your privacy requirements
+- **Automatic Protection**: All sensitive data is protected by default
+- **Selective Unredaction**: Choose which fields to track based on your needs
+- **Password Protection**: Password fields cannot be unredacted
 - **Compliance Ready**: Supports GDPR, HIPAA, and other privacy regulations
 
-## Redaction Status
-
-### Check redaction status
-
-```javascript
-// Check if redaction is currently active
-if (tracker.isRedactionActive()) {
-    console.log('Redaction is enabled');
-}
-
-// Get currently redacted fields
-const redactedFields = tracker.getRedactedFields();
-console.log('Redacted fields:', redactedFields);
-```
-
-### Dynamic updates
-
-```javascript
-// Update redaction rules based on user context
-function updateRedactionForUser(userRole) {
-    if (userRole === 'admin') {
-        tracker.setRedactedFields([
-            'input[type="password"]',
-            '.admin-sensitive'
-        ]);
-    } else {
-        tracker.setRedactedFields([
-            'input[type="password"]',
-            '.user-sensitive'
-        ]);
-    }
-}
-```
-
-## Properties & Options
-
-| Property/Option         | Type     | Description                                                        |
-|------------------------|----------|--------------------------------------------------------------------|
-| `redactFields`          | string[] | CSS selectors for fields to redact during initialization.          |
-| `setRedactedFields()`   | function | Set CSS selectors for fields to redact.                            |
-| `redact()`              | function | Start redaction with advanced configuration options.               |
-| `isRedactionActive()`   | function | Check if redaction is currently active.                            |
-| `getRedactedFields()`   | function | Get the currently selected fields for redaction.                   |
-
-**`redact(options)` fields:**
-
-| Option              | Type     | Description                                  |
-|---------------------|----------|----------------------------------------------|
-| `redactedText`      | string   | Custom text to use for redaction (default: '[REDACTED]'). |
-| `excludeSelectors`  | string[] | CSS selectors to exclude from redaction.      |
-| `userFields`        | string[] | Additional fields to redact.                  |
-
-**Common CSS selectors:**
-
-| Selector                    | Description                                 |
-|----------------------------|---------------------------------------------|
-| `input[type="password"]`   | All password input fields.                  |
-| `input[type="email"]`      | Email input fields.                         |
-| `#credit-card`             | Credit card number field.                   |
-| `.sensitive-data`          | Elements with sensitive-data class.         |
-| `[data-sensitive="true"]`  | Elements with data-sensitive attribute.     |
-
 <Note>
-  Redaction is processed in real-time and covers all event types. Only redact what's necessary for privacy - overly broad selectors may reduce the value of your session recordings.
+  The SDK automatically protects all input fields. Only unredact fields that you specifically need to track for analytics purposes. Password fields remain protected regardless of unredaction settings.
 </Note> 
