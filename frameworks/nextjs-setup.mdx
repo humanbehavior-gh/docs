@@ -63,43 +63,50 @@ npm install humanbehavior-js
 yarn add humanbehavior-js
 ```
 
-## Step 2: Basic Setup
+## Step 2: Environment Variables
 
-### Add the Tracker to Your App
+Create an environment file (`.env.local`) with your API key:
 
-Use the React provider for the best integration and automatic tracking:
+```bash
+NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
 
-**Step 1**: Create a separate providers file for client-side code:
+## Step 3: Basic Setup
+
+### Create providers.tsx file
 
 Create `app/providers.tsx`:
+
 ```tsx
-'use client' // Only the provider needs to be client-side
+'use client';
 
-import { HumanBehaviorProvider } from 'humanbehavior-js/react'
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+import { ReactNode } from 'react';
 
-export function Providers({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+interface ProvidersProps {
+  children: ReactNode;
+}
+
+export function Providers({ children }: ProvidersProps) {
   return (
-    <HumanBehaviorProvider apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!}>
+    <HumanBehaviorProvider apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}>
       {children}
     </HumanBehaviorProvider>
-  )
+  );
 }
 ```
 
-**Step 2**: Import the providers in your layout (which stays a Server Component):
+### Update layout.tsx to use providers
 
 In `app/layout.tsx`:
+
 ```tsx
-import { Providers } from './providers'
+import { Providers } from './providers';
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -109,7 +116,7 @@ export default function RootLayout({
         </Providers>
       </body>
     </html>
-  )
+  );
 }
 ```
 
@@ -126,7 +133,7 @@ export default function RootLayout({
 If you prefer manual setup, you can initialize the tracker directly:
 
 ```tsx
-'use client' // This line is CRUCIAL - it tells Next.js this is a client component
+'use client'; // This line is CRUCIAL - it tells Next.js this is a client component
 
 import { useEffect } from 'react';
 import { HumanBehaviorTracker } from 'humanbehavior-js';
@@ -143,55 +150,12 @@ function MyApp({ Component, pageProps }) {
 export default MyApp;
 ```
 
-## Optional: Advanced Features
+## Features
 
-### Track Custom Events
-
-```tsx
-'use client'
-
-import { useHumanBehavior } from 'humanbehavior-js/react';
-
-function MyComponent() {
-  const tracker = useHumanBehavior();
-
-  const handleButtonClick = async () => {
-    // Track custom event
-    await tracker.customEvent('button_clicked', {
-      buttonLocation: 'header'
-    });
-  };
-
-  const handleLogin = async (user) => {
-    // Identify user after successful authentication
-    await tracker.identifyUser({
-      userProperties: {
-        email: user.email,
-        name: user.name,
-        userId: user.id
-      }
-    });
-  };
-
-  return (
-    <div>
-      <button onClick={handleButtonClick}>Click Me</button>
-    </div>
-  );
-}
-```
-
-## Environment Variables
-
-```bash
-# .env.local
-NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
-```
-
-```tsx
-// In your code
-const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY);
-```
+- ✅ Automatic route change tracking
+- ✅ Server-side rendering compatible
+- ✅ Works with both App and Pages Router
+- ✅ Optimized bundle size
 
 ## Troubleshooting
 

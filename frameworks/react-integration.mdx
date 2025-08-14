@@ -62,19 +62,32 @@ npm install humanbehavior-js
 yarn add humanbehavior-js
 ```
 
-## Step 2: Basic Setup
+## Step 2: Environment Variables
 
-### Add the Tracker to Your App
+Create an environment file (`.env`) with your API key:
+
+```bash
+# For Vite projects
+VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
+
+# For Create React App
+REACT_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+## Step 3: Basic Setup
+
+### Wrap your app with the provider
 
 Use the React provider for the best integration and automatic tracking:
 
 ```jsx
-import React from 'react';
 import { HumanBehaviorProvider } from 'humanbehavior-js/react';
 
 function App() {
   return (
-    <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}>
+    <HumanBehaviorProvider apiKey={import.meta.env.VITE_HUMANBEHAVIOR_API_KEY}> {/* For Vite */}
+    {/* OR */}
+    <HumanBehaviorProvider apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}> {/* For Create React App */}
       <div>
         <h1>My React App</h1>
         {/* Your app content */}
@@ -89,6 +102,31 @@ export default App;
 <Note>
   **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
 </Note>
+
+## Usage in Components
+
+### Track Custom Events
+
+```jsx
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function MyComponent() {
+  const tracker = useHumanBehavior();
+
+  const handleClick = () => {
+    tracker.customEvent('button_clicked', {
+      componentName: 'MyComponent',
+      buttonId: 'submit-btn'
+    });
+  };
+
+  return (
+    <button onClick={handleClick}>
+      Submit
+    </button>
+  );
+}
+```
 
 ## Alternative: Manual Initialization
 
@@ -115,54 +153,12 @@ function App() {
 export default App;
 ```
 
-## Optional: Advanced Features
+## Features
 
-### Track Custom Events
-
-```jsx
-import React from 'react';
-import { useHumanBehavior } from 'humanbehavior-js/react';
-
-function MyComponent() {
-  const tracker = useHumanBehavior();
-
-  const handleButtonClick = async () => {
-    // Track custom event
-    await tracker.customEvent('button_clicked', {
-      buttonLocation: 'header'
-    });
-  };
-
-  const handleLogin = async (user) => {
-    // Identify user after successful authentication
-    await tracker.identifyUser({
-      userProperties: {
-        email: user.email,
-        name: user.name,
-        userId: user.id
-      }
-    });
-  };
-
-  return (
-    <div>
-      <button onClick={handleButtonClick}>Click Me</button>
-    </div>
-  );
-}
-```
-
-## Environment Variables
-
-```bash
-# .env
-REACT_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
-```
-
-```jsx
-// In your code
-const tracker = HumanBehaviorTracker.init(process.env.REACT_APP_HUMANBEHAVIOR_API_KEY);
-```
+- ✅ Automatic page view tracking
+- ✅ React hooks for custom events
+- ✅ TypeScript support included
+- ✅ Optimized for React 18+
 
 ## Troubleshooting
 
