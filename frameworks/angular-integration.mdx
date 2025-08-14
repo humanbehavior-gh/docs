@@ -63,236 +63,11 @@ npm install humanbehavior-js
 yarn add humanbehavior-js
 ```
 
-## Step 2: Basic Setup
+## Step 2: Environment Variables
 
-### Add the Tracker to Your App
+Create or update environment files:
 
-**For Angular 17+ (Standalone Components):**
-
-In your `main.ts` file:
-
-```typescript
-import { bootstrapApplication } from '@angular/platform-browser';
-import { AppComponent } from './app/app.component';
-import { initializeHumanBehavior } from 'humanbehavior-js/angular';
-import { environment } from './environments/environment';
-
-bootstrapApplication(AppComponent, {
-  providers: [
-    // Your other providers
-  ]
-}).catch(err => console.error(err));
-
-// Initialize HumanBehavior SDK (client-side only)
-if (typeof window !== 'undefined') {
-  const tracker = initializeHumanBehavior(environment.humanBehaviorApiKey);
-}
-```
-
-**For Legacy Angular (NgModule):**
-
-In your `app.module.ts` file:
-
-```typescript
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AppComponent } from './app.component';
-import { HumanBehaviorModule } from 'humanbehavior-js/angular';
-import { environment } from '../environments/environment';
-
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    HumanBehaviorModule.forRoot({
-      apiKey: environment.humanBehaviorApiKey
-    })
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
-})
-export class AppModule { }
-```
-
-<Note>
-  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
-</Note>
-
-## Optional: Advanced Features
-
-### Track Custom Events
-
-**For Angular 17+ (Standalone Components):**
-
-```typescript
-import { Component, OnInit } from '@angular/core';
-import { initializeHumanBehavior } from 'humanbehavior-js/angular';
-import { environment } from '../environments/environment';
-
-@Component({
-  selector: 'app-my-component',
-  template: `
-    <div>
-      <h1>My Component</h1>
-      <button (click)="handleButtonClick()">Click Me</button>
-    </div>
-  `,
-  standalone: true
-})
-export class MyComponent implements OnInit {
-  private tracker = initializeHumanBehavior(environment.humanBehaviorApiKey);
-
-  ngOnInit() {
-    // Track component view
-    this.tracker.customEvent('component_viewed', {
-      componentName: 'MyComponent'
-    });
-  }
-
-  async handleButtonClick() {
-    await this.tracker.customEvent('button_clicked', {
-      buttonLocation: 'header'
-    });
-  }
-}
-```
-
-**For Legacy Angular (NgModule):**
-
-```typescript
-import { Component, OnInit, Inject } from '@angular/core';
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-@Component({
-  selector: 'app-my-component',
-  template: `
-    <div>
-      <h1>My Component</h1>
-      <button (click)="handleButtonClick()">Click Me</button>
-    </div>
-  `
-})
-export class MyComponent implements OnInit {
-  constructor(@Inject(HumanBehaviorTracker) private tracker: HumanBehaviorTracker) {}
-
-  ngOnInit() {
-    // Track component view
-    this.tracker.customEvent('component_viewed', {
-      componentName: 'MyComponent'
-    });
-  }
-
-  async handleButtonClick() {
-    await this.tracker.customEvent('button_clicked', {
-      buttonLocation: 'header'
-    });
-  }
-}
-```
-
-### User Authentication Example
-
-**For Angular 17+ (Standalone Components):**
-
-```typescript
-import { Component } from '@angular/core';
-import { initializeHumanBehavior } from 'humanbehavior-js/angular';
-import { environment } from '../environments/environment';
-
-@Component({
-  selector: 'app-login-form',
-  template: `
-    <form (ngSubmit)="handleLogin()">
-      <input [(ngModel)]="email" type="email" placeholder="Email" name="email" />
-      <input [(ngModel)]="password" type="password" placeholder="Password" name="password" />
-      <button type="submit">Login</button>
-    </form>
-  `,
-  standalone: true,
-  imports: [FormsModule]
-})
-export class LoginFormComponent {
-  email = '';
-  password = '';
-  private tracker = initializeHumanBehavior(environment.humanBehaviorApiKey);
-
-  async handleLogin() {
-    try {
-      // Your login logic here
-      const user = await this.login(this.email, this.password);
-      
-      if (user) {
-        // Identify user with current endUserId
-        await this.tracker.identifyUser({
-          userProperties: {
-            email: user.email,
-            name: user.name,
-            userId: user.id,
-            plan: user.plan
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
-  }
-}
-```
-
-**For Legacy Angular (NgModule):**
-
-```typescript
-import { Component, Inject } from '@angular/core';
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-@Component({
-  selector: 'app-login-form',
-  template: `
-    <form (ngSubmit)="handleLogin()">
-      <input [(ngModel)]="email" type="email" placeholder="Email" name="email" />
-      <input [(ngModel)]="password" type="password" placeholder="Password" name="password" />
-      <button type="submit">Login</button>
-    </form>
-  `
-})
-export class LoginFormComponent {
-  email = '';
-  password = '';
-
-  constructor(@Inject(HumanBehaviorTracker) private tracker: HumanBehaviorTracker) {}
-
-  async handleLogin() {
-    try {
-      // Your login logic here
-      const user = await this.login(this.email, this.password);
-      
-      if (user) {
-        // Identify user with current endUserId
-        await this.tracker.identifyUser({
-          userProperties: {
-            email: user.email,
-            name: user.name,
-            userId: user.id,
-            plan: user.plan
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
-  }
-}
-```
-
-## Environment Variables
-
-Angular uses its own environment system with `environment.ts` files. The wizard will automatically create these files for you.
-
-### Manual Setup (if needed):
-
-**For Angular 17+ (Standalone Components):**
-
-Create `src/environments/environment.ts`:
+**Create `src/environments/environment.ts`:**
 ```typescript
 export const environment = {
   production: false,
@@ -300,25 +75,7 @@ export const environment = {
 };
 ```
 
-Create `src/environments/environment.prod.ts`:
-```typescript
-export const environment = {
-  production: true,
-  humanBehaviorApiKey: 'your-api-key-here'
-};
-```
-
-**For Legacy Angular (NgModule):**
-
-Create `src/environments/environment.ts`:
-```typescript
-export const environment = {
-  production: false,
-  humanBehaviorApiKey: 'your-api-key-here'
-};
-```
-
-Create `src/environments/environment.prod.ts`:
+**Create `src/environments/environment.prod.ts`:**
 ```typescript
 export const environment = {
   production: true,
@@ -330,19 +87,41 @@ export const environment = {
   **Angular Environment System:** Angular CLI automatically replaces `environment.ts` with `environment.prod.ts` during production builds. This is the standard Angular way to handle environment variables.
 </Note>
 
-**For Angular 17+ (Standalone Components):**
+## Step 3: Basic Setup
+
+### Update main.ts
+
+In your `main.ts` file:
+
 ```typescript
-// In your code
+import { initializeHumanBehavior } from 'humanbehavior-js/angular';
 import { environment } from './environments/environment';
-const tracker = initializeHumanBehavior(environment.humanBehaviorApiKey);
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { App } from './app/app';
+
+bootstrapApplication(App, appConfig)
+  .catch((err) => console.error(err))
+
+// Initialize HumanBehavior SDK (client-side only)
+if (typeof window !== 'undefined') {
+  const tracker = initializeHumanBehavior(
+    environment.humanBehaviorApiKey
+  );
+}
 ```
 
-**For Legacy Angular (NgModule):**
-```typescript
-// In your code
-import { environment } from '../environments/environment';
-const tracker = initializeHumanBehavior(environment.humanBehaviorApiKey);
-```
+<Note>
+  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
+</Note>
+
+## Features
+
+- ✅ Angular 17+ standalone components support
+- ✅ Legacy NgModule support
+- ✅ TypeScript support included
+- ✅ Automatic session recording
+- ✅ Environment-based configuration
 
 ## Troubleshooting
 

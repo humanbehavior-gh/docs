@@ -63,133 +63,48 @@ npm install humanbehavior-js
 yarn add humanbehavior-js
 ```
 
-## Step 2: Basic Setup
+## Step 2: Environment Variables
 
-### Add the Tracker to Your App
+Create an environment file (`.env`) with your API key:
 
-In your main `main.js` or `main.ts` file:
+```bash
+VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
+# OR for Vue CLI
+VUE_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
 
-```javascript
-import { createApp } from 'vue'
-import App from './App.vue'
-import { HumanBehaviorPlugin } from 'humanbehavior-js/vue'
+## Step 3: Basic Setup
 
-// Create and mount the app
-const app = createApp(App)
+### Update main.ts
 
-// Use the HumanBehavior plugin
+In your main `main.ts` file:
+
+```typescript
+import { createApp } from 'vue';
+import { HumanBehaviorPlugin } from 'humanbehavior-js/vue';
+import App from './App.vue';
+
+const app = createApp(App);
+
 app.use(HumanBehaviorPlugin, {
-  apiKey: import.meta.env.VITE_HUMANBEHAVIOR_API_KEY
-})
+  apiKey: process.env.VITE_HUMANBEHAVIOR_API_KEY // For Vite
+  // OR
+  apiKey: process.env.VUE_APP_HUMANBEHAVIOR_API_KEY // For Vue CLI
+});
 
-app.mount('#app')
+app.mount('#app');
 ```
 
 <Note>
   **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
 </Note>
 
-## Optional: Advanced Features
+## Features
 
-### Track Custom Events
-
-```vue
-<template>
-  <div>
-    <h1>My Component</h1>
-    <button @click="handleButtonClick">Click Me</button>
-  </div>
-</template>
-
-<script>
-export default {
-  name: 'MyComponent',
-  mounted() {
-    // Get the global tracker instance via plugin
-    const tracker = this.$humanBehavior
-    
-    // Track component view
-    tracker.customEvent('component_viewed', {
-      componentName: 'MyComponent'
-    })
-  },
-  methods: {
-    async handleButtonClick() {
-      // Access tracker via plugin
-      const tracker = this.$humanBehavior
-      await tracker.customEvent('button_clicked', {
-        buttonLocation: 'header'
-      })
-    }
-  }
-}
-</script>
-```
-
-### User Authentication Example
-
-```vue
-<template>
-  <div>
-    <form @submit.prevent="handleLogin">
-      <input v-model="email" type="email" placeholder="Email" />
-      <input v-model="password" type="password" placeholder="Password" />
-      <button type="submit">Login</button>
-    </form>
-  </div>
-</template>
-
-<script>
-export default {
-  name: 'LoginForm',
-  data() {
-    return {
-      email: '',
-      password: ''
-    }
-  },
-  methods: {
-    async handleLogin() {
-      try {
-        // Your login logic here
-        const user = await this.login(this.email, this.password)
-        
-        if (user) {
-          // Access tracker via plugin
-          const tracker = this.$humanBehavior
-          
-          // Identify user with current endUserId
-          await tracker.identifyUser({
-            userProperties: {
-              email: user.email,
-              name: user.name,
-              userId: user.id,
-              plan: user.plan
-            }
-          })
-        }
-      } catch (error) {
-        console.error('Login failed:', error)
-      }
-    }
-  }
-}
-</script>
-```
-
-## Environment Variables
-
-```bash
-# .env
-VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
-```
-
-```javascript
-// In your code
-app.use(HumanBehaviorPlugin, {
-  apiKey: import.meta.env.VITE_HUMANBEHAVIOR_API_KEY
-})
-```
+- ✅ Vue 3 Composition API support
+- ✅ Global property injection
+- ✅ Automatic route tracking
+- ✅ TypeScript support
 
 ## Troubleshooting
 
