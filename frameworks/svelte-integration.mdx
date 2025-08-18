@@ -3,8 +3,6 @@ title: 'Svelte'
 description: 'Set up HumanBehavior SDK with Svelte applications'
 ---
 
-# Using HumanBehaviorTracker with Svelte
-
 ## Quickstart
 
 Human Behavior works seamlessly to record sessions on your Svelte app.
@@ -23,38 +21,6 @@ Human Behavior works seamlessly to record sessions on your Svelte app.
 
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
 </Expandable>
-
-### Option 1: Installation Wizard (Recommended)
-
-The easiest way to get started is using our installation wizard:
-
-```bash
-# Navigate to your project directory
-cd your-project-directory
-
-# Run the installation wizard
-npx humanbehavior-js YOUR_API_KEY
-```
-
-The wizard will:
-1. Ask for your API key (if not provided as an argument)
-2. Let you select **Svelte** from the framework options
-3. Automatically install and configure the SDK for your Svelte project:
-   - Install the `humanbehavior-js` package
-   - Add humanBehaviorStore to your main file
-   - Configure environment variables
-   - Set up proper Svelte integration
-
-**Version Compatibility**: The wizard automatically detects your Svelte setup:
-- **SvelteKit**: Detects `svelte.config.js`
-- **Regular Svelte**: Standalone Svelte projects
-- TypeScript support (`typescript` or `svelte-check`)
-- Router usage (`svelte-routing` or `@sveltejs/kit`)
-- Package managers: npm, yarn, pnpm
-
-### Option 2: Manual Setup
-
-If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
 
 ## Step 1: Installation
 

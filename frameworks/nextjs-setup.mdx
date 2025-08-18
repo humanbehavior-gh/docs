@@ -3,8 +3,6 @@ title: 'Next.js'
 description: 'Set up HumanBehavior SDK with Next.js applications'
 ---
 
-# Using HumanBehaviorTracker with Next.js
-
 ## Quickstart
 
 Human Behavior works seamlessly to record sessions on your Next.js app.
@@ -24,37 +22,6 @@ Human Behavior works seamlessly to record sessions on your Next.js app.
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
 </Expandable>
 
-### Option 1: Installation Wizard (Recommended)
-
-The easiest way to get started is using our installation wizard:
-
-```bash
-# Navigate to your project directory
-cd your-project-directory
-
-# Run the installation wizard
-npx humanbehavior-js YOUR_API_KEY
-```
-
-The wizard will:
-1. Ask for your API key (if not provided as an argument)
-2. Let you select **Next.js** from the framework options
-3. Automatically install and configure the SDK for your Next.js project:
-   - Install the `humanbehavior-js` package
-   - Detect your Next.js configuration (App Router vs Pages Router)
-   - Add HumanBehaviorProvider to your app
-   - Configure environment variables
-   - Set up proper Next.js integration
-
-<Tip>
-  **Why choose the Auto-Installation Wizard?**
-  The auto-installation wizard is perfect for developers who want to get started quickly. It automatically detects your Next.js setup and provides the optimal integration configuration with detailed explanations of each step.
-</Tip>
-
-### Option 2: Manual Setup
-
-If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
-
 ## Step 1: Installation
 
 ```bash
@@ -72,8 +39,6 @@ NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
 ## Step 3: Basic Setup
-
-### Create providers.tsx file
 
 Create `app/providers.tsx`:
 

@@ -18,38 +18,6 @@ description: 'Integrate HumanBehavior SDK with Astro for session recording and a
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
 </Expandable>
 
-### Option 1: Installation Wizard (Recommended)
-
-The easiest way to get started is using our installation wizard:
-
-```bash
-# Navigate to your project directory
-cd your-project-directory
-
-# Run the installation wizard
-npx humanbehavior-js YOUR_API_KEY
-```
-
-The wizard will:
-1. Ask for your API key (if not provided as an argument)
-2. Let you select **Astro** from the framework options
-3. Automatically install and configure the SDK for your Astro project:
-   - Install the `humanbehavior-js` package
-   - Create a HumanBehavior component
-   - Add the component to your layout
-   - Configure environment variables
-   - Set up proper Astro integration
-
-**Version Compatibility**: The wizard works with most Astro versions and automatically detects:
-- **Astro 4.0+**: Modern Astro with improved performance
-- **Astro 3.x**: Stable Astro with full feature support
-- **Bundlers**: Vite (default), Webpack
-- **Package Managers**: npm, yarn, pnpm
-
-### Option 2: Manual Setup
-
-If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
-
 ## Step 1: Installation
 
 ```bash
@@ -76,12 +44,7 @@ Create a new component file `src/components/HumanBehavior.astro`:
   const apiKey = import.meta.env.PUBLIC_HUMANBEHAVIOR_API_KEY;
   
   if (apiKey) {
-    try {
-      const tracker = HumanBehaviorTracker.init(apiKey);
-      console.log('HumanBehavior: Tracker initialized successfully');
-    } catch (error) {
-      console.error('HumanBehavior: Failed to initialize tracker:', error);
-    }
+    const tracker = HumanBehaviorTracker.init(apiKey);
   } else {
     console.error('HumanBehavior: No API key found');
   }

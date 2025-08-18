@@ -2,9 +2,6 @@
 title: 'Remix'
 description: 'Set up HumanBehavior SDK with Remix applications'
 ---
-
-# Using HumanBehaviorTracker with Remix
-
 ## Quickstart
 
 Human Behavior works seamlessly to record sessions on your Remix app.
@@ -23,36 +20,6 @@ Human Behavior works seamlessly to record sessions on your Remix app.
 
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
 </Expandable>
-
-### Option 1: Installation Wizard (Recommended)
-
-The easiest way to get started is using our installation wizard:
-
-```bash
-# Navigate to your project directory
-cd your-project-directory
-
-# Run the installation wizard
-npx humanbehavior-js YOUR_API_KEY
-```
-
-The wizard will:
-1. Ask for your API key (if not provided as an argument)
-2. Let you select **Remix** from the framework options
-3. Automatically install and configure the SDK for your Remix project:
-   - Install the `humanbehavior-js` package
-   - Add createHumanBehaviorLoader to your root.tsx
-   - Configure environment variables
-   - Set up proper Remix integration
-
-**Version Compatibility**: The wizard works with most Remix versions and automatically detects:
-- TypeScript support (`typescript` or `@types/react`)
-- Modern Remix patterns
-- Package managers: npm, yarn, pnpm
-
-### Option 2: Manual Setup
-
-If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
 
 ## Step 1: Installation
 
@@ -79,25 +46,20 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
-import { HumanBehaviorProvider, createHumanBehaviorLoader } from 'humanbehavior-js/remix';
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import { HumanBehaviorProvider} from 'humanbehavior-js/remix';
+import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 
-export const loader = createHumanBehaviorLoader();
+// Add loader
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  return {
+    ENV: {
+      HUMANBEHAVIOR_API_KEY: process.env.HUMANBEHAVIOR_API_KEY,
+    },
+  };
+};
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
-  );
+  ...
 }
 
 export default function App() {
@@ -114,36 +76,6 @@ export default function App() {
 <Note>
   **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
 </Note>
-
-## Alternative: Manual Initialization
-
-If you prefer manual setup, you can initialize the tracker directly:
-
-```tsx
-import { useEffect } from 'react';
-import { HumanBehaviorTracker } from 'humanbehavior-js';
-
-export default function App() {
-  useEffect(() => {
-    // Initialize the tracker once globally (client-side only)
-    const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);
-  }, []);
-
-  return (
-    <html lang="en">
-      <head>
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        <Outlet />
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-```
 
 ## Optional: Advanced Features
 
