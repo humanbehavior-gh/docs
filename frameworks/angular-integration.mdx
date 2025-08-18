@@ -24,37 +24,6 @@ Human Behavior works seamlessly to record sessions on your Angular app.
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
 </Expandable>
 
-### Option 1: Installation Wizard (Recommended)
-
-The easiest way to get started is using our installation wizard:
-
-```bash
-# Navigate to your project directory
-cd your-project-directory
-
-# Run the installation wizard
-npx humanbehavior-js YOUR_API_KEY
-```
-
-The wizard will:
-1. Ask for your API key (if not provided as an argument)
-2. Let you select **Angular** from the framework options
-3. Automatically install and configure the SDK for your Angular project:
-   - Install the `humanbehavior-js` package
-   - Add HumanBehaviorModule or initializeHumanBehavior
-   - Configure environment variables
-   - Set up proper Angular integration
-
-**Version Compatibility**: The wizard automatically detects your Angular version and setup:
-- **Modern Angular** (17+ with standalone components): Detects `src/app/app.ts` and no `app.module.ts`
-- **Legacy Angular** (pre-17 with NgModule): Detects `src/app/app.module.ts`
-- TypeScript support (always enabled for Angular)
-- Package managers: npm, yarn, pnpm
-
-### Option 2: Manual Setup
-
-If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
-
 ## Step 1: Installation
 
 ```bash

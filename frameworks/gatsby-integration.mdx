@@ -18,37 +18,6 @@ description: 'Integrate HumanBehavior SDK with Gatsby for session recording and 
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
 </Expandable>
 
-### Option 1: Installation Wizard (Recommended)
-
-The easiest way to get started is using our installation wizard:
-
-```bash
-# Navigate to your project directory
-cd your-project-directory
-
-# Run the installation wizard
-npx humanbehavior-js YOUR_API_KEY
-```
-
-The wizard will:
-1. Ask for your API key (if not provided as an argument)
-2. Let you select **Gatsby** from the framework options
-3. Automatically install and configure the SDK for your Gatsby project:
-   - Install the `humanbehavior-js` package
-   - Create gatsby-browser.js configuration
-   - Configure environment variables
-   - Set up proper Gatsby integration
-
-**Version Compatibility**: The wizard works with most Gatsby versions and automatically detects:
-- **Gatsby 5.x**: Modern Gatsby with improved performance
-- **Gatsby 4.x**: Stable Gatsby with full feature support
-- **Bundlers**: Webpack (default), Vite
-- **Package Managers**: npm, yarn, pnpm
-
-### Option 2: Manual Setup
-
-If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
-
 ## Step 1: Installation
 
 ```bash
@@ -57,7 +26,19 @@ npm install humanbehavior-js
 yarn add humanbehavior-js
 ```
 
-## Step 2: Basic Setup
+## Step 2: Environment Variables
+
+Create or add to a `.env.production` or `.env.development` file in your project root based on your staging type:
+
+```bash
+GATSBY_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+<Note>
+  **Security Best Practice:** The `GATSBY_` prefix is required for Gatsby to expose the environment variable to the client-side code.
+</Note>
+
+## Step 3: Basic Setup
 
 ### Add the Tracker to Your App
 
@@ -72,12 +53,7 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
 export const onClientEntry = () => {
   const apiKey = process.env.GATSBY_HUMANBEHAVIOR_API_KEY;
   if (apiKey) {
-    try {
-      const tracker = HumanBehaviorTracker.init(apiKey);
-      console.log('HumanBehavior SDK initialized for Gatsby');
-    } catch (error) {
-      console.error('HumanBehavior: Failed to initialize tracker:', error);
-    }
+    const tracker = HumanBehaviorTracker.init(apiKey);
   } else {
     console.error('HumanBehavior: No API key found');
   }
@@ -88,18 +64,6 @@ export const onClientEntry = () => {
   **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
 </Note>
 
-## Step 3: Environment Variables
-
-Create a `.env` file in your project root:
-
-```bash
-# .env
-GATSBY_HUMANBEHAVIOR_API_KEY=your-api-key-here
-```
-
-<Note>
-  **Security Best Practice:** The `GATSBY_` prefix is required for Gatsby to expose the environment variable to the client-side code.
-</Note>
 
 ## Optional: Advanced Features
 

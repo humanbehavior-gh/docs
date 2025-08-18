@@ -24,37 +24,6 @@ Human Behavior works seamlessly to record sessions on your Nuxt.js app.
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
 </Expandable>
 
-### Option 1: Installation Wizard (Recommended)
-
-The easiest way to get started is using our installation wizard:
-
-```bash
-# Navigate to your project directory
-cd your-project-directory
-
-# Run the installation wizard
-npx humanbehavior-js YOUR_API_KEY
-```
-
-The wizard will:
-1. Ask for your API key (if not provided as an argument)
-2. Let you select **Nuxt.js** from the framework options
-3. Automatically install and configure the SDK for your Nuxt project:
-   - Install the `humanbehavior-js` package
-   - Create plugins/humanbehavior.client.ts
-   - Update nuxt.config.ts with runtime config
-   - Configure environment variables
-   - Set up proper Nuxt integration
-
-**Version Compatibility**: The wizard works with most Nuxt versions and automatically detects:
-- TypeScript support
-- Modern Nuxt 3 patterns
-- Package managers: npm, yarn, pnpm
-
-### Option 2: Manual Setup
-
-If you prefer manual setup or the wizard doesn't work for your project, follow the steps below.
-
 ## Step 1: Installation
 
 ```bash
@@ -63,7 +32,32 @@ npm install humanbehavior-js
 yarn add humanbehavior-js
 ```
 
-## Step 2: Basic Setup
+
+## Step 2: Environment Variables
+
+Create an environment file (`.env`) with your API key:
+
+```bash
+NUXT_PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
+```
+
+## Step 3: Basic Setup
+
+### Update `nuxt.config.ts`
+
+Update `nuxt.config.ts` with environment variable in runtimeConfig:
+
+```typescript
+export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      humanBehaviorApiKey: process.env.NUXT_PUBLIC_HUMANBEHAVIOR_API_KEY
+    }
+  }
+})
+```
+
+## Step 4: Basic Setup
 
 ### Add the Tracker to Your App
 
@@ -74,23 +68,13 @@ import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
-  
-  // Initialize the tracker once globally (client-side only)
   const apiKey = config.public.humanBehaviorApiKey;
   
-  if (apiKey) {
-    const tracker = HumanBehaviorTracker.init(apiKey);
-    
-    return {
-      provide: {
-        tracker
-      }
-    };
-  }
+  const tracker = apiKey ? HumanBehaviorTracker.init(apiKey as string) : null;
   
   return {
     provide: {
-      tracker: null
+      tracker: tracker as HumanBehaviorTracker | null
     }
   };
 });
