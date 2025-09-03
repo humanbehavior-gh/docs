@@ -26,7 +26,7 @@ The Human Behavior SDK allows you to record user sessions and track behavior ana
 <p style={{ fontSize: '0.95em', color: '#888', marginTop: '-0.5rem', marginBottom: '1.5rem' }}><em>Example screenshot – your actual API key will be different.</em></p>
 </Expandable>
 
-### Option 1: Auto-Installation Wizard (Recommended)
+### Option 1: Auto-Installation Wizard (`Under Construction`)
 
 The easiest way to get started is using our auto-installation wizard:
 
@@ -115,7 +115,7 @@ const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);
 Add this to the top of your file.
 
 ```html
-<script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+<script src="https://unpkg.com/humanbehavior-js@latest"></script>
 ```
 
 #### Option 2: Package Manager
@@ -131,7 +131,7 @@ npm install humanbehavior-js
 ```html
 <head>
 	<!-- your other metadata here -->
-	<script>const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);</script>
+	<script>const tracker = HumanBehaviorTracker.init('your-api-key-here');</script>
 </head>
 <body>
 	<!-- your website content here -->
@@ -150,10 +150,10 @@ Here is a simple HTML website using the CDN version:
     <link rel="stylesheet" href="style.css">
 
     <!-- Load the HumanBehavior SDK -->
-    <script src="https://unpkg.com/humanbehavior-js@latest/dist/index.min.js"></script>
+    <script src="https://unpkg.com/humanbehavior-js@latest"></script>
 
     <!-- Initialize the tracker -->
-    <script>const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY);</script>
+    <script>const tracker = HumanBehaviorTracker.init('your-api-key-here');</script>
 
   </head>
   <body>

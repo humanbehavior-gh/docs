@@ -10,13 +10,51 @@ HumanBehavior SDK automatically identifies and tracks users across sessions usin
 The SDK handles user identification using cookies. A unique user ID is generated and stored in a cookie on first visit, and persists for 1 year. 
 Initializing the SDK handles user authentication automatically.
 
-## User Identification
+## User Identification Methods
 
-### Client-side Identification (Recommended)
+### 1. `identifyUser()` - Instance Method (Recommended)
 
-For the best user tracking experience, identify users client-side after successful authentication. This ensures users are identified with their current session and maintains session continuity.
+Use this method when you have access to a tracker instance. This is the most common approach.
 
-**NextAuth.js Example:**
+```javascript
+// After successful login/signup, identify the user with their current session
+const endUserId = await tracker.identifyUser({
+  userProperties: {
+    email: user.email,
+    name: user.name,
+    plan: user.plan
+  }
+});
+
+console.log('User identified with ID:', endUserId);
+```
+
+**Returns:** `Promise<string>` - The endUserId of the identified user
+
+### 2. `identifyUserGlobally()` - Global Function
+
+Use this function when you don't have direct access to a tracker instance, or for global user identification.
+
+```javascript
+import { identifyUserGlobally } from 'humanbehavior-js';
+
+// Identify user globally (works from anywhere in your app)
+const endUserId = await identifyUserGlobally({
+  email: user.email,
+  name: user.name,
+  userId: user.id,
+  plan: user.plan
+});
+
+console.log('User identified globally with ID:', endUserId);
+```
+
+**Returns:** `Promise<string> | null` - The endUserId if successful, null if tracker not found
+
+## Framework-Specific Examples
+
+### NextAuth.js Example
+
 ```javascript
 // In your NextAuth configuration
 import { HumanBehaviorTracker } from 'humanbehavior-js';
@@ -28,7 +66,7 @@ export default NextAuth({
       const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY);
       
       // Identify user with current endUserId
-      await tracker.identifyUser({
+      const endUserId = await tracker.identifyUser({
         userProperties: {
           email: user.email,
           name: user.name,
@@ -36,12 +74,15 @@ export default NextAuth({
           provider: account?.provider
         }
       });
+      
+      console.log('User identified:', endUserId);
     }
   }
 });
 ```
 
-**Firebase Auth Example:**
+### Firebase Auth Example
+
 ```javascript
 // In your Firebase auth state listener
 import { HumanBehaviorTracker } from 'humanbehavior-js';
@@ -52,7 +93,7 @@ onAuthStateChanged(auth, async (user) => {
     const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY);
     
     // Identify user with current endUserId
-    await tracker.identifyUser({
+    const endUserId = await tracker.identifyUser({
       userProperties: {
         email: user.email,
         name: user.displayName,
@@ -61,11 +102,14 @@ onAuthStateChanged(auth, async (user) => {
         provider: user.providerData[0]?.providerId
       }
     });
+    
+    console.log('User identified:', endUserId);
   }
 });
 ```
 
-**Google Auth Example:**
+### Google Auth Example
+
 ```javascript
 // In your Google Auth sign-in handler
 import { HumanBehaviorTracker } from 'humanbehavior-js';
@@ -80,7 +124,7 @@ const handleGoogleSignIn = async () => {
       const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY);
       
       // Identify user with current endUserId
-      await tracker.identifyUser({
+      const endUserId = await tracker.identifyUser({
         userProperties: {
           email: user.email,
           name: user.displayName,
@@ -89,6 +133,8 @@ const handleGoogleSignIn = async () => {
           provider: 'google'
         }
       });
+      
+      console.log('User identified:', endUserId);
     }
   } catch (error) {
     console.error('Google sign-in failed:', error);
@@ -96,7 +142,7 @@ const handleGoogleSignIn = async () => {
 };
 ```
 
-### Client-side Identification
+## Client-side Identification
 
 You can also identify users client-side after successful authentication or for client-only applications:
 
@@ -106,50 +152,57 @@ You can also identify users client-side after successful authentication or for c
 
 ```javascript
 // After successful login/signup, identify the user with their current session
-await tracker.identifyUser({
+const endUserId = await tracker.identifyUser({
   userProperties: {
     email: user.email,
     name: user.name,
     plan: user.plan
   }
 });
+
+console.log('User identified with ID:', endUserId);
 ```
 
-### Logging out a user
+## User Logout
 
-When the user is finished with their session, you can log them out using the `logout` function. We highly
-recommend doing this to prevent conflating user data or persisting it across sessions.
+When a user logs out, you should clear any user-specific data. The SDK doesn't have a built-in logout method, so handle this in your authentication logic:
 
 ```javascript
-// Log out the current user
-tracker.logout();
+// Handle user logout
+const handleLogout = () => {
+  // Your logout logic here
+  // Clear user data, redirect, etc.
+  
+  // Note: The SDK automatically maintains the session ID
+  // You don't need to call any specific logout method
+};
 ```
 
-### Complete Example 
+## Complete Example 
 
 ```jsx title="AuthComponents.jsx"
-import { useHumanBehavior } from 'humanbehavior-js/react';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 function LoginForm() {
-    const tracker = useHumanBehavior();
-    
     const handleLogin = async (formData) => {   
-
       // ... Your authentication logic here ...
 
       // Upon successful authentication, identify user in the current session
       if (loginSuccessful) {
-        await tracker.identifyUser({
+        const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMAN_BEHAVIOR_API_KEY);
+        
+        const endUserId = await tracker.identifyUser({
           userProperties: {
             email: user.email,
             name: user.name,
             plan: 'premium'
           }
         });
+        
         console.log('User successfully identified:', endUserId);
       }
-
     }
+    
     return (
         <form onSubmit={handleLogin}>
             {/* Your form fields */}
@@ -158,13 +211,9 @@ function LoginForm() {
 }
 
 function LogOutButton() {
-  const tracker = useHumanBehavior();
-
   const handleLogout = () => {
-
     // ... Your logout logic here ...
-
-    tracker.logout();
+    // Clear user data, redirect, etc.
   }
 
   return (
@@ -184,7 +233,8 @@ function LogOutButton() {
 | Property/Option         | Type     | Description                                                        |
 |------------------------|----------|--------------------------------------------------------------------|
 | `endUserId`            | string   | Unique user ID (auto-generated and stored in a cookie by default).  |
-| `identifyUser()`       | function | Identify user with properties (see below).                         |
+| `identifyUser()`       | function | Identify user with properties (returns `Promise<string>`).           |
+| `identifyUserGlobally()` | function | Global user identification function (returns Promise). |
 | `userProperties`       | object   | Any key-value pairs (e.g., `email`, `name`, `plan`, etc.).         |
 | `cookie`               | string   | Stores user ID for 365 days.                                       |
 
@@ -198,4 +248,11 @@ function LogOutButton() {
 | `name`        | string   | User's name.                                |
 | `userId`      | string   | Your internal user ID.                      |
 | `plan`        | string   | User's plan or segment.                     | 
+
+## Method Comparison
+
+| Method | When to Use | Returns | Notes |
+|--------|-------------|---------|-------|
+| `tracker.identifyUser()` | You have tracker instance | `Promise<string>` | Most common, direct access |
+| `identifyUserGlobally()` | No tracker access, global usage | `Promise<string or null>` | Works from anywhere, requires global tracker |
 
