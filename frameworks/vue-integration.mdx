@@ -36,30 +36,131 @@ Create an environment file (`.env`) with your API key:
 
 ```bash
 VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
-# OR for Vue CLI
-VUE_APP_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
 
-## Step 3: Basic Setup
+<Note>
+  **Important:** For Vite-based Vue projects, environment variables must start with `VITE_` to be accessible in the browser.
+</Note>
 
-### Update main.ts
+## Step 3: Create HumanBehavior Composable
 
-In your main `main.ts` file:
+Create `src/composables/useHumanBehavior.ts`:
 
 ```typescript
-import { createApp } from 'vue';
-import { HumanBehaviorPlugin } from 'humanbehavior-js/vue';
-import App from './App.vue';
+import { HumanBehaviorTracker } from 'humanbehavior-js'
 
-const app = createApp(App);
+export function useHumanBehavior() {
+  const apiKey = import.meta.env.VITE_HUMANBEHAVIOR_API_KEY
+  
+  if (apiKey) {
+    const tracker = HumanBehaviorTracker.init(apiKey, undefined, { 
+      logLevel: 'debug' 
+    })
+    
+    return { tracker }
+  }
+  
+  return { tracker: null }
+}
+```
 
-app.use(HumanBehaviorPlugin, {
-  apiKey: process.env.VITE_HUMANBEHAVIOR_API_KEY // For Vite
-  // OR
-  apiKey: process.env.VUE_APP_HUMANBEHAVIOR_API_KEY // For Vue CLI
-});
+## Step 4: Initialize in Router
 
-app.mount('#app');
+Update `src/router/index.ts`:
+
+```typescript
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+import { useHumanBehavior } from '@/composables/useHumanBehavior'
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: HomeView,
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: () => import('../views/AboutView.vue'),
+    },
+  ],
+})
+
+// Initialize HumanBehavior
+const { tracker } = useHumanBehavior()
+
+export default router
+```
+
+## Step 5: Use in Components
+
+Now you can use HumanBehavior in any Vue component:
+
+```vue
+<template>
+  <div class="about">
+    <h1>About Page</h1>
+    <button @click="handleClick">Test HumanBehavior</button>
+    <router-link to="/">Go to Home</router-link>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useHumanBehavior } from '@/composables/useHumanBehavior'
+
+const { tracker } = useHumanBehavior()
+
+function handleClick() {
+  tracker?.customEvent('button_clicked', { button: 'test' })
+}
+
+function identifyUser() {
+  tracker?.identifyUser({ 
+    userProperties: { email: 'user@example.com' } 
+  })
+}
+</script>
+```
+
+## Alternative: Provide/Inject Pattern
+
+If you prefer to use Vue's provide/inject system instead of composables:
+
+### Initialize in main.ts
+
+```typescript
+import { createApp } from 'vue'
+import App from './App.vue'
+import { HumanBehaviorTracker } from 'humanbehavior-js'
+
+const app = createApp(App)
+
+const apiKey = import.meta.env.VITE_HUMANBEHAVIOR_API_KEY
+if (apiKey) {
+  const tracker = HumanBehaviorTracker.init(apiKey, undefined, { 
+    logLevel: 'debug' 
+  })
+  app.provide('humanBehavior', tracker)
+}
+
+app.mount('#app')
+```
+
+### Inject in Components
+
+```vue
+<script setup lang="ts">
+import { inject } from 'vue'
+
+const tracker = inject('humanBehavior')
+
+function handleClick() {
+  tracker?.customEvent('button_clicked')
+}
+</script>
 ```
 
 <Note>
@@ -69,12 +170,17 @@ app.mount('#app');
 ## Features
 
 - ✅ Vue 3 Composition API support
-- ✅ Global property injection
-- ✅ Automatic route tracking
-- ✅ TypeScript support
+- ✅ Composable-based architecture
+- ✅ Provide/inject pattern support
+- ✅ Automatic session recording
+- ✅ Custom event tracking
+- ✅ User identification
+- ✅ TypeScript support included
 
 ## Troubleshooting
 
 - Check browser console for any error messages
-- Verify your API key is correct
-- Ensure the tracker is initialized before any user interaction 
+- Verify your API key is correct and starts with `VITE_`
+- Ensure the tracker is initialized before any user interaction
+- Make sure `.env` is in your project root directory
+- For Vue CLI projects, use `VUE_APP_` prefix instead of `VITE_` 

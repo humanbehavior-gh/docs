@@ -56,44 +56,92 @@ export const environment = {
   **Angular Environment System:** Angular CLI automatically replaces `environment.ts` with `environment.prod.ts` during production builds. This is the standard Angular way to handle environment variables.
 </Note>
 
-## Step 3: Basic Setup
+## Step 3: Initialize via a singleton service (recommended)
 
-### Update main.ts
+Create a service and initialize the SDK outside Angular's zone, and only in the browser.
 
-In your `main.ts` file:
+```ts
+// src/app/services/hb.service.ts
+import { Injectable, NgZone, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+import { environment } from '../environments/environment';
 
-```typescript
-import { initializeHumanBehavior } from 'humanbehavior-js/angular';
-import { environment } from './environments/environment';
-import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { App } from './app/app';
+@Injectable({ providedIn: 'root' })
+export class HumanBehavior {
+  private tracker: ReturnType<typeof HumanBehaviorTracker.init> | null = null;
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err))
+  constructor(private ngZone: NgZone, @Inject(PLATFORM_ID) private platformId: Object) {
+    if (isPlatformBrowser(this.platformId)) {
+      this.ngZone.runOutsideAngular(() => {
+        this.tracker = HumanBehaviorTracker.init(environment.humanBehaviorApiKey);
+      });
+    }
+  }
 
-// Initialize HumanBehavior SDK (client-side only)
-if (typeof window !== 'undefined') {
-  const tracker = initializeHumanBehavior(
-    environment.humanBehaviorApiKey
-  );
+  capture(event: string, props?: Record<string, any>) {
+    this.tracker?.customEvent(event, props);
+  }
+
+  identify(user: Record<string, any>) {
+    this.tracker?.identifyUser({ userProperties: user });
+  }
+
+  trackPageView(path?: string) {
+    this.tracker?.trackPageView(path);
+  }
+}
+```
+
+Inject the service in your root standalone component so it initializes early:
+
+```ts
+// src/app/app.ts
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Navigation } from './navigation/navigation';
+import { HumanBehavior } from './services/hb.service';
+
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet, Navigation],
+  templateUrl: './app.html',
+  styleUrl: './app.css'
+})
+export class App {
+  constructor(private readonly humanBehavior: HumanBehavior) {}
+}
+```
+
+### Optional: Router-based pageviews
+
+```ts
+// e.g., in app.ts
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+
+constructor(private hb: HBService, private router: Router) {
+  this.router.events
+    .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+    .subscribe((evt) => this.hb.trackPageView(evt.urlAfterRedirects));
 }
 ```
 
 <Note>
-  **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
+No separate Angular package is required. Use the single `humanbehavior-js` package.
 </Note>
 
 ## Features
 
 - ✅ Angular 17+ standalone components support
-- ✅ Legacy NgModule support
-- ✅ TypeScript support included
-- ✅ Automatic session recording
-- ✅ Environment-based configuration
+- ✅ Works with earlier Angular versions via a service
+- ✅ TypeScript support
+- ✅ Automatic session recording (via SDK) and custom events
+- ✅ SSR-safe guard with `isPlatformBrowser` and `runOutsideAngular`
 
 ## Troubleshooting
 
-- Check browser console for any error messages
-- Verify your API key is correct
-- Ensure the tracker is initialized before any user interaction 
+- Ensure `HumanBehaviorTracker.init` is called as `init(apiKey, ingestionUrl?, options?)`
+- If TypeScript complains about rrweb types, add:
+  - `@rrweb/types@2.0.0-alpha.17`
+  - `rrweb-snapshot@2.0.0-alpha.17` 

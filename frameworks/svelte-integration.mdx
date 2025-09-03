@@ -35,8 +35,12 @@ yarn add humanbehavior-js
 Create an environment file (`.env`) with your API key:
 
 ```bash
-PUBLIC_HUMANBEHAVIOR_API_KEY=your-api-key-here
+VITE_HUMANBEHAVIOR_API_KEY=your-api-key-here
 ```
+
+<Note>
+  **Important:** For SvelteKit, environment variables must start with `VITE_` to be accessible in the browser.
+</Note>
 
 ## Step 3: Basic Setup
 
@@ -46,23 +50,37 @@ Update your `+layout.svelte` file:
 
 ```svelte
 <script lang="ts">
-import { PUBLIC_HUMANBEHAVIOR_API_KEY } from '$env/static/public';
+import favicon from '$lib/assets/favicon.svg';
+import '../app.css';
+import Navigation from '$lib/Navigation.svelte';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
 import { browser } from '$app/environment';
-import { humanBehaviorStore } from 'humanbehavior-js/svelte';
-
-// Only initialize on client side to avoid SSR issues
-if (browser) {
-  humanBehaviorStore.init(PUBLIC_HUMANBEHAVIOR_API_KEY || '');
-}
 
 let { children } = $props();
+
+// Initialize HumanBehavior when in browser
+if (browser) {
+  const apiKey = import.meta.env.VITE_HUMANBEHAVIOR_API_KEY;
+  if (apiKey) {
+    HumanBehaviorTracker.init(apiKey, undefined, { 
+      logLevel: 'debug' 
+    });
+  }
+}
 </script>
 
-{@render children?.()}
+<svelte:head>
+  <link rel="icon" href={favicon} />
+</svelte:head>
+
+<div class="min-h-screen bg-gray-50">
+  <Navigation />
+  {@render children?.()}
+</div>
 ```
 
 <Note>
-  **Important:** This setup is for SvelteKit (which has SSR). The `browser` check prevents the tracker from initializing during server-side rendering, which would cause errors since browser APIs aren't available on the server.
+  **Important:** The `browser` check prevents the tracker from initializing during server-side rendering, which would cause errors since browser APIs aren't available on the server.
 </Note>
 
 ### For Regular Svelte (non-SSR)
@@ -71,10 +89,12 @@ In your `main.js` or `main.ts` file:
 
 ```javascript
 import App from './App.svelte';
-import { humanBehaviorStore } from 'humanbehavior-js/svelte';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 // Direct initialization (no browser check needed)
-const tracker = humanBehaviorStore.init('your-api-key-here');
+const tracker = HumanBehaviorTracker.init('your-api-key-here', undefined, { 
+  logLevel: 'debug' 
+});
 
 const app = new App({
   target: document.body
@@ -83,21 +103,48 @@ const app = new App({
 export default app;
 ```
 
+## Step 4: Using in Components
+
+Now you can use HumanBehavior directly in any Svelte component:
+
+```svelte
+<script>
+  import { HumanBehaviorTracker } from 'humanbehavior-js';
+  
+  function handleClick() {
+    HumanBehaviorTracker.capture('button_clicked', { button: 'cta' });
+  }
+  
+  function handleFormSubmit() {
+    HumanBehaviorTracker.identifyUser({ 
+      userProperties: { email: 'user@example.com', plan: 'premium' } 
+    });
+  }
+</script>
+
+<button on:click={handleClick}>Click Me</button>
+<form on:submit={handleFormSubmit}>
+  <!-- form content -->
+</form>
+```
+
 <Note>
   **That's it!** The SDK now automatically tracks user interactions, navigation, and console events. Everything past here is optional.
 </Note>
 
 ## Features
 
-- ✅ Svelte reactive statements
-- ✅ Store-based architecture
+- ✅ Direct SDK integration
+- ✅ SvelteKit SSR compatibility
 - ✅ TypeScript support included
-- ✅ Automatic route tracking
-- ✅ SSR-safe with SvelteKit
+- ✅ Automatic session recording
+- ✅ Custom event tracking
+- ✅ User identification
 
 ## Troubleshooting
 
 - Check browser console for any error messages
-- Verify your API key is correct
+- Verify your API key is correct and starts with `VITE_`
 - Ensure the tracker is initialized before any user interaction
-- For SvelteKit: Make sure you're using the `browser` check to avoid SSR issues 
+- For SvelteKit: Make sure you're using the `browser` check to avoid SSR issues
+- Make sure `.env` is in your project root directory 
