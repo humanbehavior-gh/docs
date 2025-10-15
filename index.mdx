@@ -222,6 +222,46 @@ The SDK supports all modern browsers:
 
 ---
 
+## Data Redaction
+
+The SDK includes comprehensive data redaction to protect sensitive information:
+
+### Two Redaction Modes
+- **Privacy-First**: Everything masked by default, selectively unredact fields
+- **Visibility-First**: Everything visible by default, selectively redact fields
+
+### Flexible Field Selection
+- **Programmatic**: Configure via `redactionStrategy` options
+- **Markup-Driven**: Add `data-hb-redact="true"` to any input
+- **Runtime Control**: Change settings after initialization
+
+### Key Features
+- **1:1 Character Masking**: Shows asterisks matching input length
+- **All Input Types**: Works with text, email, password, number, etc.
+- **Always Protected**: Password fields cannot be unredacted
+- **Real-time**: Masks data as users type
+
+```javascript
+// Privacy-first example
+redactionStrategy: { 
+  mode: 'privacy-first' as const, 
+  unredactFields: ['#public-comment'] 
+}
+
+// Visibility-first example  
+redactionStrategy: { 
+  mode: 'visibility-first' as const
+}
+```
+
+```html
+<!-- Mark sensitive fields for redaction -->
+<input id="username" data-hb-redact="true">
+<input id="ssn" data-hb-redact="true">
+```
+
+Learn more in our [Data Redaction guide](/core-features/data-redaction).
+
 ## What Happens Next?
 
 Once you've completed the setup:

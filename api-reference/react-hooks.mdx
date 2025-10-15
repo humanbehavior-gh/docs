@@ -30,7 +30,10 @@ interface HumanBehaviorProviderProps {
   options?: {
     ingestionUrl?: string;
     logLevel?: 'none' | 'error' | 'warn' | 'info' | 'debug';
-    redactFields?: string[];
+    redactionStrategy?: {
+      mode: 'privacy-first' | 'visibility-first';
+      unredactFields?: string[];
+    };
   };
 }
 ```
@@ -80,7 +83,9 @@ const tracker = HumanBehaviorTracker.init(process.env.REACT_APP_HUMANBEHAVIOR_AP
   apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
   options={{
     logLevel: 'debug',
-    redactFields: ['input[type="password"]']
+    redactionStrategy: { 
+      mode: 'visibility-first' as const
+    }
   }}
 >
   <YourApp />
@@ -163,9 +168,10 @@ Returns an object with redaction methods:
 
 ```typescript
 interface RedactionInterface {
-  setRedactedFields: (fields: string[]) => void;
-  isRedactionActive: () => boolean;
-  getRedactedFields: () => string[];
+  setUnredactedFields: (fields: string[]) => void;
+  clearUnredactedFields: () => void;
+  hasUnredactedFields: () => boolean;
+  getUnredactedFields: () => string[];
 }
 ```
 
@@ -174,26 +180,25 @@ interface RedactionInterface {
 import { useRedaction } from 'humanbehavior-js/react';
 
 function PrivacySettings() {
-  const { setRedactedFields, isRedactionActive, getRedactedFields } = useRedaction();
+  const { setUnredactedFields, clearUnredactedFields, hasUnredactedFields, getUnredactedFields } = useRedaction();
 
-  const handleEnableRedaction = () => {
-    setRedactedFields([
-      'input[type="password"]',
-      'input[name="ssn"]',
-      '.sensitive-data'
+  const handleUnredactFields = () => {
+    setUnredactedFields([
+      '#public-comment',
+      '.non-sensitive-input'
     ]);
   };
 
-  const handleDisableRedaction = () => {
-    setRedactedFields([]);
+  const handleClearUnredacted = () => {
+    clearUnredactedFields();
   };
 
   return (
     <div>
-      <p>Redaction active: {isRedactionActive() ? 'Yes' : 'No'}</p>
-      <p>Redacted fields: {getRedactedFields().join(', ')}</p>
-      <button onClick={handleEnableRedaction}>Enable Redaction</button>
-      <button onClick={handleDisableRedaction}>Disable Redaction</button>
+      <p>Has unredacted fields: {hasUnredactedFields() ? 'Yes' : 'No'}</p>
+      <p>Unredacted fields: {getUnredactedFields().join(', ')}</p>
+      <button onClick={handleUnredactFields}>Unredact Fields</button>
+      <button onClick={handleClearUnredacted}>Clear Unredacted Fields</button>
     </div>
   );
 }
@@ -248,7 +253,9 @@ function App() {
     <HumanBehaviorProvider 
       apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
       options={{
-        redactFields: ['input[type="password"]']
+        redactionStrategy: { 
+          mode: 'visibility-first' as const
+        }
       }}
     >
       <YourApp />
@@ -282,7 +289,7 @@ interface User {
 function MyComponent() {
   const tracker = useHumanBehavior();
   const { identifyUser } = useUserTracking();
-  const { setRedactedFields } = useRedaction();
+  const { setUnredactedFields } = useRedaction();
 
   const handleUserLogin = async (user: User) => {
     await identifyUser({

@@ -28,7 +28,10 @@ static init(
   options?: {
     ingestionUrl?: string;
     logLevel?: 'none' | 'error' | 'warn' | 'info' | 'debug';
-    redactFields?: string[];
+    redactionStrategy?: {
+      mode: 'privacy-first' | 'visibility-first';
+      unredactFields?: string[];
+    };
     enableAutomaticTracking?: boolean;
     automaticTrackingOptions?: {
       trackButtons?: boolean;
@@ -46,7 +49,7 @@ static init(
 - `options` (object, optional): Configuration options
   - `ingestionUrl` (string, optional): Custom ingestion URL
   - `logLevel` (string, optional): Logging level
-  - `redactFields` (string[], optional): CSS selectors for fields to redact
+  - `redactionStrategy` (object, optional): Redaction configuration
   - `enableAutomaticTracking` (boolean, optional): Enable automatic tracking (default: true)
   - `automaticTrackingOptions` (object, optional): Automatic tracking configuration
 
@@ -55,7 +58,9 @@ static init(
 **Example:**
 ```javascript
 const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY, {
-  redactFields: ['input[type="password"]', '#email'],
+  redactionStrategy: { 
+    mode: 'visibility-first' as const
+  },
   logLevel: 'debug',
   automaticTrackingOptions: {
     trackButtons: true,
@@ -230,62 +235,12 @@ await tracker.trackNavigationEvent('push', '/home', '/dashboard');
 
 ## Redaction Management
 
-### `setRedactedFields(fields)`
+### `setUnredactedFields(fields)`
 
-Set fields to be redacted from recordings.
-
-```typescript
-setRedactedFields(fields: string[]): void
-```
-
-**Parameters:**
-- `fields` (string[]): Array of CSS selectors for fields to redact
-
-**Example:**
-```javascript
-tracker.setRedactedFields([
-  'input[type="password"]',
-  '#email',
-  '.sensitive-data'
-]);
-```
-
-### `isRedactionActive()`
-
-Check if redaction is currently active.
+Set fields to be unredacted (visible) in recordings (privacy-first mode only).
 
 ```typescript
-isRedactionActive(): boolean
-```
-
-**Returns:** `boolean` - Whether redaction is active
-
-**Example:**
-```javascript
-const isActive = tracker.isRedactionActive();
-```
-
-### `getRedactedFields()`
-
-Get current redacted fields.
-
-```typescript
-getRedactedFields(): string[]
-```
-
-**Returns:** `string[]` - Array of current redacted field selectors
-
-**Example:**
-```javascript
-const fields = tracker.getRedactedFields();
-```
-
-### `unredactFields(fields)`
-
-Remove specific fields from redaction.
-
-```typescript
-unredactFields(fields: string[]): void
+setUnredactedFields(fields: string[]): void
 ```
 
 **Parameters:**
@@ -293,39 +248,53 @@ unredactFields(fields: string[]): void
 
 **Example:**
 ```javascript
-tracker.unredactFields([
+tracker.setUnredactedFields([
   '#public-comment',
   '.non-sensitive-input'
 ]);
 ```
 
-### `clearRedactedFields()`
+### `clearUnredactedFields()`
 
-Clear all redacted fields (disable redaction completely).
+Clear all unredacted fields (everything becomes redacted).
 
 ```typescript
-clearRedactedFields(): void
+clearUnredactedFields(): void
 ```
 
 **Example:**
 ```javascript
-tracker.clearRedactedFields();
+tracker.clearUnredactedFields();
 ```
 
-### `redact(options?)`
+### `hasUnredactedFields()`
 
-Apply redaction to current session.
+Check if any fields are currently unredacted.
 
 ```typescript
-async redact(options?: RedactionOptions): Promise<void>
+hasUnredactedFields(): boolean
 ```
 
-**Parameters:**
-- `options` (object, optional): Redaction options
+**Returns:** `boolean` - Whether any fields are unredacted
 
 **Example:**
 ```javascript
-await tracker.redact();
+const hasUnredacted = tracker.hasUnredactedFields();
+```
+
+### `getUnredactedFields()`
+
+Get current unredacted fields.
+
+```typescript
+getUnredactedFields(): string[]
+```
+
+**Returns:** `string[]` - Array of current unredacted field selectors
+
+**Example:**
+```javascript
+const fields = tracker.getUnredactedFields();
 ```
 
 ## Session Information
