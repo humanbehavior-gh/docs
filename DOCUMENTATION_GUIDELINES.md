@@ -21,12 +21,13 @@ This file tracks what should and shouldn't be included in the HumanBehavior SDK 
 
 ### **Data Redaction**
 - `redact()` - Enable data redaction
-- `setRedactedFields()` - Set fields to redact
-- `isRedactionActive()` - Check redaction status
-- `getRedactedFields()` - Get redacted fields
+- `setUnredactedFields()` - Set fields to unredact (privacy-first mode)
+- `clearUnredactedFields()` - Clear all unredacted fields
+- `hasUnredactedFields()` - Check if any fields are unredacted
+- `getUnredactedFields()` - Get unredacted fields
 
 ### **Configuration Options**
-- `redactFields` - CSS selectors for sensitive fields
+- `redactionStrategy` - Redaction configuration with privacy-first/visibility-first modes
 - `enableAutomaticTracking` - Enable/disable automatic tracking
 - `automaticTrackingOptions` - Configure automatic tracking behavior
 

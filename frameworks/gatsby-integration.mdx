@@ -141,9 +141,9 @@ export const onClientEntry = () => {
   const apiKey = process.env.GATSBY_HUMANBEHAVIOR_API_KEY;
   if (apiKey) {
     const tracker = HumanBehaviorTracker.init(apiKey, {
-      redactText: ['password', 'credit-card', 'ssn'],
-      redactInputs: ['password', 'credit-card-number'],
-      redactAttributes: ['data-sensitive']
+      redactionStrategy: { 
+        mode: 'visibility-first' as const
+      }
     });
     console.log('HumanBehavior SDK initialized for Gatsby');
   }

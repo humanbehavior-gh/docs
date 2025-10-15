@@ -54,7 +54,14 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <HumanBehaviorProvider apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}>
+    <HumanBehaviorProvider 
+      apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+      options={{
+        redactionStrategy: { 
+          mode: 'visibility-first' as const
+        }
+      }}
+    >
       {children}
     </HumanBehaviorProvider>
   );
@@ -115,12 +122,45 @@ function MyApp({ Component, pageProps }) {
 export default MyApp;
 ```
 
+## Data Redaction
+
+Configure data redaction for sensitive information in your providers:
+
+```tsx
+export function Providers({ children }: ProvidersProps) {
+  return (
+    <HumanBehaviorProvider 
+      apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+      options={{
+        redactionStrategy: { 
+          mode: 'privacy-first' as const, 
+          unredactFields: ['#public-comment', '#feedback'] 
+        }
+      }}
+    >
+      {children}
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Markup-Driven Redaction
+
+You can also use HTML attributes for redaction:
+
+```tsx
+// These fields will be redacted in visibility-first mode
+<input id="username" data-hb-redact="true" />
+<input id="ssn" data-hb-redact="true" />
+```
+
 ## Features
 
 - ✅ Automatic route change tracking
 - ✅ Server-side rendering compatible
 - ✅ Works with both App and Pages Router
 - ✅ Optimized bundle size
+- ✅ Flexible data redaction with privacy-first and visibility-first modes
 
 ## Troubleshooting
 

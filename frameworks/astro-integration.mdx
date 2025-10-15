@@ -177,9 +177,9 @@ Configure data redaction for sensitive information:
   const apiKey = import.meta.env.PUBLIC_HUMANBEHAVIOR_API_KEY;
   
   const tracker = HumanBehaviorTracker.init(apiKey, {
-    redactText: ['password', 'credit-card', 'ssn'],
-    redactInputs: ['password', 'credit-card-number'],
-    redactAttributes: ['data-sensitive']
+    redactionStrategy: { 
+      mode: 'visibility-first' as const
+    }
   });
 </script>
 ```

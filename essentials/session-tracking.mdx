@@ -44,7 +44,7 @@ Events are automatically batched and sent every few seconds to reduce network re
 | Property/Option                | Type      | Description                                                                                 |
 |-------------------------------|-----------|---------------------------------------------------------------------------------------------|
 | `apiKey`                      | string    | Your project’s API key (required).                                                          |
-| `redactFields`                | string[]  | CSS selectors for fields to redact.                                                         |
+| `redactionStrategy`           | object    | Redaction configuration (see Data Redaction guide).                                          |
 | `enableAutomaticTracking`     | boolean   | Enable/disable automatic event tracking (default: true).                                    |
 | `automaticTrackingOptions`    | object    | Fine-tune automatic tracking (see below).                                                   |
 | `sessionId`                   | string    | Unique session ID for the current user session.                                             |
@@ -66,7 +66,9 @@ Events are automatically batched and sent every few seconds to reduce network re
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 const tracker = HumanBehaviorTracker.init('your-api-key', {
-  redactFields: ['input[type="password"]', '.sensitive'],
+  redactionStrategy: { 
+    mode: 'visibility-first' as const
+  },
   enableAutomaticTracking: true,
   automaticTrackingOptions: {
     trackButtons: true,

@@ -1,142 +1,192 @@
 ---
 title: 'Data Redaction'
-description: 'Automatic data redaction with optional field unredaction'
+description: 'Flexible data redaction with privacy-first and visibility-first modes'
 ---
 
-HumanBehavior SDK automatically redacts sensitive data using rrweb's built-in masking. **All input fields are redacted by default**, ensuring privacy compliance while maintaining the value of your analytics.
+HumanBehavior SDK provides comprehensive data redaction with two flexible modes to protect sensitive information while maintaining analytics value.
 
-## Automatic Redaction
+## Redaction Modes
 
-The SDK automatically redacts sensitive data without any configuration:
-
-- ✅ **All Input Fields**: Automatically masked (`maskAllInputs: true`)
-- ✅ **Password Fields**: Always masked (`maskInputOptions: { password: true }`)
-- ✅ **Real-time Protection**: Data is masked before being recorded
-- ✅ **No Configuration Required**: Works out of the box
-
-## Unredacting Specific Fields
-
-You can selectively unredact fields that you want to track (except passwords, which remain protected):
+### Privacy-First Mode (Default)
+Everything is masked by default. Selectively unredact fields you want to track.
 
 ```javascript
-// Unredact specific fields for tracking
-tracker.setUnredactedFields([
-  '#public-comment',
-  '.feedback-input',
-  'input[name="username"]'
-]);
+// All inputs masked by default, unredact specific fields
+const tracker = HumanBehaviorTracker.init(API_KEY, {
+  redactionStrategy: { 
+    mode: 'privacy-first' as const as const, 
+    unredactFields: ['#public-comment', '#feedback-input'] 
+  }
+});
 ```
 
-### Accessing the Tracker Instance
+### Visibility-First Mode
+Everything is visible by default. Selectively redact sensitive fields using `data-hb-redact="true"`.
 
-**React/Next.js:**
 ```javascript
-import { useHumanBehavior } from '@humanbehavior/react';
+// All inputs visible by default, redact fields marked with data-hb-redact="true"
+const tracker = HumanBehaviorTracker.init(API_KEY, {
+  redactionStrategy: { 
+    mode: 'visibility-first' as const
+  }
+});
+```
 
-function MyComponent() {
-  const tracker = useHumanBehavior();
-  
-  const handleUnredact = () => {
-    tracker.setUnredactedFields(['#comment-field']);
-  };
+## Field Selection Methods
+
+### 1. Markup-Driven Selection (Primary Method)
+Add `data-hb-redact="true"` to any input element you want to redact:
+
+```html
+<!-- These fields will be redacted in visibility-first mode -->
+<input id="username" data-hb-redact="true">
+<input id="ssn" data-hb-redact="true">
+<textarea class="sensitive-input" data-hb-redact="true"></textarea>
+```
+
+### 2. Programmatic Selection (Privacy-First Only)
+For privacy-first mode, configure unredacted fields at initialization:
+
+```javascript
+// Privacy-first: unredact specific fields
+redactionStrategy: { 
+  mode: 'privacy-first' as const, 
+  unredactFields: ['#public-comment', '.feedback-input', 'input[name="topic"]'] 
 }
 ```
 
-**Angular:**
+### 3. Runtime Control
+Change redaction settings after initialization:
+
 ```javascript
+// Add more fields to unredact (privacy-first)
+tracker.setUnredactedFields(['#new-public-field']);
+
+// Clear all unredacted fields (everything becomes redacted)
+tracker.clearUnredactedFields();
+```
+
+## Framework Integration
+
+### React/Next.js
+```tsx
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider
+      apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY}
+      options={{
+        redactionStrategy: { 
+          mode: 'visibility-first' as const
+        }
+      }}
+    >
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Vue
+```javascript
+import { HumanBehaviorTracker } from 'humanbehavior-js';
+
+const tracker = HumanBehaviorTracker.init(API_KEY, {
+  redactionStrategy: { 
+    mode: 'privacy-first' as const, 
+    unredactFields: ['#public-comment'] 
+  }
+});
+```
+
+### Angular
+```typescript
 import { HumanBehaviorService } from '@humanbehavior/angular';
 
-constructor(private humanBehavior: HumanBehaviorService) {}
-
-unredactFields() {
-  this.humanBehavior.setUnredactedFields(['#comment-field']);
+constructor(private humanBehavior: HumanBehaviorService) {
+  this.humanBehavior.init(API_KEY, {
+    redactionStrategy: { 
+      mode: 'visibility-first' as const
+    }
+  });
 }
 ```
 
-**Vue:**
+### Vanilla JavaScript
 ```javascript
-import { useHumanBehavior } from '@humanbehavior/vue';
-
-const tracker = useHumanBehavior();
-tracker.setUnredactedFields(['#comment-field']);
+const tracker = HumanBehaviorTracker.init(API_KEY, {
+  redactionStrategy: { 
+    mode: 'visibility-first' as const
+  }
+});
 ```
 
-**Vanilla JavaScript:**
-```javascript
-// The tracker instance is available globally after initialization
-window.HumanBehaviorTracker.setUnredactedFields(['#comment-field']);
-```
+## Advanced Features
+
+### 1:1 Character Masking
+Input values are masked with asterisks matching the character count:
+- Typing "hello" shows "*****" in recordings
+- Typing "test" shows "****" in recordings
+
+### All Input Types Supported
+Redaction works with all common input types:
+- `text`, `email`, `password`, `number`, `tel`, `url`, `search`
+- `textarea`, `date`, `time`, `datetime-local`, `month`, `week`
+
+### Always Protected
+- **Password fields**: Always masked regardless of mode
+- **Security**: Passwords cannot be unredacted
 
 ## Common Use Cases
 
-### Public Forms
-```javascript
-// Unredact public feedback fields
-tracker.setUnredactedFields([
-  '#feedback-form textarea',
-  '.public-comment',
-  'input[name="topic"]'
-]);
+### E-commerce Checkout
+```html
+<!-- Mark sensitive payment fields for redaction -->
+<input id="credit-card" data-hb-redact="true">
+<input id="cvv" data-hb-redact="true">
+<input id="ssn" data-hb-redact="true">
 ```
 
-### User Experience Research
 ```javascript
-// Unredact fields for UX research (but keep passwords protected)
-tracker.setUnredactedFields([
-  '.search-input',
-  '#product-feedback',
-  'input[name="category"]'
-]);
+// Use visibility-first mode
+redactionStrategy: { mode: 'visibility-first' as const }
 ```
 
-### Debugging Mode
+### User Feedback Forms
 ```javascript
-// Temporarily unredact fields for debugging
-tracker.setUnredactedFields([
-  '#debug-input',
-  '.test-field'
-]);
-
-// Re-enable redaction later
-tracker.redactFields([
-  '#debug-input',
-  '.test-field'
-]);
+// Show public feedback, hide personal info
+redactionStrategy: { 
+  mode: 'privacy-first' as const, 
+  unredactFields: ['#feedback-text', '#rating'] 
+}
 ```
 
-### Cross-Page/Component Usage
-
-**Important**: When using redaction methods across different pages or components, you need to access the tracker instance again:
-
-```javascript
-// ✅ Correct - Get fresh tracker instance
-const tracker = useHumanBehavior(); // React
-// or
-const tracker = window.HumanBehaviorTracker; // Vanilla JS
-
-tracker.setUnredactedFields(['#new-field']);
-
-// ❌ Incorrect - Don't reuse old references
-// const oldTracker = someOldReference; // This might be stale
+### Simple Markup-Driven Approach
+```html
+<!-- Just add data-hb-redact="true" to sensitive fields -->
+<input id="username" data-hb-redact="true">
+<input id="ssn" data-hb-redact="true">
+<input id="credit-card" data-hb-redact="true">
 ```
 
 ## API Reference
 
 | Method | Description |
 |--------|-------------|
-| `setUnredactedFields(fields)` | Unredact specific fields |
-| `clearUnredactedFields()` | Redact all fields (everything becomes redacted) |
-| `redactFields(fields)` | Redact specific fields |
+| `setUnredactedFields(fields)` | Add fields to unredact (privacy-first) |
+| `clearUnredactedFields()` | Redact all fields |
 | `hasUnredactedFields()` | Check if any fields are unredacted |
 | `getUnredactedFields()` | Get currently unredacted fields |
 
 ## Privacy & Compliance
 
-- **Automatic Protection**: All sensitive data is protected by default
-- **Selective Unredaction**: Choose which fields to track based on your needs
-- **Password Protection**: Password fields cannot be unredacted
+- **Flexible Control**: Choose between privacy-first or visibility-first based on your needs
+- **Automatic Protection**: Password fields are always protected
+- **Real-time Masking**: Data is masked as users type
 - **Compliance Ready**: Supports GDPR, HIPAA, and other privacy regulations
+- **Framework Agnostic**: Works consistently across all supported frameworks
 
 <Note>
-  The SDK automatically protects all input fields. Only unredact fields that you specifically need to track for analytics purposes. Password fields remain protected regardless of unredaction settings.
-</Note> 
+  Choose the mode that best fits your use case. Privacy-first is recommended for applications handling sensitive data, while visibility-first with `data-hb-redact="true"` is better for public-facing applications where you want to track most interactions and only redact specific sensitive fields.
+</Note>

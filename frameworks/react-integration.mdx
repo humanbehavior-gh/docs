@@ -121,12 +121,59 @@ function App() {
 export default App;
 ```
 
+## Data Redaction
+
+Configure data redaction for sensitive information:
+
+```jsx
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider 
+      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+      options={{
+        redactionStrategy: { 
+          mode: 'visibility-first' as const
+        }
+      }}
+    >
+      <div>
+        <h1>My React App</h1>
+        {/* Your app content */}
+      </div>
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+### Runtime Redaction Control
+
+```jsx
+import { useHumanBehavior } from 'humanbehavior-js/react';
+
+function MyComponent() {
+  const tracker = useHumanBehavior();
+
+  const handleUnredactField = () => {
+    tracker.setUnredactedFields(['#new-public-field']);
+  };
+
+  return (
+    <button onClick={handleUnredactField}>
+      Unredact New Field
+    </button>
+  );
+}
+```
+
 ## Features
 
 - ✅ Automatic page view tracking
 - ✅ React hooks for custom events
 - ✅ TypeScript support included
 - ✅ Optimized for React 18+
+- ✅ Flexible data redaction with privacy-first and visibility-first modes
 
 ## Troubleshooting
 
