@@ -8,45 +8,44 @@
     "light": "#00a63e",
     "dark": "#4f46e5"
   },
-  "favicon": "/favicon.png",
+  "favicon": "/logo.jpg",
   "navigation": {
     "tabs": [
       {
         "tab": "Guide",
         "groups": [
           {
-            "group": "Get Started",
+            "group": "Installation",
             "pages": [
-              "index"
-            ]
-          },
-          {
-            "group": "Core Features",
-            "pages": [
-              "core-features/user-identification",
-              "core-features/custom-events",
-              "core-features/data-redaction"
-            ]
-          },
-          {
-            "group": "Frameworks",
-            "pages": [
-              "frameworks/frameworks",
-              "frameworks/react-integration",
-              "frameworks/nextjs-setup",
-              "frameworks/vue-integration",
-              "frameworks/angular-integration",
-              "frameworks/svelte-integration",
-              "frameworks/nuxt-integration",
-              "frameworks/remix-integration",
-              "frameworks/astro-integration",
-              "frameworks/gatsby-integration"
+              "index",
+              {
+                "group": "Framework Guides",
+                "pages": [
+                  "frameworks/react-integration",
+                  "frameworks/nextjs-setup",
+                  "frameworks/vue-integration",
+                  "frameworks/angular-integration",
+                  "frameworks/svelte-integration",
+                  "frameworks/nuxt-integration",
+                  "frameworks/remix-integration",
+                  "frameworks/astro-integration",
+                  "frameworks/gatsby-integration"
+                ]
+              },
+              {
+                "group": "Core Features",
+                "pages": [
+                  "core-features/user-identification",
+                  "core-features/custom-events",
+                  "core-features/data-redaction"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "tab": "API Reference",
+        "tab": "SDK Reference",
         "groups": [
           {
             "group": "Core API",
@@ -66,8 +65,8 @@
     ]
   },
   "logo": {
-    "light": "/logo/light.png",
-    "dark": "/logo/dark.png"
+    "light": "/logo.jpg",
+    "dark": "/logo.jpg"
   },
   "navbar": {
     "links": []
