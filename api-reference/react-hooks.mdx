@@ -34,6 +34,8 @@ interface HumanBehaviorProviderProps {
       mode: 'privacy-first' | 'visibility-first';
       unredactFields?: string[];
     };
+    enableConsoleTracking?: boolean;
+    enableNetworkTracking?: boolean;
   };
 }
 ```
@@ -82,15 +84,20 @@ const tracker = HumanBehaviorTracker.init(process.env.REACT_APP_HUMANBEHAVIOR_AP
 <HumanBehaviorProvider 
   apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
   options={{
-    logLevel: 'debug',
     redactionStrategy: { 
       mode: 'visibility-first' as const
-    }
+    },
+    enableConsoleTracking: true,  // Track console.warn/error (default: true)
+    enableNetworkTracking: true   // Track network errors (default: true)
   }}
 >
   <YourApp />
 </HumanBehaviorProvider>
 ```
+
+<Note>
+  Learn more about automatic tracking features (rage clicks, network errors, console logs) in the [Automatic Tracking guide](/core-features/automatic-tracking).
+</Note>
 
 ## useHumanBehavior
 

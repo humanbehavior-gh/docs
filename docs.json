@@ -21,15 +21,15 @@
               {
                 "group": "Framework Guides",
                 "pages": [
-                  "frameworks/react-integration",
-                  "frameworks/nextjs-setup",
-                  "frameworks/vue-integration",
-                  "frameworks/angular-integration",
-                  "frameworks/svelte-integration",
-                  "frameworks/nuxt-integration",
-                  "frameworks/remix-integration",
-                  "frameworks/astro-integration",
-                  "frameworks/gatsby-integration"
+                  "core-features/frameworks/react-integration",
+                  "core-features/frameworks/nextjs-setup",
+                  "core-features/frameworks/vue-integration",
+                  "core-features/frameworks/angular-integration",
+                  "core-features/frameworks/svelte-integration",
+                  "core-features/frameworks/nuxt-integration",
+                  "core-features/frameworks/remix-integration",
+                  "core-features/frameworks/astro-integration",
+                  "core-features/frameworks/gatsby-integration"
                 ]
               },
               {
@@ -37,7 +37,8 @@
                 "pages": [
                   "core-features/user-identification",
                   "core-features/custom-events",
-                  "core-features/data-redaction"
+                  "core-features/data-redaction",
+                  "core-features/automatic-tracking"
                 ]
               }
             ]

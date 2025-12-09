@@ -1,0 +1,314 @@
+---
+title: 'Automatic Tracking'
+description: 'Automatic detection of user frustration, errors, and performance issues'
+---
+
+HumanBehavior SDK automatically tracks several types of user interactions and errors to help you identify issues and improve user experience. These features work automatically without any additional configuration.
+
+The SDK automatically sends events for common interactions like page views, button clicks, and form submissions. You can also track your own events – see the [Custom Events guide](/core-features/custom-events) for more information.
+
+### At a Glance
+
+| Feature | Default | What It Tracks | Event Name |
+|---------|---------|----------------|------------|
+| Page Views | Always On | Page loads and navigation | `$page_viewed` |
+| Button Clicks | Enabled* | Button click interactions | `$button_clicked` |
+| Form Submissions | Enabled* | Form submit events | `$form_submitted` |
+| Rage Click | Always On | 3+ clicks in 1s within 30px | `$rageclick` |
+| Network Errors | Enabled | Failed/slow HTTP requests | Network error logs |
+| Console Errors | Enabled | `console.warn()` / `console.error()` | Console error logs |
+
+*Requires `enableAutomaticTracking: true` (default)
+
+## Page Views (`$page_viewed`)
+
+Automatically tracked on page loads and navigation events.
+
+**When It's Triggered:**
+- Initial page load
+- Navigation via `pushState` (SPA routing)
+- Navigation via `replaceState` (SPA routing)
+- Browser back/forward (`popstate`)
+- Hash changes (`hashchange`)
+
+**Event Properties:**
+```javascript
+{
+  url: 'https://example.com/checkout?step=2#payment',  // Full URL
+  fromUrl: '/cart',                                     // Previous URL
+  navigationType: 'pushState',                          // Type of navigation
+  pathname: '/checkout',                               // Current path
+  search: '?step=2',                                   // Query string
+  hash: '#payment',                                    // Hash fragment
+  referrer: 'https://google.com',                      // Referrer URL
+  timestamp: 1234567890                                // Timestamp
+}
+```
+
+## Button Clicks (`$button_clicked`)
+
+Automatically tracked when users click buttons (when automatic tracking is enabled).
+
+**When It's Triggered:**
+- User clicks any `<button>` element
+- User clicks elements inside a button
+
+**Event Properties:**
+```javascript
+{
+  buttonId: 'submit-btn',           // Button ID (if available)
+  buttonType: 'submit',             // Button type (button, submit, reset)
+  buttonText: 'Submit Order',       // Button text (if includeText enabled)
+  buttonClass: 'btn-primary',       // Button classes (if includeClasses enabled)
+  page: '/checkout',                // Current page path
+  timestamp: 1234567890             // Timestamp
+}
+```
+
+**Configuration:**
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableAutomaticTracking: true,  // Enable automatic tracking (default: true)
+  automaticTrackingOptions: {
+    trackButtons: true,            // Track button clicks (default: true)
+    includeText: true,             // Include button text (default: true)
+    includeClasses: true           // Include button classes (default: true)
+  }
+});
+```
+
+## Form Submissions (`$form_submitted`)
+
+Automatically tracked when users submit forms (when automatic tracking is enabled).
+
+**When It's Triggered:**
+- User submits any `<form>` element
+
+**Event Properties:**
+```javascript
+{
+  formId: 'checkout-form',          // Form ID (if available)
+  formAction: '/api/checkout',      // Form action URL (if available)
+  formMethod: 'post',               // Form method (get, post, etc.)
+  formClass: 'checkout-form',       // Form classes (if includeClasses enabled)
+  fields: ['email', 'name', 'card'], // Array of form field names
+  page: '/checkout',                // Current page path
+  timestamp: 1234567890             // Timestamp
+}
+```
+
+**Configuration:**
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableAutomaticTracking: true,  // Enable automatic tracking (default: true)
+  automaticTrackingOptions: {
+    trackForms: true,              // Track form submissions (default: true)
+    includeClasses: true           // Include form classes (default: true)
+  }
+});
+```
+
+## Rage Click Detection
+
+Rage clicks occur when users repeatedly click the same area, indicating frustration with unresponsive UI elements.
+
+### How It Works
+
+The SDK automatically detects rage clicks when:
+- **3 or more clicks** occur within **1 second**
+- All clicks are within a **30px radius** of each other
+
+When a rage click is detected, a `$rageclick` event is automatically sent with details about the clicked element.
+
+### Event Properties
+
+```javascript
+{
+  x: 150,                    // X coordinate of the click
+  y: 200,                    // Y coordinate of the click
+  page: '/checkout',         // Current page path
+  element: 'button',         // Element tag name
+  elementId: 'submit-btn',   // Element ID (if available)
+  elementClass: 'btn-primary', // Element classes (if available)
+  elementText: 'Submit',     // Element text content (if available)
+  clickCount: 3,            // Number of clicks detected
+  timestamp: 1234567890      // Timestamp of the rage click
+}
+```
+
+### Use Cases
+
+- **Identify broken buttons** - Users clicking repeatedly on non-functional elements
+- **Detect UI responsiveness issues** - Slow-loading pages causing user frustration
+- **Find confusing interfaces** - Areas where users are unsure if their click registered
+
+### Example
+
+```javascript
+// Rage clicks are automatically tracked - no code needed!
+// When a user clicks 3+ times in the same area, you'll see a $rageclick event in your dashboard
+```
+
+## Network Error Tracking
+
+The SDK automatically tracks network errors and slow requests to help you identify API issues and performance problems.
+
+### What Gets Tracked
+
+**Automatic Tracking:**
+- **Failed HTTP requests** (4xx, 5xx status codes)
+- **Network errors** (timeouts, connection failures, CORS errors)
+- **Blocked requests** (ad blockers, browser extensions)
+- **Slow requests** (>10 seconds loading time)
+
+**Error Types:**
+- `client_error` - 4xx status codes
+- `server_error` - 5xx status codes
+- `timeout_error` - Request timeout
+- `network_error` - Network connection failure
+- `cors_error` - CORS policy violation
+- `blocked_by_client` - Blocked by ad blocker or extension
+- `csp_violation` - Content Security Policy violation
+- `long_loading` - Request taking >10 seconds
+
+### What's NOT Tracked
+
+The SDK automatically skips tracking its own requests to the ingestion server to avoid infinite loops.
+
+### Configuration
+
+Network tracking is **enabled by default**. To disable it:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableNetworkTracking: false  // Disable network error tracking
+});
+```
+
+### React Provider
+
+```jsx
+<HumanBehaviorProvider 
+  apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+  options={{
+    enableNetworkTracking: false  // Disable network tracking
+  }}
+>
+  <App />
+</HumanBehaviorProvider>
+```
+
+### Tracked Data
+
+Each network error includes:
+- Request URL and method
+- HTTP status code (if available)
+- Error type and message
+- Request duration
+- Timestamp
+- Session and user context
+
+## Console Log Tracking
+
+The SDK automatically tracks console warnings and errors to help you identify JavaScript errors in production.
+
+### What Gets Tracked
+
+**Automatic Tracking:**
+- `console.warn()` calls
+- `console.error()` calls
+- Stack traces (when available)
+- Error messages and context
+
+**What's NOT Tracked:**
+- `console.log()` calls (not tracked to reduce noise)
+- SDK's own console output (automatically filtered)
+
+### Configuration
+
+Console tracking is **enabled by default**. To disable it:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableConsoleTracking: false  // Disable console error tracking
+});
+```
+
+### React Provider
+
+```jsx
+<HumanBehaviorProvider 
+  apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+  options={{
+    enableConsoleTracking: false  // Disable console tracking
+  }}
+>
+  <App />
+</HumanBehaviorProvider>
+```
+
+### Tracked Data
+
+Each console error/warning includes:
+- Log level (`warn` or `error`)
+- Message content
+- Stack trace (if available)
+- Current page URL
+- User agent
+- Timestamp
+- Session and user context
+
+### Example
+
+```javascript
+// These are automatically tracked:
+console.warn('Deprecated API used');
+console.error('Failed to load user data', error);
+
+// This is NOT tracked:
+console.log('Debug information');  // Not tracked
+```
+
+## Viewing Tracked Events
+
+All automatic tracking events appear in your HumanBehavior dashboard:
+
+1. **Page Views** - View as `$page_viewed` events
+2. **Button Clicks** - View as `$button_clicked` events
+3. **Form Submissions** - View as `$form_submitted` events
+4. **Rage Clicks** - View as `$rageclick` events
+5. **Network Errors** - View in network error logs
+6. **Console Errors** - View in console error logs
+
+You can filter, search, and analyze these events alongside your session recordings to understand user behavior, frustration, and technical issues.
+
+## Best Practices
+
+### When to Enable/Disable Tracking
+
+**Enable Network Tracking** (default):
+- Production environments
+- When you want to monitor API health
+- Debugging performance issues
+
+**Disable Network Tracking**:
+- Development environments with noisy network logs
+- When using third-party APIs that frequently fail
+
+**Enable Console Tracking** (default):
+- Production environments
+- When you want to catch JavaScript errors
+- Debugging user-reported issues
+
+**Disable Console Tracking**:
+- Development environments with verbose logging
+- When using libraries that log warnings frequently
+
+### Privacy Considerations
+
+- **Network errors** include request URLs (may contain sensitive data)
+- **Console errors** include error messages (may contain sensitive data)
+- **Rage clicks** include element text (may contain user input)
+
+Consider using [data redaction](/core-features/data-redaction) to protect sensitive information in tracked events.
+

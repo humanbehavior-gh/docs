@@ -53,9 +53,7 @@ export function useHumanBehavior() {
   const apiKey = import.meta.env.VITE_HUMANBEHAVIOR_API_KEY
   
   if (apiKey) {
-    const tracker = HumanBehaviorTracker.init(apiKey, undefined, { 
-      logLevel: 'debug' 
-    })
+    const tracker = HumanBehaviorTracker.init(apiKey)
     
     return { tracker }
   }
@@ -140,9 +138,7 @@ const app = createApp(App)
 
 const apiKey = import.meta.env.VITE_HUMANBEHAVIOR_API_KEY
 if (apiKey) {
-  const tracker = HumanBehaviorTracker.init(apiKey, undefined, { 
-    logLevel: 'debug' 
-  })
+  const tracker = HumanBehaviorTracker.init(apiKey)
   app.provide('humanBehavior', tracker)
 }
 

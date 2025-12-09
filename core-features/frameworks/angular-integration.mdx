@@ -141,7 +141,7 @@ No separate Angular package is required. Use the single `humanbehavior-js` packa
 
 ## Troubleshooting
 
-- Ensure `HumanBehaviorTracker.init` is called as `init(apiKey, ingestionUrl?, options?)`
+- Ensure `HumanBehaviorTracker.init` is called as `init(apiKey, options?)` where `ingestionUrl` is inside `options` if needed
 - If TypeScript complains about rrweb types, add:
   - `@rrweb/types@2.0.0-alpha.17`
   - `rrweb-snapshot@2.0.0-alpha.17` 

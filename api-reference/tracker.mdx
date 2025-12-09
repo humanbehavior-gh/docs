@@ -40,6 +40,8 @@ static init(
       includeText?: boolean;
       includeClasses?: boolean;
     };
+    enableConsoleTracking?: boolean;
+    enableNetworkTracking?: boolean;
   }
 ): HumanBehaviorTracker
 ```
@@ -52,6 +54,8 @@ static init(
   - `redactionStrategy` (object, optional): Redaction configuration
   - `enableAutomaticTracking` (boolean, optional): Enable automatic tracking (default: true)
   - `automaticTrackingOptions` (object, optional): Automatic tracking configuration
+  - `enableConsoleTracking` (boolean, optional): Enable console error/warning tracking (default: true)
+  - `enableNetworkTracking` (boolean, optional): Enable network error tracking (default: true)
 
 **Returns:** `HumanBehaviorTracker` instance
 
@@ -61,7 +65,8 @@ const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY, {
   redactionStrategy: { 
     mode: 'visibility-first' as const
   },
-  logLevel: 'debug',
+  enableConsoleTracking: true,  // Track console.warn/error (default: true)
+  enableNetworkTracking: true,  // Track network errors (default: true)
   automaticTrackingOptions: {
     trackButtons: true,
     trackLinks: true,
@@ -69,6 +74,10 @@ const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY, {
   }
 });
 ```
+
+<Note>
+  Learn more about automatic tracking features (rage clicks, network errors, console logs) in the [Automatic Tracking guide](/core-features/automatic-tracking).
+</Note>
 
 ## Core Methods
 
