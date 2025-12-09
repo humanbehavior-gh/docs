@@ -62,9 +62,7 @@ let { children } = $props();
 if (browser) {
   const apiKey = import.meta.env.VITE_HUMANBEHAVIOR_API_KEY;
   if (apiKey) {
-    HumanBehaviorTracker.init(apiKey, undefined, { 
-      logLevel: 'debug' 
-    });
+    HumanBehaviorTracker.init(apiKey);
   }
 }
 </script>
@@ -92,9 +90,7 @@ import App from './App.svelte';
 import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 // Direct initialization (no browser check needed)
-const tracker = HumanBehaviorTracker.init('your-api-key-here', undefined, { 
-  logLevel: 'debug' 
-});
+const tracker = HumanBehaviorTracker.init('your-api-key-here');
 
 const app = new App({
   target: document.body
