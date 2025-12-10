@@ -1,0 +1,429 @@
+---
+title: 'Tracker Configuration'
+description: 'Complete guide to configuring the HumanBehavior SDK'
+---
+
+<Info>
+  <strong>All options are optional!</strong> The SDK works perfectly with just your API key. You only need to configure these options if you want to customize the default behavior.
+</Info>
+
+The HumanBehavior SDK provides extensive configuration options to customize tracking behavior, privacy settings, and performance. All options are passed to `HumanBehaviorTracker.init()` or `HumanBehaviorProvider`.
+
+**Minimal setup (all you need):**
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key');
+```
+
+## Quick Example
+
+Here's an example showing all options with their typical values:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  // Basic
+  ingestionUrl: 'https://custom-ingestion-url.com',
+  
+  // Tracking
+  enableAutomaticTracking: true,
+  enableConsoleTracking: true,
+  enableNetworkTracking: true,
+  
+  // Automatic Tracking Options
+  automaticTrackingOptions: {
+    trackButtons: true,
+    trackForms: true
+  },
+  
+  // Privacy & Redaction
+  redactionStrategy: {
+    mode: 'privacy-first',
+    unredactFields: ['#public-comment'],
+    // For visibility-first mode:
+    // redactFields: ['#password', '#ssn']
+  },
+  
+  // Performance
+  recordCanvas: false,
+  
+  // Properties
+  enableAutomaticProperties: true
+});
+```
+
+<Expandable title="React Quick Example">
+
+Here's the same configuration using the React Provider:
+
+```jsx
+import { HumanBehaviorProvider } from 'humanbehavior-js/react';
+
+function App() {
+  return (
+    <HumanBehaviorProvider 
+      apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+      options={{
+        // Basic
+        ingestionUrl: 'https://custom-ingestion-url.com',
+        
+        // Tracking
+        enableAutomaticTracking: true,
+        enableConsoleTracking: true,
+        enableNetworkTracking: true,
+        
+        // Automatic Tracking Options
+        automaticTrackingOptions: {
+          trackButtons: true,
+          trackForms: true
+        },
+        
+        // Privacy & Redaction
+        redactionStrategy: {
+          mode: 'privacy-first',
+          unredactFields: ['#public-comment']
+        },
+        
+        // Performance
+        recordCanvas: false,
+        
+        // Properties
+        enableAutomaticProperties: true
+      }}
+    >
+      <YourApp />
+    </HumanBehaviorProvider>
+  );
+}
+```
+
+</Expandable>
+
+## Basic Configuration
+
+### API Key and Ingestion URL
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  ingestionUrl: 'https://custom-ingestion-url.com', // Optional: Custom ingestion endpoint
+});
+```
+
+**Parameters:**
+- `apiKey` (string, required): Your HumanBehavior API key
+- `ingestionUrl` (string, optional): Custom ingestion URL (defaults to HumanBehavior's ingestion server)
+
+## Tracking Configuration
+
+### Automatic Tracking
+
+Control which automatic tracking features are enabled:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableAutomaticTracking: true, // Enable/disable all automatic tracking (default: true)
+  automaticTrackingOptions: {
+    trackButtons: true,    // Track button clicks (default: true)
+    trackForms: true       // Track form submissions (default: true)
+  }
+});
+```
+
+### Console Error Tracking
+
+**Enabled by default.** Track `console.warn()` and `console.error()` calls to identify JavaScript errors in production.
+
+**To disable console tracking:**
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableConsoleTracking: false  // Disable console error/warning tracking
+});
+```
+
+**React Provider:**
+
+```jsx
+<HumanBehaviorProvider 
+  apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+  options={{
+    enableConsoleTracking: false  // Disable console tracking
+  }}
+>
+  <App />
+</HumanBehaviorProvider>
+```
+
+**When to disable:**
+- Development environments with verbose logging
+- When using libraries that log warnings frequently
+- When you want to reduce event volume
+
+### Network Error Tracking
+
+**Enabled by default.** Automatically tracks failed network requests (4xx, 5xx status codes) and network errors to help identify API issues.
+
+**To disable network tracking:**
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableNetworkTracking: false  // Disable network error tracking
+});
+```
+
+**React Provider:**
+
+```jsx
+<HumanBehaviorProvider 
+  apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+  options={{
+    enableNetworkTracking: false  // Disable network error tracking
+  }}
+>
+  <App />
+</HumanBehaviorProvider>
+```
+
+**When to disable:**
+- Development environments with noisy network logs
+- When using third-party APIs that frequently fail
+- When you want to reduce event volume
+
+### Disable Both Console and Network Tracking
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableConsoleTracking: false,  // Disable console error tracking
+  enableNetworkTracking: false  // Disable network error tracking
+});
+```
+
+**React Provider:**
+
+```jsx
+<HumanBehaviorProvider 
+  apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+  options={{
+    enableConsoleTracking: false,  // Disable console tracking
+    enableNetworkTracking: false  // Disable network tracking
+  }}
+>
+  <App />
+</HumanBehaviorProvider>
+```
+
+## Privacy & Redaction
+
+### Redaction Strategy
+
+Control how sensitive data is handled in recordings:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  redactionStrategy: {
+    mode: 'privacy-first', // or 'visibility-first'
+    // Privacy-first mode: Everything is redacted by default
+    unredactFields: ['#public-comment', '.non-sensitive-input'],
+    // Visibility-first mode: Everything is visible by default
+    redactFields: ['#password', '#ssn', '.sensitive-field']
+  }
+});
+```
+
+**Modes:**
+- `privacy-first` (default): Everything is redacted by default. Use `unredactFields` to make specific fields visible.
+- `visibility-first`: Everything is visible by default. Use `redactFields` to hide specific sensitive fields.
+
+### Disable Auto Redaction
+
+To disable automatic redaction and make all fields visible (except passwords, which are always protected):
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  redactionStrategy: {
+    mode: 'visibility-first'  // Everything visible, only passwords redacted
+  }
+});
+```
+
+**Note:** Password fields (`input[type="password"]`) are always automatically redacted for security, regardless of the redaction mode.
+
+**React Provider:**
+
+```jsx
+<HumanBehaviorProvider 
+  apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+  options={{
+    redactionStrategy: {
+      mode: 'visibility-first'  // Disable auto redaction
+    }
+  }}
+>
+  <App />
+</HumanBehaviorProvider>
+```
+
+<Note>
+  Learn more about data redaction in the [Data Redaction guide](/core-features/data-redaction).
+</Note>
+
+## Performance Configuration
+
+### Canvas Recording
+
+Enable canvas element recording (with security protections):
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  recordCanvas: true  // Enable canvas recording (default: false)
+});
+```
+
+<Warning>
+  Canvas recording may capture sensitive visual data. Ensure you have proper redaction configured.
+</Warning>
+
+## Property Management
+
+### Automatic Properties
+
+Control automatic property detection:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableAutomaticProperties: true  // Enable automatic property detection (default: true)
+});
+```
+
+**Automatic properties include:**
+- Browser information
+- Device information
+- Screen/viewport dimensions
+- Page URL and referrer
+- User agent
+- Timezone and language
+
+## Complete Configuration Example
+
+Here's a complete example with all options:
+
+```javascript
+const tracker = HumanBehaviorTracker.init(process.env.HUMANBEHAVIOR_API_KEY, {
+  // Basic
+  ingestionUrl: 'https://custom-ingestion-url.com',
+  
+  // Tracking
+  enableAutomaticTracking: true,
+  automaticTrackingOptions: {
+    trackButtons: true,
+    trackForms: true
+  },
+  enableConsoleTracking: true,   // Track console errors (default: true)
+  enableNetworkTracking: true,   // Track network errors (default: true)
+  
+  // Privacy
+  redactionStrategy: {
+    mode: 'privacy-first',
+    unredactFields: ['#public-comment']
+  },
+  
+  // Performance
+  recordCanvas: false,
+  
+  // Properties
+  enableAutomaticProperties: true
+});
+```
+
+## React Provider Configuration
+
+All the same options are available in the React Provider:
+
+```jsx
+<HumanBehaviorProvider 
+  apiKey={process.env.REACT_APP_HUMANBEHAVIOR_API_KEY}
+  options={{
+    enableConsoleTracking: false,
+    enableNetworkTracking: false,
+    redactionStrategy: {
+      mode: 'visibility-first',
+      redactFields: ['#password', '#ssn']
+    },
+    automaticTrackingOptions: {
+      trackButtons: true,
+      trackForms: true
+    }
+  }}
+>
+  <App />
+</HumanBehaviorProvider>
+```
+
+## Best Practices
+
+### 1. Configure Privacy Early
+
+Set up redaction before starting tracking:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  redactionStrategy: {
+    mode: 'privacy-first',
+    unredactFields: ['#public-comment']
+  }
+});
+
+await tracker.start();  // Start after configuration
+```
+
+### 2. Disable Tracking in Development
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableAutomaticTracking: false,
+  enableConsoleTracking: false,
+  enableNetworkTracking: false
+});
+```
+
+## Troubleshooting
+
+### Too Many Events
+
+If you're seeing too many events:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableConsoleTracking: false,  // Disable console tracking
+  enableNetworkTracking: false,  // Disable network tracking
+  automaticTrackingOptions: {
+    trackButtons: false,  // Disable button tracking
+    trackForms: false     // Disable form tracking
+  }ytur6
+});
+```
+
+### Missing Events
+
+If events aren't appearing:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  enableAutomaticTracking: true,  // Ensure tracking is enabled
+  enableConsoleTracking: true,
+  enableNetworkTracking: true
+});
+```
+
+### Privacy Concerns
+
+For strict privacy:
+
+```javascript
+const tracker = HumanBehaviorTracker.init('your-api-key', {
+  redactionStrategy: {
+    mode: 'privacy-first',
+    unredactFields: []  // Redact everything
+  },
+  enableAutomaticProperties: false  // Disable automatic properties
+});
+```
+
